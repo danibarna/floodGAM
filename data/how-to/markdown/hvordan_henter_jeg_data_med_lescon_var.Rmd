@@ -1,6 +1,12 @@
 ---
 title: "Hvordan henter jeg data med lescon_var"
 output: github_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../data/how-to/"
+    )
+  })
 number_sections: true
 ---
 ```{r setup, include=FALSE}
@@ -36,7 +42,7 @@ For å hente flere detaljer om lescon_var, åpne smarTTY og skriv **lescon_var**
 
 ## Bruke R til å lage en lescon_var kjørbar fil
 
-En lescon_var kjørbar fil er en .txt-fil som vi kan laste opp til en nve server og gjøre kjørbar på kommandolinjen. Hver linje i .txt-filen er en lescon_var-kommando som henter data for en enkelt stasjon. Siden vi trenger data fra flere hundre stasjoner, er det praktisk å bruke bash for å lage .txt-filen. Denne kan vi gjøre med R. 
+En lescon_var kjørbar fil er en .txt-fil som vi kan laste opp til en nve server og gjøre kjørbar på kommandolinjen. Hver linje i .txt-filen er en lescon_var-kommando som henter data for en enkelt stasjon. Siden vi trenger data fra flere hundre stasjoner, er det praktisk å bruke en automatisert metode (e.g. bash) for å lage .txt-filen. Denne kan vi gjøre med R. 
 
 Skriptet for å gjøre dette finnes [her](link) og kjørbar filen selv er lagret [her](link).
 

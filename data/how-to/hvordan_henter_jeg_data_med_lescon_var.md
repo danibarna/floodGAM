@@ -37,8 +37,9 @@ For å hente flere detaljer om lescon_var, åpne smarTTY og skriv
 En lescon_var kjørbar fil er en .txt-fil som vi kan laste opp til en nve
 server og gjøre kjørbar på kommandolinjen. Hver linje i .txt-filen er en
 lescon_var-kommando som henter data for en enkelt stasjon. Siden vi
-trenger data fra flere hundre stasjoner, er det praktisk å bruke bash
-for å lage .txt-filen. Denne kan vi gjøre med R.
+trenger data fra flere hundre stasjoner, er det praktisk å bruke en
+automatisert metode (e.g. bash) for å lage .txt-filen. Denne kan vi
+gjøre med R.
 
 Skriptet for å gjøre dette finnes [her](link) og kjørbar filen selv er
 lagret [her](link).
@@ -62,8 +63,8 @@ Last opp lescon_var-kjørbarfilen du skrev med R. Klikk på “SCP”-fanen i
 smarTTY-grensesnittet. Klikk “upload a file”. Last opp
 my_lescon_var_commands.txt. Den skal nå være i ClimDesign-mappen.
 
-Gjør my_lescon_var_commands.txt eksekverbar på kommandolinjen. Skriv
-**chmod u+x my_lescon_var_commands.txt** og trykk enter.
+Gjør my_lescon_var_commands.txt kjørbar på kommandolinjen. Skriv **chmod
+u+x my_lescon_var_commands.txt** og trykk enter.
 
 Kjør my_lescon_var_commands.txt. Skriv **./my_lescon_var_commands.txt**
 og trykk enter.
