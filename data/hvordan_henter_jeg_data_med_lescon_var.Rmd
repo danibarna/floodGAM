@@ -54,7 +54,7 @@ Naviger til ClimDesign-mappen (eller en annen mappe du ønsker) ved hjelp av kom
 
 Last opp lescon_var-kjørbarfilen du skrev med R. Klikk på "SCP"-fanen i smarTTY-grensesnittet. Klikk "upload a file". Last opp my_lescon_var_commands.txt. Den skal nå være i ClimDesign-mappen.
 
-Gjør my_lescon_var_commands.txt eksekverbar på kommandolinjen. Skriv **chmod u+x my_lescon_var_commands.txt** og trykk enter.
+Gjør my_lescon_var_commands.txt kjørbar på kommandolinjen. Skriv **chmod u+x my_lescon_var_commands.txt** og trykk enter.
 
 Kjør my_lescon_var_commands.txt. Skriv **./my_lescon_var_commands.txt** og trykk enter.
 
