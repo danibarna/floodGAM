@@ -1,8 +1,17 @@
 ##
 ##
 ##
+## create executable .txt file to run lescon var
 ##
+## based on .txt file created from excel sheet found at
+## "\\nve.no\fil\h\HM\Eksterne Prosjekter\ClimDesign\PhD"
+## and the lescon_var scripts provided by Kolbjørn
 ##
+## takes the station names from tabel A2 (excel sheet)
+## and version numbers from a mix of Kolbjørn's script
+## and manual control (i.e. checking which version actually exists)
+##
+## ---------------------------------------------
 
 library(data.table)
 library(stringr)
@@ -11,13 +20,14 @@ library(stringr)
 setwd(myfilePath)
 
 ## ------- Les inn data: 
-  
 ## read in the manually controlled version numbers
 altversions <- readRDS(paste0(myfilePath,
                               "alternate_version_numbers_from_ks_script.rds"))
 ## read in table A2 from report 2016:85
 tabellA2 <- data.table::fread(paste0(myfilePath,
                                      "tabell_for_rapport2016_forenkelt_v.txt"))
+
+
 
 ## there are 530 stations in table A2. Some of these stations have just daily 
 ## data, some have both daily data and findata.
