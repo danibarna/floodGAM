@@ -3,11 +3,9 @@
 ##
 ## create executable .txt file to run lescon var
 ##
-## based on .txt file created from excel sheet found at
-## "\\nve.no\fil\h\HM\Eksterne Prosjekter\ClimDesign\PhD"
-## and the lescon_var scripts provided by Kolbjørn
+## based on tabel A2 from NVE report 2016:85 (data for flood freq analysis)
 ##
-## takes the station names from tabel A2 (excel sheet)
+## takes the station names from tabel A2
 ## and version numbers from a mix of Kolbjørn's script
 ## and manual control (i.e. checking which version actually exists)
 ##
