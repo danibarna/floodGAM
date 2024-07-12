@@ -15,7 +15,7 @@ library(data.table)
 library(stringr)
 
 ## set a working directory. R will write the text file to this directory.
-setwd(myfilePath)
+setwd("~/floodGAM/data/raw-data/")
 
 ## ------- Les inn data: 
 ## read in the manually controlled version numbers
