@@ -9,6 +9,8 @@ Supporting files `alternate_version_numbers.csv`, `table_A2_report_2016-85.csv` 
  ## gamfelt catchments
 
  ### covariates
+ - `gamfelt_catchment_covariates.csv` - catchment covariates from GIS. Created by Kolbjørn in 2019(?)
+ - `README-gamfelt-covariates.txt` - description of gamfelt catchment covariates
 
  ### streamflow data
  - `utelatt.csv` - list of stations / years with problematic streamflow data. Manually identified (Kolbjørn and Danielle)
