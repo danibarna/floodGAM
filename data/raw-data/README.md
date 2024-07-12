@@ -1,6 +1,4 @@
-Raw datafiles.
-
-Catchment covariate datasets created from GIS. 
+Raw datafiles used to create the Rdata objects used in the analysis.
 
 Note the raw streamflow data is not stored here (too large for github). Instead we store the commands needed to talk to the NVE database and pull streamflow data. 
 
