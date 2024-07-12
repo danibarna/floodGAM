@@ -3,9 +3,9 @@
 ##
 ## create executable .txt file to run lescon var
 ##
-## based on tabel A2 from NVE report 2016:85 (data for flood freq analysis)
+## based on table A2 from NVE report 2016:85 (data for flood freq analysis)
 ##
-## takes the station names from tabel A2
+## takes the station names from table A2
 ## and version numbers from a mix of Kolbjørn's script
 ## and manual control (i.e. checking which version actually exists)
 ##
@@ -19,8 +19,8 @@ setwd(myfilePath)
 
 ## ------- Les inn data: 
 ## read in the manually controlled version numbers
-altversions <- readRDS(paste0("~/floodGAM/data/raw-data/",
-                              "alternate_version_numbers_from_ks_script.rds"))
+altversions <- data.table::fread(paste0("~/floodGAM/data/raw-data/",
+                              "alternate_version_numbers.csv"))
 ## read in table A2 from report 2016:85
 tabellA2 <- data.table::fread(paste0("~/floodGAM/data/raw-data/",
                                      "tabell_for_rapport2016_forenkelt_v.txt"))
