@@ -23,7 +23,7 @@ altversions <- data.table::fread(paste0("~/floodGAM/data/raw-data/",
                               "alternate_version_numbers.csv"))
 ## read in table A2 from report 2016:85
 tabellA2 <- data.table::fread(paste0("~/floodGAM/data/raw-data/",
-                                     "tabell_for_rapport2016_forenkelt_v.txt"))
+                                     "table_A2_report_2016-85.csv"))
 
 
 
