@@ -1,6 +1,6 @@
 Raw datafiles used to create the Rdata objects used in the analysis. These files are used in the scripts located at [/code/scripts/data-creation/](/code/scripts/data-creation/).
 
-Note the raw streamflow data is not stored here (too large for github). Instead we store the commands needed to talk to the NVE database and pull streamflow data. See [this](/data/how-to/hvordan_henter_jeg_data_med_lescon_var.md) guide for how to pull data from teh databases using lescon_var (internal system).
+Note the raw streamflow data is not stored here (too large for github). Instead we store the commands needed to talk to the NVE database and pull streamflow data. See [this](/data/how-to/hvordan_henter_jeg_data_med_lescon_var.md) guide for how to pull data from the databases using lescon_var (internal system).
 
 Supporting files `alternate_version_numbers.csv`, `table_A2_report_2016-85.csv` are used to create the database commands. `utelatt.csv` is used to quality control the streamflow data. 
 
