@@ -1,11 +1,3 @@
-ams_daily.csv
-
-File with annual maximum floods
-
-regine: regine number of station	
-main: main number of station	
-year: 	year of annual maximum flood
-ams: annual maximum daily flood (m3/s)
 
 NB: Eeach streamflow station has a unique identification by the combination of regine- and main numbers.
 
@@ -13,8 +5,8 @@ catchment properties.csv
 
 File with properties of all catchments with annual maximum flood data.
 
-regine:		regine number of station
-main:		main number of station	
+RN:		regine number of station
+HN:		main number of station	
 Y_lat:		y-coordinate for the catchment’s outlet (Decimal degrees) 	
 X_long:		x-coordinate for the catchment’s outlet (Decimal degrees) 	
 Y_utm:		y-coordinate for the catchment’s outlet, UTM33N (m) 	
