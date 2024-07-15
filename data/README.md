@@ -24,8 +24,9 @@ that have suitable sub-daily sampling frequency around annual maxima.
 Den komplette vannførings tidsserien for hver stasjon er tilgjengelig på
 NVE-serveren på (link). Databasekommandoer for å hente data fra HYDRA II
 er tilgjengelige [her](/data/raw-data/), sammen med en bruksanvisning
-[her](/data/how-to/). All kode for rensing og kvalitetskontroll av rå
-vannføringsdata er tilgjengelig [her](/code/data-creation/).
+[her](/data/how-to/hvordan_henter_jeg_data_med_lescon_var.md). All kode
+for rensing og kvalitetskontroll av rå vannføringsdata er tilgjengelig
+[her](/code/data-creation/).
 
 ### Feltegenskaper
 

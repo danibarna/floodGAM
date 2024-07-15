@@ -32,7 +32,7 @@ The stations are a subset of those in NVE-rapport 2016:85 [Flomdata: utvalg og k
 
  - download the set of annual maxima [l/s/km2] here.
 
-Den komplette vannførings tidsserien for hver stasjon er tilgjengelig på NVE-serveren på (link). Databasekommandoer for å hente data fra HYDRA II er tilgjengelige [her](/data/raw-data/), sammen med en bruksanvisning [her](/data/how-to/). All kode for rensing og kvalitetskontroll av rå vannføringsdata er tilgjengelig [her](/code/data-creation/).
+Den komplette vannførings tidsserien for hver stasjon er tilgjengelig på NVE-serveren på (link). Databasekommandoer for å hente data fra HYDRA II er tilgjengelige [her](/data/raw-data/), sammen med en bruksanvisning [her](/data/how-to/hvordan_henter_jeg_data_med_lescon_var.md). All kode for rensing og kvalitetskontroll av rå vannføringsdata er tilgjengelig [her](/code/data-creation/).
 
 ### Feltegenskaper
 
