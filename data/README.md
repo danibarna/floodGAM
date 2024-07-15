@@ -1,0 +1,17 @@
+1-hour dataset for flood frequency analysis
+================
+
+## Overview
+
+Flood dataset focused on sub-daily sampling frequency for flood
+frequency analysis using annual maximum data. It includes 259 stations,
+each with at least 20 years of total data and at least 11 years of
+sub-daily data.
+
+The dataset is based on the data in NVE-rapport 2016:85 [Flomdata:
+utvalg og kvalitetssikring av flomdata for
+flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147)
+
+control of sub-daily sampling frequency around annual maxima.
+
+Catchment covariates for each of the 259 stations are also included
