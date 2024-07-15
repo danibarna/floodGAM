@@ -1,4 +1,10 @@
 
+Authors: Danielle Barna, Kolbjørn Engeland
+
+Publications: [Regional index flood estimation at multiple durations
+with generalized additive models
+(preprint)](https://egusphere.copernicus.org/preprints/2023/egusphere-2023-2335/)
+
 ## Overview
 
 Flood dataset focused on sub-daily sampling frequency for flood
@@ -9,7 +15,27 @@ sub-daily data.
 The stations are based on NVE-rapport 2016:85 [Flomdata: utvalg og
 kvalitetssikring av flomdata for
 flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147),
-but include added requirements for sub-daily sampling frequency around
-annual maxima and data up to 2023.
+with added requirements for sub-daily sampling frequency around annual
+maxima and data up to 2023.
 
 ## How to get the data
+
+download the set of annual maxima \[l/s/km2\] here.
+
+download catchment covariates for each of the 259 stations here.
+
+the full streamflow time series for each station is too large to upload
+here, but can be found on the NVE server at (link). The database
+commands used to pull the data from HYDRA II are saved in this
+repository at (link) and a database how-to guide can be found at (link).
+
+We also store other datasets relevant to the floodGAM analysis in this
+repository. The raw-data folder contains the list of station names,
+version numbers, and manually controlled utelatt years and stations used
+to make the database commands. The how-to folder contains guides
+describing how to get raw streamflow data. The Rdata folder saves many
+intermediate data objects used in the analysis.
+
+All code used to clean and construct the dataset can be found here.
+
+## How we chose the data
