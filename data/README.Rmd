@@ -5,6 +5,17 @@ number_sections: true
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(data.table)
+library(lubridate)
+library(ggplot2)
+library(scico)
+
+savePath <- paste0("~/ClimDesign_PhD/XGBoost-GAM index flood model","/coms/",
+                   "markdown/","markdown data/")
+load(paste0(savePath,"exampleplots_fjern_manglende_data.rda"))
+load(paste0(savePath,"tidsopplxsning_datapack.rda"))
+load(paste0(savePath,"station-years.rda"))
 ```
 
 <h1 align="center">floodGAM datasets</h1>
@@ -23,7 +34,7 @@ The stations are based on NVE-rapport 2016:85 [Flomdata: utvalg og kvalitetssikr
 
 The full streamflow time series for each station is available on the NVE server at (link). Database commands for pulling data from HYDRA II are in this repository at (link), along with a how-to guide at (link). All code for cleaning and quality control of raw streamflow data is available (here).
 
-### Felt egenskaper
+### Feltegenskaper
 
  - Fysiografiske og klimatiske feltegenskaper for de 259 stasjonene 
 
@@ -52,6 +63,83 @@ NVE har ingen «perfekt» arkiv for verken findata eller døgndata. Noen arkiver
 Vi bruker data fra arkiv HYKALP-ICECORR (arkiv 35), som har primærtkontrollerte data med fin/variabel tidsoppløsning og er virtuelt isreduserte. HYKVALP-ICECORR er ikke sekundærkontrollert eller kompletterte. 
 
 Fordi HYKVAL-dataene ikke er komplette, må vi derfor ta beslutninger om hvordan vi skal håndtere år med manglende data. Vi velger å kryssjekke HYKVALP-ICECORR dataene med data fra et annet arkiv, HYDAG (arkiv 05), som inneholder kontrollerte, kompletterte døgndata som er isredusert og etterkontrollert. 
+
+#### 1. Minimum antall dager i HYKVAL-ICECORR og HYDAG
+
+Først teller vi antall dager / år for hvert år og hver stasjon. Da kan vi fjerne år som har < 200 dager i HYKVALP-ICECORR eller < 300 dager i både HYKVALP_ICECORR og HYDAG. Vi kan se på noen av årene vi fjerner:
+
+**Eksemple av år fjernet p.g.a. < 200 dager i HYKVALP-ICECORR:**
+
+```{r,echo=F, fig.dim=c(10,4), warning=F}
+ggplot(look200day.hykval[.(these.200day)]) +
+  geom_line(aes(date,cumecs,color="hykval"),size=1.1) +
+  geom_line(data=look200day.hydag[.(these.200day)],
+            aes(date,cumecs,color="hydag")) +
+  labs(y = "m3/s") +
+  facet_wrap(ID~yk,scales="free", nrow=1) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = "bottom",legend.title = element_blank())
+```
+
+
+**Eksemple av år fjernet p.g.a. < 300 dager i begge arkivene:** 
+
+God overensstemmelse mellom arkivene her, men deler av året mangler.
+
+```{r,echo=F, fig.dim=c(10,4), warning=F}
+ggplot(look300day.hykval[.(these.300day)]) +
+  geom_line(aes(perc.yr,cumecs,color="hykval"),size=1.1) +
+  geom_line(data=look300day.hydag[.(these.300day)],
+            aes(perc.yr,cumecs,color="hydag")) +
+  labs(y = "m3/s",x="date as percent of the year") +
+  facet_wrap(ID~yk,scales="free_y", nrow=1) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = "bottom",legend.title = element_blank())
+```
+
+#### 2. Kryssjekke HYKVALP-ICECORR med HYDAG
+
+Kriteriene for å kryssjekke med HYDAG er litt mer kompliserte. HYDAG og HYKVALP-ICECORR samsvarer ikke perfekt. Det finnes noen stasjoner og år som er i HYKVALP-ICECORR, men ikke i HYDAG, og omvendt:
+
+```{r, eval = FALSE}
+# find unique station-year combinations in both hydag and hykvalp-icecorr:
+hykval.sy <- data35[,unique(.SD),.SDcols = c("ID","yk")]
+hydag.sy <- data05[,unique(.SD),.SDcols = c("ID","yk")]
+
+setkey(hykval.sy,ID,yk); setkey(hydag.sy,ID,yk)
+```
+
+```{r}
+# station-years in hykvalp-icecorr *not* in hydag:
+hykval.sy[, in.hydag := FALSE][hydag.sy, in.hydag := TRUE]
+print(hykval.sy[in.hydag==FALSE], nrows = 5)
+
+# station-years in hydag *not* in hykvalp-icecorr:
+hydag.sy[, in.hykval := FALSE][hykval.sy, in.hykval := TRUE]
+print(hydag.sy[in.hykval==FALSE], nrows = 5)
+```
+
+Det er 70 år hvor vi har data i HYKVALP-ICECORR, men ikke i HYDAG. For de resterende 14 156 år hvor vi har data både i HYKVALP-ICECORR og HYDAG, utfører vi en årlige maksimumskontroll:
+
+Beregne de årlige maksimumene med HYDAG. Sjekk om HYKVALP-ICECORR inneholder en observasjon innenfor +/- 48 timer fra datoen da det årlige maksimumet fra HYDAG ble observert. Hvis det ikke er noen HYKVALP-ICECORR observasjon innenfor +/- 48 timer fra det nødvendige punktet, fjern året.
+
+Vi kan se på noen av årene vi fjerner:
+
+```{r,echo=F, fig.dim=c(10,4), warning=F}
+ggplot(lookAMgap.hykval[.(these.AMgap)]) +
+  geom_line(aes(date,cumecs.x,color="hykval"),size=1.1) +
+  geom_line(data=lookAMgap.hydag[.(these.AMgap)],
+            aes(date,cumecs,color="hydag")) +
+  labs(y = "m3/s") +
+  facet_wrap(ID~yk,scales="free", nrow=1) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),legend.position = "bottom",legend.title = element_blank())
+```
+
+
+
 
 ### Enforce findata and record length minimums
 

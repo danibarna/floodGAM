@@ -28,7 +28,7 @@ in this repository at (link), along with a how-to guide at (link). All
 code for cleaning and quality control of raw streamflow data is
 available (here).
 
-### Felt egenskaper
+### Feltegenskaper
 
 - Fysiografiske og klimatiske feltegenskaper for de 259 stasjonene
 
@@ -70,5 +70,91 @@ hvordan vi skal håndtere år med manglende data. Vi velger å kryssjekke
 HYKVALP-ICECORR dataene med data fra et annet arkiv, HYDAG (arkiv 05),
 som inneholder kontrollerte, kompletterte døgndata som er isredusert og
 etterkontrollert.
+
+#### 1. Minimum antall dager i HYKVAL-ICECORR og HYDAG
+
+Først teller vi antall dager / år for hvert år og hver stasjon. Da kan
+vi fjerne år som har \< 200 dager i HYKVALP-ICECORR eller \< 300 dager i
+både HYKVALP_ICECORR og HYDAG. Vi kan se på noen av årene vi fjerner:
+
+**Eksemple av år fjernet p.g.a. \< 200 dager i HYKVALP-ICECORR:**
+
+![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+**Eksemple av år fjernet p.g.a. \< 300 dager i begge arkivene:**
+
+God overensstemmelse mellom arkivene her, men deler av året mangler.
+
+![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+#### 2. Kryssjekke HYKVALP-ICECORR med HYDAG
+
+Kriteriene for å kryssjekke med HYDAG er litt mer kompliserte. HYDAG og
+HYKVALP-ICECORR samsvarer ikke perfekt. Det finnes noen stasjoner og år
+som er i HYKVALP-ICECORR, men ikke i HYDAG, og omvendt:
+
+``` r
+# find unique station-year combinations in both hydag and hykvalp-icecorr:
+hykval.sy <- data35[,unique(.SD),.SDcols = c("ID","yk")]
+hydag.sy <- data05[,unique(.SD),.SDcols = c("ID","yk")]
+
+setkey(hykval.sy,ID,yk); setkey(hydag.sy,ID,yk)
+```
+
+``` r
+# station-years in hykvalp-icecorr *not* in hydag:
+hykval.sy[, in.hydag := FALSE][hydag.sy, in.hydag := TRUE]
+print(hykval.sy[in.hydag==FALSE], nrows = 5)
+```
+
+    ## Key: <ID, yk>
+    ##           ID    yk in.hydag
+    ##       <char> <num>   <lgcl>
+    ##  1:  1200013  2023    FALSE
+    ##  2: 12300029  1998    FALSE
+    ##  3: 12300029  1999    FALSE
+    ##  4: 12300029  2000    FALSE
+    ##  5: 12300029  2001    FALSE
+    ## ---                        
+    ## 66:  7500022  2018    FALSE
+    ## 67:  7500028  2023    FALSE
+    ## 68:   800008  2003    FALSE
+    ## 69:   800008  2004    FALSE
+    ## 70:   800008  2005    FALSE
+
+``` r
+# station-years in hydag *not* in hykvalp-icecorr:
+hydag.sy[, in.hykval := FALSE][hykval.sy, in.hykval := TRUE]
+print(hydag.sy[in.hykval==FALSE], nrows = 5)
+```
+
+    ## Key: <ID, yk>
+    ##           ID    yk in.hykval
+    ##       <char> <num>    <lgcl>
+    ##   1: 1100004  1975     FALSE
+    ##   2: 1100004  1976     FALSE
+    ##   3: 1500053  1969     FALSE
+    ##   4: 1500053  1973     FALSE
+    ##   5: 1500053  1974     FALSE
+    ##  ---                        
+    ## 279: 8300006  1970     FALSE
+    ## 280: 8300006  1971     FALSE
+    ## 281: 9800004  1979     FALSE
+    ## 282: 9800004  1980     FALSE
+    ## 283: 9800004  1981     FALSE
+
+Det er 70 år hvor vi har data i HYKVALP-ICECORR, men ikke i HYDAG. For
+de resterende 14 156 år hvor vi har data både i HYKVALP-ICECORR og
+HYDAG, utfører vi en årlige maksimumskontroll:
+
+Beregne de årlige maksimumene med HYDAG. Sjekk om HYKVALP-ICECORR
+inneholder en observasjon innenfor +/- 48 timer fra datoen da det årlige
+maksimumet fra HYDAG ble observert. Hvis det ikke er noen
+HYKVALP-ICECORR observasjon innenfor +/- 48 timer fra det nødvendige
+punktet, fjern året.
+
+Vi kan se på noen av årene vi fjerner:
+
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ### Enforce findata and record length minimums
