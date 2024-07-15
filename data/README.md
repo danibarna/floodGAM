@@ -1,4 +1,8 @@
 
+<h1 align="center">
+floodGAM datasets
+</h1>
+
 ## Overview
 
 As part of the floodGAM analysis, we developed a flood dataset focused
@@ -14,20 +18,23 @@ maxima and data up to 2023.
 
 ## Dataprodukter
 
-#### Flomdata
+### Flomdata fra vannføringsstasjoner
 
-download the set of annual maxima \[l/s/km2\] here.
+- download the set of annual maxima \[l/s/km2\] here.
 
-the full streamflow time series for each station is too large to upload
-here, but can be found on the NVE server at (link). The database
-commands used to pull the data from HYDRA II are saved in this
-repository at (link) and a database how-to guide can be found at (link).
+The full streamflow time series for each station is available on the NVE
+server at (link). Database commands for pulling data from HYDRA II are
+in this repository at (link), along with a how-to guide at (link). All
+code for cleaning and quality control of raw streamflow data is
+available (here).
 
-#### Felt egenskaper
+### Felt egenskaper
 
-download catchment covariates for each of the 259 stations here.
+- Fysiografiske og klimatiske feltegenskaper for de 259 stasjonene
 
-#### Andre dataprodukter
+- README for feltegenskaper
+
+### Andre dataprodukter
 
 We also store other datasets relevant to the floodGAM analysis in this
 repository. The raw-data folder contains the list of station names,
@@ -36,9 +43,18 @@ to make the database commands. The how-to folder contains guides
 describing how to get raw streamflow data. The Rdata folder saves many
 intermediate data objects used in the analysis.
 
-All code used to clean and construct the dataset can be found here.
+## Kvalitetskontroll av vannføringsdata
 
-## Valg av flomdata
+### Manuell fjerning
+
+Rapporten 2016:85 identifiserer visse år med data som bør utelates for
+flomfrekvensanalyse. I tillegg har vi identifisert noen år og stasjoner
+som bør utelates hvis vi trenger fin tidsoppløsning.
+
+- `utelatt.csv` - list over år og stasjoner som utelates
+- `utelatt_notes.xlsx` - noen notater om manuelle fjernet år
+
+### Håndtering av år med manglende data
 
 NVE har ingen «perfekt» arkiv for verken findata eller døgndata. Noen
 arkiver er isredusert, mens andre er ikke. Det samme gjelder
@@ -55,5 +71,4 @@ HYKVALP-ICECORR dataene med data fra et annet arkiv, HYDAG (arkiv 05),
 som inneholder kontrollerte, kompletterte døgndata som er isredusert og
 etterkontrollert.
 
-Denne delen av rapporten beskriver prosedyrene vi bruker for å
-kvalitetskontrollere HYKVALP-ICECORR dataene.
+### Enforce findata and record length minimums
