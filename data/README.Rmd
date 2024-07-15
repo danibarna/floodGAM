@@ -23,8 +23,8 @@ load(paste0(savePath,"station-years.rda"))
 ## Overview
 As part of the floodGAM analysis, we developed a flood dataset focused on sub-daily sampling frequency for flood frequency analysis using annual maximum data. It includes 259 stations, each with at least 20 years of total data and at least 11 years of sub-daily data.
 
-The stations are based on NVE-rapport 2016:85 [Flomdata: utvalg og kvalitetssikring av flomdata for flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147), with added requirements for sub-daily sampling frequency around annual maxima and data up to 2023. 
- 
+The stations are a subset of those in NVE-rapport 2016:85 [Flomdata: utvalg og kvalitetssikring av flomdata for flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147) that have suitable sub-daily sampling frequency around annual maxima. 
+
 
 ## Dataprodukter
 
@@ -32,7 +32,7 @@ The stations are based on NVE-rapport 2016:85 [Flomdata: utvalg og kvalitetssikr
 
  - download the set of annual maxima [l/s/km2] here.
 
-The full streamflow time series for each station is available on the NVE server at (link). Database commands for pulling data from HYDRA II are in this repository at (link), along with a how-to guide at (link). All code for cleaning and quality control of raw streamflow data is available (here).
+Den komplette vannførings tidsserien for hver stasjon er tilgjengelig på NVE-serveren på (link). Databasekommandoer for å hente data fra HYDRA II er tilgjengelige [her](/data/raw-data/), sammen med en bruksanvisning [her](/data/how-to/). All kode for rensing og kvalitetskontroll av rå vannføringsdata er tilgjengelig [her](/code/data-creation/).
 
 ### Feltegenskaper
 
@@ -47,6 +47,8 @@ We also store other datasets relevant to the floodGAM analysis in this repositor
 
 
 ## Kvalitetskontroll av vannføringsdata
+
+A big part of the dataset development was quality control to ensure the findata was good enough. we desribe the process here
 
 ### Manuell fjerning
 
