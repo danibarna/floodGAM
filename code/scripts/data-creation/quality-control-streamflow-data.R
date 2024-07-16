@@ -213,7 +213,7 @@ setkey(numyrsfin,ID)
 # remove the nine stations with less than 10 years of findata
 discard.fin <- numyrsfin[N<10]
 
-data35 <- data35[!discard.fin]
+data35 <- data35[.(discard.fin), discard := TRUE][discard == FALSE]
 
 # now we have 250 stations:
 data35[,uniqueN(.SD),.SDcols = c("ID")]
