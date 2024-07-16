@@ -6,42 +6,95 @@ floodGAM datasets
 ## Overview
 
 As part of the floodGAM analysis, we developed a flood dataset focused
-on sub-daily sampling frequency for flood frequency analysis using
-annual maximum data. It includes 259 stations, each with at least 20
-years of total data and at least 11 years of sub-daily data.
+on sub-daily sampling frequency.
 
-The stations are a subset of those in NVE-rapport 2016:85 [Flomdata:
-utvalg og kvalitetssikring av flomdata for
+NVE report 2016:85 [Flomdata: utvalg og kvalitetssikring av flomdata for
 flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147)
-that have suitable sub-daily sampling frequency around annual maxima.
+identifies 529 stations suitable for flood frequency analysis. We
+independently evaluated each year of data at these stations for ability
+to capture annual maxima at sub-daily sampling frequency. The result was
+a set of 250 stations (the `gamfelt` dataset), each with at least 20
+years of total data and at least 10 years of sub-daily data.
 
-## Dataprodukter
+We provide both (i) the `gamfelt` dataset and (ii) all scripts and
+resources needed to recreate the dataset from the raw data stored in
+HYDRA II.
 
-### Flomdata fra vannføringsstasjoner
+Feedback on the dataset is very welcome.
 
-- download the set of annual maxima \[l/s/km2\] here.
+## How to get the data
 
-Den komplette vannførings tidsserien for hver stasjon er tilgjengelig på
-NVE-serveren på (link). Databasekommandoer for å hente data fra HYDRA II
-er tilgjengelige [her](/data/raw-data/), sammen med en bruksanvisning
-[her](/data/how-to/hvordan_henter_jeg_data_med_lescon_var.md). All kode
-for rensing og kvalitetskontroll av rå vannføringsdata er tilgjengelig
-[her](/code/data-creation/).
+The annual maxima, catchment descriptors, descriptive table and
+statistical summary of the `gamfelt` dataset is stored in
+[/data/processed-data/gamfelt/]().
 
-### Feltegenskaper
+## File structure
 
-- Fysiografiske og klimatiske feltegenskaper for de 259 stasjonene
+In addition to the `gamfelt` dataset, this folder contains many data
+products relevant to the larger floodGAM analysis (e.g. model fitting
+and evaluation).
 
-- README for feltegenskaper
+- `processed-data` – Any data loaded/manipulated/changed/saved with code
+  from the `code` folders.
 
-### Andre dataprodukter
+- `raw-data` – HYDRA II database commands and other raw data.
 
-We also store other datasets relevant to the floodGAM analysis in this
-repository. The raw-data folder contains the list of station names,
-version numbers, and manually controlled utelatt years and stations used
-to make the database commands. The how-to folder contains guides
-describing how to get raw streamflow data. The Rdata folder saves many
-intermediate data objects used in the analysis.
+- `how-to-guides` – how to use the database commands in `raw-data`.
+
+## Data pipeline
+
+| Type            | Action                                      | Requires                                                                                              | Output saved? | Where? |
+|-----------------|---------------------------------------------|-------------------------------------------------------------------------------------------------------|:-------------:|:------:|
+| Data download   | Download data from HYDRA II                 | **lescon_var**, [`lescon_var_commands.txt`](/data/raw-data/)                                          |      \-       |   \-   |
+| Quality control | Manually discard problem years and stations | [`utelatt.csv`](/data/raw-data/), [`quality-control-streamflow-data.R`](/code/scripts/data-creation/) |      \-       |   \-   |
+
+<table style="width:99%;">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Action</th>
+<th>Requires</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Download data from HYDRA II</td>
+<td><table>
+<thead>
+<tr class="header">
+<th>Programs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>lescon_var</code></td>
+</tr>
+<tr class="even">
+<td>lmnop</td>
+</tr>
+<tr class="odd">
+<td>wx</td>
+</tr>
+</tbody>
+</table></td>
+</tr>
+<tr class="even">
+<td><table>
+<thead>
+<tr class="header">
+<th>Quality control data</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table></td>
+<td>Regular text that spans multiple lin within this cell.</td>
+</tr>
+</tbody>
+</table>
 
 ## Kvalitetskontroll av vannføringsdata
 
@@ -73,6 +126,10 @@ hvordan vi skal håndtere år med manglende data. Vi velger å kryssjekke
 HYKVALP-ICECORR dataene med data fra et annet arkiv, HYDAG (arkiv 05),
 som inneholder kontrollerte, kompletterte døgndata som er isredusert og
 etterkontrollert.
+
+> NB: det kommer snart (slutten av 2024/tidlig 2025) en oppdatering i
+> databasen. HYKVAL-data skal bli sekundærkontrollert etter en bestemt
+> dato. Data før denne datoen skal ikke endres.
 
 #### 1. Minimum antall dager i HYKVAL-ICECORR og HYDAG
 
