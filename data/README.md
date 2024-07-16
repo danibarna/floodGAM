@@ -26,7 +26,7 @@ Feedback on the dataset is very welcome.
 
 The annual maxima, catchment descriptors, descriptive table and
 statistical summary of the `gamfelt` dataset is stored in
-[/data/processed-data/gamfelt/]().
+[`/data/processed-data/gamfelt/`](/data/processed-data/gamfelt/)
 
 ## File structure
 
@@ -43,58 +43,16 @@ and evaluation).
 
 ## Data pipeline
 
-| Type            | Action                                      | Requires                                                                                              | Output saved? | Where? |
-|-----------------|---------------------------------------------|-------------------------------------------------------------------------------------------------------|:-------------:|:------:|
-| Data download   | Download data from HYDRA II                 | **lescon_var**, [`lescon_var_commands.txt`](/data/raw-data/)                                          |      \-       |   \-   |
-| Quality control | Manually discard problem years and stations | [`utelatt.csv`](/data/raw-data/), [`quality-control-streamflow-data.R`](/code/scripts/data-creation/) |      \-       |   \-   |
+Some of the intermediate data files are large (part of the data quality
+control requires cross-checking the HYKVALP-ICECORR database with
+HYDAG). Any data file over 50 Mb is stored on zenodo.
 
-<table style="width:99%;">
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 65%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Action</th>
-<th>Requires</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Download data from HYDRA II</td>
-<td><table>
-<thead>
-<tr class="header">
-<th>Programs</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>lescon_var</code></td>
-</tr>
-<tr class="even">
-<td>lmnop</td>
-</tr>
-<tr class="odd">
-<td>wx</td>
-</tr>
-</tbody>
-</table></td>
-</tr>
-<tr class="even">
-<td><table>
-<thead>
-<tr class="header">
-<th>Quality control data</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table></td>
-<td>Regular text that spans multiple lin within this cell.</td>
-</tr>
-</tbody>
-</table>
+| Action               | Description                                                                        | Requires                                                                                              | Output saved? | Where? |
+|----------------------|------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|:-------------:|:------:|
+| Get data             | Download data from HYDRA II                                                        | **lescon_var**, [`lescon_var_commands.txt`](/data/raw-data/)                                          |      \-       |   \-   |
+| Change formatting    | Change downloaded data to .rds format                                              | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                           |      no       |   \-   |
+| Quality control data | choose excluded years/stations, handle missing data, enforce minimum record length | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/), [`utelatt.csv`](/data/raw-data/) |      yes      | zenodo |
+| Process data         | Select annual maxima                                                               | `write-this-script.R`                                                                                 |      yes      | github |
 
 ## Kvalitetskontroll av vannføringsdata
 

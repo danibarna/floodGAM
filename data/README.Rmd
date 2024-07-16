@@ -31,7 +31,8 @@ Feedback on the dataset is very welcome.
 
 ## How to get the data
 
-The annual maxima, catchment descriptors, descriptive table and statistical summary of the `gamfelt` dataset is stored in [/data/processed-data/gamfelt/]().
+The annual maxima, catchment descriptors, descriptive table and statistical summary of the `gamfelt` dataset is stored in [`/data/processed-data/gamfelt/`](/data/processed-data/gamfelt/)
+
 
 ## File structure
 
@@ -46,25 +47,17 @@ In addition to the `gamfelt` dataset, this folder contains many data products re
 
 ## Data pipeline
 
-| Type | Action  | Requires | Output saved? | Where? |
+Some of the intermediate data files are large (part of the data quality control requires cross-checking the HYKVALP-ICECORR database with HYDAG). Any data file over 50 Mb is stored on zenodo. 
+
+| Action | Description | Requires | Output saved? | Where? |
 | --- | --- | --- | :---: | :---: |
-| Data download | Download data from HYDRA II | **lescon_var**, [`lescon_var_commands.txt`](/data/raw-data/) | - | - |
-| Quality control | Manually discard problem years and stations | [`utelatt.csv`](/data/raw-data/), [`quality-control-streamflow-data.R`](/code/scripts/data-creation/) | - | - |
+| Get data | Download data from HYDRA II | **lescon_var**, [`lescon_var_commands.txt`](/data/raw-data/) | - | - |
+| Change formatting | Change downloaded data to .rds format  | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/) | no | - |
+| Quality control data | choose excluded years/stations, handle missing data, enforce minimum record length | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/), [`utelatt.csv`](/data/raw-data/) | yes | zenodo |
+| Process data | Select annual maxima | `write-this-script.R` | yes | github |
 
 
 
-+-----------------------+----------------------------------------------+
-| Action                | Requires                                     |
-+=======================+==============================================+
-|                       | | Programs        |                          |
-| Download data         | |-----------------|                          |
-| from HYDRA II         | | `lescon_var`    |                          |
-|                       | | lmnop           |                          |
-|                       | | wx              |                          |
-+-----------------------+----------------------------------------------+
-||Quality control data| |  Regular text that spans multiple lin        |
-||--------------------| | within this cell.                            |
-+-----------------------+----------------------------------------------+
 
 
 ## Kvalitetskontroll av vannføringsdata
