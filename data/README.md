@@ -25,14 +25,14 @@ Feedback on the dataset is very welcome.
 ## How to get the data
 
 The annual maxima, catchment descriptors, descriptive table and
-statistical summary of the `gamfelt` dataset is stored in
+statistical summary of the `gamfelt` dataset are stored in
 [`/data/processed-data/gamfelt/`](/data/processed-data/gamfelt/)
 
 ## File structure
 
-In addition to the `gamfelt` dataset, this folder contains many data
-products relevant to the larger floodGAM analysis (e.g. model fitting
-and evaluation).
+In addition to the `gamfelt` dataset, this data folder contains many
+data products relevant to the larger floodGAM analysis (e.g. model
+fitting and evaluation).
 
 - `processed-data` – Any data loaded/manipulated/changed/saved with code
   from the `code` folders.
@@ -43,16 +43,28 @@ and evaluation).
 
 ## Data pipeline
 
-Some of the intermediate data files are large (part of the data quality
-control requires cross-checking the HYKVALP-ICECORR database with
-HYDAG). Any data file over 50 Mb is stored on zenodo.
+The data pipeline is the process
 
-| Action               | Description                                                                        | Requires                                                                                              | Output saved? | Where? |
-|----------------------|------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|:-------------:|:------:|
-| Get data             | Download data from HYDRA II                                                        | **lescon_var**, [`lescon_var_commands.txt`](/data/raw-data/)                                          |      \-       |   \-   |
-| Change formatting    | Change downloaded data to .rds format                                              | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                           |      no       |   \-   |
-| Quality control data | choose excluded years/stations, handle missing data, enforce minimum record length | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/), [`utelatt.csv`](/data/raw-data/) |      yes      | zenodo |
-| Process data         | Select annual maxima                                                               | `write-this-script.R`                                                                                 |      yes      | github |
+### Dependencies
+
+Building the `gamfelt` dataset with the scripts provided here requires:
+
+- the NVE database **HYDRA II**
+- access to the internal NVE system **lescon_var**
+- the programming language **R**.
+
+Some of the intermediate data files are large (part of the quality
+control requires downloading and cross-checking the HYKVALP-ICECORR
+database with HYDAG). Any data file over 50 Mb is stored on zenodo.
+
+| Action               | Description                                                                                                               | Requires                                                                                              | Output saved? | Where? |
+|----------------------|---------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|:-------------:|:------:|
+| Get streamflow data  | Download data from HYDRA II                                                                                               | lescon_var (internal system), [`lescon_var_commands.txt`](/data/raw-data/)                            |      \-       |   \-   |
+| Change formatting    | Change downloaded data to .rds format                                                                                     | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                           |      no       |   \-   |
+| Quality control data | choose excluded years/stations, handle missing data, enforce minimum time spacing at peaks, enforce minimum record length | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/), [`utelatt.csv`](/data/raw-data/) |      yes      | zenodo |
+| Process data         | Select annual maxima                                                                                                      | `write-this-script.R`                                                                                 |      yes      | github |
+
+## Quality control streamflow data
 
 ## Kvalitetskontroll av vannføringsdata
 
