@@ -18,7 +18,7 @@ library(data.table)
 library(lubridate)
 
 ## ---define a local path to wherever you have stored the 
-## .rds files (see raa-vannforingsdata-til-Rdata.R) 
+## .rds files (see /code/scripts/data-creation/clean-and-process-rawdata-from-database.R) 
 dataPath
 
 ## ---read in data
@@ -185,6 +185,38 @@ data35[,uniqueN(.SD),.SDcols = c("ID")]
 hykval.sy <- data35[,uniqueN(.SD),.SDcols = c("yk"),by="ID"]
 hist(hykval.sy$V1)
 
+
+# Steg 5: Fjern stasjoner < 10 år findata ---------------------------------
+
+# compute the time between observations
+difftimeFn <- function(x){
+  a=x[-1]
+  b=x[-length(x)]
+  dtvec <- as.numeric(difftime(a,b,units="mins"))
+  return(c(0,dtvec))
+}
+
+data35[, gapmin := lapply(.SD,difftimeFn), .SDcols = "date", by = c("ID","yk")]
+
+# what station-years have at least 200 days of findata?
+setkey(data35,ID,yk,mk,dk)
+
+numdayfin <- data35[,median(gapmin),by=c("yk","mk","dk","ID")]
+numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
+setnames(numdayfin,"V1","nfin.yk")
+
+# how many years of fine data does each station have?
+numyrsfin <- numdayfin[nfin.yk>199, .N, by="ID"]
+
+setkey(numyrsfin,ID)
+
+# remove the nine stations with less than 10 years of findata
+discard.fin <- numyrsfin[N<10]
+
+data35 <- data35[!discard.fin]
+
+# now we have 250 stations:
+data35[,uniqueN(.SD),.SDcols = c("ID")]
 
 
 # Save data ---------------------------------------------------------------
