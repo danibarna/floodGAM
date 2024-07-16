@@ -43,11 +43,13 @@ fitting and evaluation).
 
 ## Data pipeline
 
-The data pipeline is the process
+The data pipeline is the process of building the `gamfelt` dataset from
+the raw streamflow data provided by NVE. The “findata quality control”
+step is described in the following section.
 
 ### Dependencies
 
-Building the `gamfelt` dataset with the scripts provided here requires:
+Building the dataset with the scripts in this repository requires:
 
 - the NVE database **HYDRA II**
 - access to the internal NVE system **lescon_var**
@@ -57,14 +59,20 @@ Some of the intermediate data files are large (part of the quality
 control requires downloading and cross-checking the HYKVALP-ICECORR
 database with HYDAG). Any data file over 50 Mb is stored on zenodo.
 
-| Action               | Description                                                                                                               | Requires                                                                                              | Output saved? | Where? |
-|----------------------|---------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|:-------------:|:------:|
-| Get streamflow data  | Download data from HYDRA II                                                                                               | lescon_var (internal system), [`lescon_var_commands.txt`](/data/raw-data/)                            |      \-       |   \-   |
-| Change formatting    | Change downloaded data to .rds format                                                                                     | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                           |      no       |   \-   |
-| Quality control data | choose excluded years/stations, handle missing data, enforce minimum time spacing at peaks, enforce minimum record length | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/), [`utelatt.csv`](/data/raw-data/) |      yes      | zenodo |
-| Process data         | Select annual maxima                                                                                                      | `write-this-script.R`                                                                                 |      yes      | github |
+| Action                  | Description                                                                                                             | Requires                                                                                              | Output saved? | Where? |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|:-------------:|:------:|
+| Get streamflow data     | Download data from HYDRA II                                                                                             | lescon_var (internal system), [`lescon_var_commands.txt`](/data/raw-data/)                            |      \-       |   \-   |
+| Change formatting       | Change downloaded data to .rds format                                                                                   | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                           |      yes      | zenodo |
+| Findata quality control | Choose excluded years/stations, handle missing data, check minimum time spacing at peaks, enforce minimum record length | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/), [`utelatt.csv`](/data/raw-data/) |      yes      | zenodo |
+| Process data            | Select annual maxima                                                                                                    | `write-this-script.R`                                                                                 |      yes      | github |
 
-## Quality control streamflow data
+## Findata quality control
+
+### Choose excluded years / stations
+
+### Handle missing data and check minimum time spacing at peaks
+
+### Enforce minimum record length
 
 ## Kvalitetskontroll av vannføringsdata
 
@@ -186,5 +194,3 @@ punktet, fjern året.
 Vi kan se på noen av årene vi fjerner:
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
-
-### Enforce findata and record length minimums
