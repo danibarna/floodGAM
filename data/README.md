@@ -59,79 +59,74 @@ Some of the intermediate data files are large (part of the quality
 control requires downloading and cross-checking the HYKVALP-ICECORR
 database with HYDAG). Any data file over 50 Mb is stored on zenodo.
 
-| Action                  | Description                                                                                                             | Requires                                                                                              | Output saved? | Where? |
-|-------------------------|-------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|:-------------:|:------:|
-| Get streamflow data     | Download data from HYDRA II                                                                                             | lescon_var (internal system), [`lescon_var_commands.txt`](/data/raw-data/)                            |      \-       |   \-   |
-| Change formatting       | Change downloaded data to .rds format                                                                                   | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                           |      yes      | zenodo |
-| Findata quality control | Choose excluded years/stations, handle missing data, check minimum time spacing at peaks, enforce minimum record length | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/), [`utelatt.csv`](/data/raw-data/) |      yes      | zenodo |
-| Process data            | Select annual maxima                                                                                                    | `write-this-script.R`                                                                                 |      yes      | github |
+| Action                  | Description                                                                                                             | Requires                                                                                                                                                    | Output saved? | Where? |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------:|:------:|
+| Get streamflow data     | Download data from HYDRA II                                                                                             | lescon_var (internal system), [`lescon_var_commands.txt`](/data/raw-data/), [lescon_var user guide](/data/how-to/hvordan_henter_jeg_data_med_lescon_var.md) |      \-       |   \-   |
+| Change formatting       | Change downloaded data to .rds format                                                                                   | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                                                                                 |      yes      | zenodo |
+| Findata quality control | Choose excluded years/stations, handle missing data, check minimum time spacing at peaks, enforce minimum record length | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/), [`utelatt.csv`](/data/raw-data/)                                                       |      yes      | zenodo |
+| Process data            | Select annual maxima                                                                                                    | `write-this-script.R`                                                                                                                                       |      yes      | github |
 
 ## Findata quality control
 
-This step is how we check for sub-daily sampling frequency.
+This step is how we check for sub-daily sampling frequency. when
+possible, the steps should be systematisk (i.e. minimum data in manual
+exclusion). if we have prior reasons to exclude the manual stations.
 
-### Choose excluded years / stations
+### 1. Manually select excluded years / stations
 
-### Handle missing data and check minimum time spacing at peaks
+Report
+[2016:85](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147)
+identifies certain years that should be excluded from flood frequency
+analysis. In addition we have manually identified some years and
+stations that should be excluded if we need sub-daily sampling
+frequency.
 
-### Enforce minimum record length
+- [`utelatt.csv`](/data/raw-data/) - list of years and stations that
+  should be excluded
+- [`utelatt_notes.xlsx`](/data/raw-data/) - some notes on manually
+  removed years
 
-## Kvalitetskontroll av vannføringsdata
+### 2. Handle missing data and check minimum time spacing at peaks
 
-A big part of the dataset development was quality control to ensure the
-findata was good enough. we desribe the process here
+NVE has no “perfect” archive for either fine data or daily data. Some
+archives are ice-reduced, while others are not. The same applies to
+completeness.
 
-### Manuell fjerning
+We use data from the HYKVALP-ICECORR archive (archive 35), which has
+primarily controlled data with fine/variable time resolution and is
+virtually ice-reduced. HYKVALP-ICECORR is not secondarily controlled or
+complete[^1].
 
-Rapporten 2016:85 identifiserer visse år med data som bør utelates for
-flomfrekvensanalyse. I tillegg har vi identifisert noen år og stasjoner
-som bør utelates hvis vi trenger fin tidsoppløsning.
+Because the HYKVAL data is incomplete, we must make decisions on how to
+handle years with missing data. We choose to cross-check the
+HYKVALP-ICECORR data with data from another archive, HYDAG (archive 05),
+which contains controlled, complete daily data that is ice-reduced and
+re-checked.
 
-- `utelatt.csv` - list over år og stasjoner som utelates
-- `utelatt_notes.xlsx` - noen notater om manuelle fjernet år
+The cross-checking has two components:
 
-### Håndtering av år med manglende data
+#### 2.1 Check the minimum number of days per year in HYKVALP-ICECORR and HYDAG
 
-NVE har ingen «perfekt» arkiv for verken findata eller døgndata. Noen
-arkiver er isredusert, mens andre er ikke. Det samme gjelder
-kompletthet.
+First we count the number of days per year for every year and every
+station. Then we can remove years that have less than 200 days of
+observations in HYKVALP-ICECORR or less than 300 days in both
+HYKVALP-ICECORR and HYDAG. We can look at some of the years that we
+remove:
 
-Vi bruker data fra arkiv HYKALP-ICECORR (arkiv 35), som har
-primærtkontrollerte data med fin/variabel tidsoppløsning og er virtuelt
-isreduserte. HYKVALP-ICECORR er ikke sekundærkontrollert eller
-kompletterte.
-
-Fordi HYKVAL-dataene ikke er komplette, må vi derfor ta beslutninger om
-hvordan vi skal håndtere år med manglende data. Vi velger å kryssjekke
-HYKVALP-ICECORR dataene med data fra et annet arkiv, HYDAG (arkiv 05),
-som inneholder kontrollerte, kompletterte døgndata som er isredusert og
-etterkontrollert.
-
-> NB: det kommer snart (slutten av 2024/tidlig 2025) en oppdatering i
-> databasen. HYKVAL-data skal bli sekundærkontrollert etter en bestemt
-> dato. Data før denne datoen skal ikke endres.
-
-#### 1. Minimum antall dager i HYKVAL-ICECORR og HYDAG
-
-Først teller vi antall dager / år for hvert år og hver stasjon. Da kan
-vi fjerne år som har \< 200 dager i HYKVALP-ICECORR eller \< 300 dager i
-både HYKVALP_ICECORR og HYDAG. Vi kan se på noen av årene vi fjerner:
-
-**Eksemple av år fjernet p.g.a. \< 200 dager i HYKVALP-ICECORR:**
+##### Example of years removed due to \< 200 days in HYKVALP-ICECORR:
 
 ![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
-**Eksemple av år fjernet p.g.a. \< 300 dager i begge arkivene:**
-
-God overensstemmelse mellom arkivene her, men deler av året mangler.
+##### Example of years removed due to \< 300 days in both archives:
 
 ![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-#### 2. Kryssjekke HYKVALP-ICECORR med HYDAG
+#### 2.2 Check minimum time spacing using HYDAG annual maxima
 
-Kriteriene for å kryssjekke med HYDAG er litt mer kompliserte. HYDAG og
-HYKVALP-ICECORR samsvarer ikke perfekt. Det finnes noen stasjoner og år
-som er i HYKVALP-ICECORR, men ikke i HYDAG, og omvendt:
+The criteria for cross-checking with HYDAG are a bit more complicated.
+HYDAG and HYKVALP-ICECORR do not perfectly match. There are some
+stations and years that are in HYKVALP-ICECORR but not in HYDAG, and
+vice versa.
 
 ``` r
 # find unique station-year combinations in both hydag and hykvalp-icecorr:
@@ -183,16 +178,22 @@ print(hydag.sy[in.hykval==FALSE], nrows = 5)
     ## 282: 9800004  1980     FALSE
     ## 283: 9800004  1981     FALSE
 
-Det er 70 år hvor vi har data i HYKVALP-ICECORR, men ikke i HYDAG. For
-de resterende 14 156 år hvor vi har data både i HYKVALP-ICECORR og
-HYDAG, utfører vi en årlige maksimumskontroll:
+There are 70 years where we have data in HYKVALP-ICECORR but not in
+HYDAG. For the remaining 14,156 unique station - year combinations where
+we have data in both HYKVALP-ICECORR and HYDAG, we perform an annual
+maximum check:
 
-Beregne de årlige maksimumene med HYDAG. Sjekk om HYKVALP-ICECORR
-inneholder en observasjon innenfor +/- 48 timer fra datoen da det årlige
-maksimumet fra HYDAG ble observert. Hvis det ikke er noen
-HYKVALP-ICECORR observasjon innenfor +/- 48 timer fra det nødvendige
-punktet, fjern året.
+Calculate the annual maxima using HYDAG. Check if HYKVALP-ICECORR
+contains an observation within +/- 48 hours of the date the annual
+maximum from HYDAG was observed. If there is no HYKVALP-ICECORR
+observation within +/- 48 hours of the needed point, discard the year.
 
-Vi kan se på noen av årene vi fjerner:
+We can look at some of the years we discard:
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+### 3. Enforce minimum record length
+
+[^1]: Det kommer snart (slutten av 2024/tidlig 2025) en oppdatering i
+    databasen. HYKVAL-data skal bli sekundærkontrollert etter en bestemt
+    dato. Data før denne datoen skal ikke endres.
