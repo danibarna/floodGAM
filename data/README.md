@@ -45,7 +45,7 @@ fitting and evaluation).
 
 The data pipeline is the process of building the `gamfelt` dataset from
 the raw streamflow data provided by NVE. The “findata quality control”
-step is described in the following section.
+step is described in more detail in the following section.
 
 ### Dependencies
 
@@ -67,6 +67,8 @@ database with HYDAG). Any data file over 50 Mb is stored on zenodo.
 | Process data            | Select annual maxima                                                                                                    | `write-this-script.R`                                                                                 |      yes      | github |
 
 ## Findata quality control
+
+This step is how we check for sub-daily sampling frequency.
 
 ### Choose excluded years / stations
 

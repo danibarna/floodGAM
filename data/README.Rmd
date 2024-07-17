@@ -47,7 +47,7 @@ In addition to the `gamfelt` dataset, this data folder contains many data produc
 
 ## Data pipeline
 
-The data pipeline is the process of building the `gamfelt` dataset from the raw streamflow data provided by NVE. The "findata quality control" step is described in the following section.
+The data pipeline is the process of building the `gamfelt` dataset from the raw streamflow data provided by NVE. The "findata quality control" step is described in more detail in the following section.
 
 ### Dependencies
 
@@ -68,6 +68,8 @@ Some of the intermediate data files are large (part of the quality control requi
 
 
 ## Findata quality control
+
+This step is how we check for sub-daily sampling frequency. 
 
 ### Choose excluded years / stations
 
