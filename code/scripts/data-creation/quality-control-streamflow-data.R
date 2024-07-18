@@ -25,7 +25,7 @@ dataPath
 data35 <- readRDS(paste0(dataPath,"arkiv35","data.rds")) # not stored on github
 data05 <- readRDS(paste0(dataPath,"arkiv05","data.rds")) # not stored on github
 
-# load in utelatt
+# load in utelatt (all stations and years)
 utelatt <- readRDS(paste0("~/floodGAM/data/raw-data/","utelatt.rds"))
 
 ## hykvalp-icecorr dataset is a few gigabytes:
