@@ -13,7 +13,7 @@ library(lubridate)
 
 ## ---define paths
 dataPath <- paste0("~/ClimDesign_PhD/XGBoost-GAM index flood model",
-                   "/src/","dataset_construction/","publishable/")
+                   "/src/","dataset_construction/","publishable/") # zenodo download
 
 load(paste0(dataPath,"cleaned_archive35.rda"))
 
