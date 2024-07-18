@@ -6,7 +6,7 @@ floodGAM datasets
 ## Overview
 
 As part of the floodGAM analysis, we developed a flood dataset focused
-on sub-daily sampling frequency.
+on sub-daily (“fine”) sampling frequency.
 
 NVE report 2016:85 [Flomdata: utvalg og kvalitetssikring av flomdata for
 flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147)
@@ -63,30 +63,37 @@ database with HYDAG). Any data file over 50 Mb is stored on zenodo.
 |-------------------------|-------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------:|:------:|
 | Get streamflow data     | Download data from HYDRA II                                                                                             | lescon_var (internal system), [`lescon_var_commands.txt`](/data/raw-data/), [lescon_var user guide](/data/how-to/hvordan_henter_jeg_data_med_lescon_var.md) |      \-       |   \-   |
 | Change formatting       | Change downloaded data to .rds format                                                                                   | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                                                                                 |      yes      | zenodo |
-| Findata quality control | Choose excluded years/stations, handle missing data, check minimum time spacing at peaks, enforce minimum record length | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/), [`utelatt.csv`](/data/raw-data/)                                                       |      yes      | zenodo |
+| Findata quality control | Handle missing data, check time spacing at annual maxima, enforce minimum record length, choose excluded years/stations | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/)                                                                                         |      yes      | zenodo |
 | Process data            | Select annual maxima                                                                                                    | `write-this-script.R`                                                                                                                                       |      yes      | github |
 
 ## Findata quality control
 
-This step is how we check for sub-daily sampling frequency. when
-possible, the steps should be systematisk (i.e. minimum data in manual
-exclusion). if we have prior reasons to exclude the manual stations.
+We start with the 529 stations from report
+[2016:85](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147).
+The findata quality control process evaluates each year of data at these
+stations, discarding those with too much missing data or improper
+spacing around annual maxima (**archive cross-check criteria**), too few
+years of data (**minimum record length criteria**), or are otherwise
+unsuited for the sub-daily dataset (**manual quality control**).
 
-### 1. Manually select excluded years / stations
+### Filtering and quality control by the numbers
 
-Report
-[2016:85](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147)
-identifies certain years that should be excluded from flood frequency
-analysis. In addition we have manually identified some years and
-stations that should be excluded if we need sub-daily sampling
-frequency.
+Out of 529 stations, 329 have some fine data, but only 274 have at least
+20 years of total data and 10 years of fine data (where a “year of fine
+data” is defined as a year having at least 200 days where the median
+spacing between observations was less than 24 hours).
 
-- [`utelatt.csv`](/data/raw-data/) - list of years and stations that
-  should be excluded
-- [`utelatt_notes.xlsx`](/data/raw-data/) - some notes on manually
-  removed years
+We quality control these 274 stations year by year, removing those that
+fail the ‘archive cross-check’ criteria, resulting in 257 stations. We
+then manually remove 7 stations and several individual years from the
+remaining stations. The final dataset consists of 250 stations, each
+with at least 20 years of total data and 10 years of fine data.
 
-### 2. Handle missing data and check minimum time spacing at peaks
+##### Distribution of data removed vs final dataset
+
+![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+### Archive cross-check criteria
 
 NVE has no “perfect” archive for either fine data or daily data. Some
 archives are ice-reduced, while others are not. The same applies to
@@ -105,7 +112,7 @@ re-checked.
 
 The cross-checking has two components:
 
-#### 2.1 Check the minimum number of days per year in HYKVALP-ICECORR and HYDAG
+#### 1. Check the minimum number of days per year in HYKVALP-ICECORR and HYDAG
 
 First we count the number of days per year for every year and every
 station. Then we can remove years that have less than 200 days of
@@ -115,18 +122,18 @@ remove:
 
 ##### Example of years removed due to \< 200 days in HYKVALP-ICECORR:
 
-![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ##### Example of years removed due to \< 300 days in both archives:
 
-![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-#### 2.2 Check minimum time spacing using HYDAG annual maxima
+#### 2. Check minimum time spacing using HYDAG annual maxima
 
-The criteria for cross-checking with HYDAG are a bit more complicated.
-HYDAG and HYKVALP-ICECORR do not perfectly match. There are some
-stations and years that are in HYKVALP-ICECORR but not in HYDAG, and
-vice versa.
+The criteria for cross-checking annual maxima with HYDAG are a bit more
+complicated. HYDAG and HYKVALP-ICECORR do not perfectly match. There are
+some stations and years that are in HYKVALP-ICECORR but not in HYDAG,
+and vice versa.
 
 ``` r
 # find unique station-year combinations in both hydag and hykvalp-icecorr:
@@ -178,10 +185,10 @@ print(hydag.sy[in.hykval==FALSE], nrows = 5)
     ## 282: 9800004  1980     FALSE
     ## 283: 9800004  1981     FALSE
 
-There are 70 years where we have data in HYKVALP-ICECORR but not in
-HYDAG. For the remaining 14,156 unique station - year combinations where
-we have data in both HYKVALP-ICECORR and HYDAG, we perform an annual
-maximum check:
+There are 70 unique station - year combinations where we have data in
+HYKVALP-ICECORR but not in HYDAG. For the remaining 14,156 unique
+station - year combinations where we have data in both HYKVALP-ICECORR
+and HYDAG, we perform an annual maximum check:
 
 Calculate the annual maxima using HYDAG. Check if HYKVALP-ICECORR
 contains an observation within +/- 48 hours of the date the annual
@@ -190,9 +197,26 @@ observation within +/- 48 hours of the needed point, discard the year.
 
 We can look at some of the years we discard:
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
-### 3. Enforce minimum record length
+### Manually exclude years / stations
+
+The archive cross-check criteria systematically removes some problematic
+years, but may not catch all issues. External knowledge about a
+station’s reliability can help in manually validating and removing
+problematic data if necessary.
+
+Since manual removal can be subjective, it is always good to get a
+second opinion on any stations and years removed manually.
+
+The files containing the manually removed stations and years are:
+
+- [`utelatt_stations.csv`](/data/raw-data/) - stations that should be
+  excluded
+- [`utelatt_years.csv`](/data/raw-data/) - individual years at remaining
+  stations that should be excluded
+- [`utelatt_notes.xlsx`](/data/raw-data/) - some notes on manually
+  removed years and stations
 
 [^1]: Det kommer snart (slutten av 2024/tidlig 2025) en oppdatering i
     databasen. HYKVAL-data skal bli sekundærkontrollert etter en bestemt
