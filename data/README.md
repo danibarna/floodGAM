@@ -59,12 +59,12 @@ Some of the intermediate data files are large (part of the quality
 control requires downloading and cross-checking the HYKVALP-ICECORR
 database with HYDAG). Any data file over 50 Mb is stored on zenodo.
 
-| Action                  | Description                                                                                                             | Requires                                                                                                                                                    | Output saved? | Where? |
-|-------------------------|-------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------:|:------:|
-| Get streamflow data     | Download data from HYDRA II                                                                                             | lescon_var (internal system), [`lescon_var_commands.txt`](/data/raw-data/), [lescon_var user guide](/data/how-to/hvordan_henter_jeg_data_med_lescon_var.md) |      \-       |   \-   |
-| Change formatting       | Change downloaded data to .rds format                                                                                   | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                                                                                 |      yes      | zenodo |
-| Findata quality control | Handle missing data, check time spacing at annual maxima, enforce minimum record length, choose excluded years/stations | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/)                                                                                         |      yes      | zenodo |
-| Process data            | Select annual maxima                                                                                                    | `write-this-script.R`                                                                                                                                       |      yes      | github |
+| Action                  | Description                                                                                                             | Requires                                                                                                                                                           | Output saved? |                 Where?                  |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------:|:---------------------------------------:|
+| Get streamflow data     | Download data from HYDRA II                                                                                             | lescon_var (internal system), [`lescon_var_commands.txt`](/data/raw-data/), [lescon_var user guide](/data/how-to-guides/hvordan_henter_jeg_data_med_lescon_var.md) |      \-       |                   \-                    |
+| Change formatting       | Change downloaded data to .rds format                                                                                   | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/)                                                                                        |      yes      |                 zenodo                  |
+| Findata quality control | Handle missing data, check time spacing at annual maxima, enforce minimum record length, choose excluded years/stations | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/)                                                                                                |      yes      |                 zenodo                  |
+| Process data            | Select annual maxima                                                                                                    | [`get-annual-maxima.R`](/code/scripts/data-creation/)                                                                                                              |      yes      | [github](/data/processed-data/gamfelt/) |
 
 ## Findata quality control
 
@@ -101,8 +101,8 @@ completeness.
 
 We use data from the HYKVALP-ICECORR archive (archive 35), which has
 primarily controlled data with fine/variable time resolution and is
-virtually ice-reduced. HYKVALP-ICECORR is not secondarily controlled or
-complete[^1].
+virtually ice-reduced. HYKVALP-ICECORR is not currently secondarily
+controlled or complete[^1].
 
 Because the HYKVAL data is incomplete, we must make decisions on how to
 handle years with missing data. We choose to cross-check the
