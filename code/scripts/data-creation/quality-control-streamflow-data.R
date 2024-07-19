@@ -63,7 +63,7 @@ data35 <- data35[.(utelatt), discard := TRUE][discard == FALSE]
 
 # Steg 3: Fjern year med manglende data -------------------------------------
 
-# 15496 unique ID-yk (station-year) tuples before filtering
+# This many unique ID-yk (station-year) tuples before filtering
 data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
 # create month column, day column and search for
@@ -95,7 +95,7 @@ data05 <- data05[.(discard.hykval200), discard := TRUE][discard == FALSE]
 data35 <- data35[.(discard.hykval200), discard := TRUE][discard == FALSE]
 
 # after filtering on the hykval-200 days criteria, we have
-# 14311 unique ID-yk tuples:
+# this many unique ID-yk tuples:
 data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
 
@@ -111,7 +111,7 @@ data05 <- data05[.(discard.both300), discard := TRUE][discard == FALSE]
 data35 <- data35[.(discard.both300), discard := TRUE][discard == FALSE]
 
 # after filtering on the both-300 days criteria, we have
-# 14226 unique ID-yk tuples:
+# this many unique ID-yk tuples:
 data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
 
@@ -175,10 +175,10 @@ data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
 data35 <- data35[ID %in% data35[,uniqueN(.SD),by=ID,.SDcols = "yk"][V1>=20]$ID,]
 
 # after filtering on the hydag-annmax criteria, we have
-# 13242 unique ID-yk tuples:
+# this many unique ID-yk tuples:
 data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
-# and 259 stations:
+# and this many stations:
 data35[,uniqueN(.SD),.SDcols = c("ID")]
 
 ## distribution of the number of years per station:
@@ -215,13 +215,13 @@ discard.fin <- numyrsfin[N<10]
 
 data35 <- data35[.(discard.fin), discard := TRUE][discard == FALSE]
 
-# now we have 250 stations:
+# now we have this many stations:
 data35[,uniqueN(.SD),.SDcols = c("ID")]
 
 
 # Save data ---------------------------------------------------------------
 
-save(data35,file=paste0("~/floodGAM/data/Rdata/","cleaned_archive35.rda"))
+save(data35,file=paste0("cleaned_archive35.rda"))
 
 
 
