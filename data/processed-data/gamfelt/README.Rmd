@@ -3,8 +3,14 @@ output: github_document
 number_sections: true
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=12, fig.height=7.5)
+```
 
 
-
+```{r}
+plot(1:10,1:10)
+```
 
 
