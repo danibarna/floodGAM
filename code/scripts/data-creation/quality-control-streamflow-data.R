@@ -206,7 +206,10 @@ numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
 setnames(numdayfin,"V1","nfin.yk")
 
 # how many years of fine data does each station have?
-numyrsfin <- numdayfin[nfin.yk>199, .N, by="ID"]
+numyrsfin <- merge(numdayfin[nfin.yk>199, .N, by="ID"][,c("ID","N")],
+                   numdayfin[, .N, by="ID"][,"ID"],
+                   all.y=T)
+setnafill(numyrsfin,cols="N",fill=0)
 
 setkey(numyrsfin,ID)
 

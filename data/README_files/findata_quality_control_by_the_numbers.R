@@ -61,13 +61,16 @@ numdayfin <- data35[,median(gapmin),by=c("yk","mk","dk","ID")]
 numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
 setnames(numdayfin,"V1","nfin.yk")
 # how many years of fine data does each station have?
-numyrsfin <- numdayfin[nfin.yk>199, .N, by="ID"]
+numyrsfin <- merge(numdayfin[nfin.yk>199, .N, by="ID"][,c("ID","N")],
+                   numdayfin[, .N, by="ID"][,"ID"],
+                   all.y=T)
+setnafill(numyrsfin,cols="N",fill=0)
 discard.fin <- numyrsfin[N<10]
 setkey(discard.fin,ID)
 
 data35 <- data35[.(discard.fin), discard := TRUE][discard == FALSE]
 
-data35[,uniqueN(.SD),.SDcols = c("ID")] # 274 stations
+data35[,uniqueN(.SD),.SDcols = c("ID")] # 273 stations
 
 
 # run cross-check before utelatt ------------------------------------------
@@ -177,18 +180,27 @@ data35[,uniqueN(.SD),.SDcols = c("ID")]
 
 # findata years > 10:
 data35[, gapmin := lapply(.SD,difftimeFn), .SDcols = "date", by = c("ID","yk")]
+
+# what station-years have at least 200 days of findata?
 setkey(data35,ID,yk,mk,dk)
+
 numdayfin <- data35[,median(gapmin),by=c("yk","mk","dk","ID")]
 numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
 setnames(numdayfin,"V1","nfin.yk")
+
 # how many years of fine data does each station have?
-numyrsfin <- numdayfin[nfin.yk>199, .N, by="ID"]
+numyrsfin <- merge(numdayfin[nfin.yk>199, .N, by="ID"][,c("ID","N")],
+                   numdayfin[, .N, by="ID"][,"ID"],
+                   all.y=T)
+setnafill(numyrsfin,cols="N",fill=0)
+
 discard.fin <- numyrsfin[N<10]
 setkey(discard.fin,ID)
 
 data35 <- data35[.(discard.fin), discard := TRUE][discard == FALSE]
 
-data35[,uniqueN(.SD),.SDcols = c("ID")] # 256 stations
+data35[,uniqueN(.SD),.SDcols = c("ID")] # 255 stations
+
 
 
 ## ------------------ now: how many utelatt years are still valid?
@@ -213,7 +225,7 @@ setnafill(tv,cols="isutelatt", fill = 0)
 tv[,uteyrs:=sum(isutelatt),by="ID"]
 tv[,Nyrs:= .N, by ="ID"]
 
-utelatt.stations <- tv[uteyrs==Nyrs,unique(ID)] # so we remove 8 stations 
+utelatt.stations <- tv[uteyrs==Nyrs,unique(ID)] # so we remove 7 stations 
 
 # and 376 years from other stations
 tv[!ID%in%utelatt.stations,sum(isutelatt)]
@@ -256,6 +268,26 @@ saveRDS(discard.all,file=paste0("~/floodGAM/data/","README_files/",
 
 
 
+# percent fine data? ------------------------------------------------------
+
+## remove utelatt years
+setkey(utelatt,ID,yk)
+data35 <- data35[.(utelatt), discard := TRUE][discard == FALSE]
+
+## within each station...
+numdayfin <- data35[,median(gapmin),by=c("yk","mk","dk","ID")]
+numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
+setnames(numdayfin,"V1","nfin.yk")
+
+# how many years of fine data does each station have?
+numyrsfin <- numdayfin[nfin.yk>199, .N, by="ID"]
+# what percentage of years per station have at least 200 days of fine data?
+numdayfin[,isfin.yk:=nfin.yk>200]
+percentfin <- numdayfin[,sum(isfin.yk)/.N,by=c("ID")]
+percentfin[,perct:=ceiling(V1*100)]
+hist(percentfin$perct)
+
+setkey(percentfin,perct)
 
 
 
