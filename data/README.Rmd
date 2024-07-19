@@ -12,10 +12,8 @@ library(lubridate)
 library(ggplot2)
 library(scico)
 
-savePath <- paste0("~/ClimDesign_PhD/XGBoost-GAM index flood model","/coms/",
-                   "markdown/","markdown data/")
+savePath <- paste0("~/floodGAM/data/","README_files/")
 load(paste0(savePath,"exampleplots_fjern_manglende_data.rda"))
-load(paste0(savePath,"tidsopplxsning_datapack.rda"))
 load(paste0(savePath,"station-years.rda"))
 hist.discard <- readRDS(paste0(savePath,"discard_histogram_data.rds"))
 ```
@@ -77,7 +75,7 @@ We start with the 529 stations from report [2016:85](https://asp.bibliotekservic
 
 Out of 529 stations, 329 have some fine data, but only 274 have at least 20 years of total data and 10 years of fine data (where a "year of fine data" is defined as a year having at least 200 days where the median spacing between observations was less than 24 hours).
 
-We quality control these 274 stations year by year, removing those that fail the 'archive cross-check' criteria, resulting in 257 stations. We then manually remove 7 stations and several individual years from the remaining stations. The final dataset consists of 249 stations, each with at least 20 years of total data and 10 years of fine data.
+We quality control these 274 stations year by year, removing those that fail the 'archive cross-check' criteria, resulting in 256 stations. We then manually remove 7 stations and several individual years from the remaining stations. The final dataset consists of 249 stations, each with at least 20 years of total data and 10 years of fine data.
  
 ##### Distribution of data removed vs final dataset
 

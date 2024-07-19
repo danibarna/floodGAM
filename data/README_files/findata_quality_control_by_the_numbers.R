@@ -3,6 +3,8 @@
 ##
 ##
 ## what is removed when: numbers for summarizing findata quality control
+##
+## need to fix: still relies on old repository
 ## -----------------------------------------------------------------------------
 
 library(data.table)
@@ -66,38 +68,6 @@ setkey(discard.fin,ID)
 data35 <- data35[.(discard.fin), discard := TRUE][discard == FALSE]
 
 data35[,uniqueN(.SD),.SDcols = c("ID")] # 274 stations
-
-
-
-# utelatt: total years ? subdaily years ? ---------------------------------
-
-utelatt <- fread(paste0(dataPath,"utelatt.csv"),
-                 colClasses = c("character","numeric"))
-
-# do we remove entire stations in the utelatt file?
-
-# merge utelatt and ID, yk from data35.
-
-tt <- data35[,unique(yk),by="ID"]
-setnames(tt,"V1","yk")
-
-# 1043 station-years in utelatt are valid
-utelatt <- merge(tt,utelatt,by=c("ID","yk"))
-
-# see if the number of utelatt years = N years per station
-utelatt[,isutelatt:=1]
-tv <- merge(tt,utelatt,by=c("ID","yk"), all.x = T)
-setnafill(tv,cols="isutelatt", fill = 0)
-
-tv[,uteyrs:=sum(isutelatt),by="ID"]
-tv[,Nyrs:= .N, by ="ID"]
-
-utelatt.stations <- tv[uteyrs==Nyrs,unique(ID)] # so we remove 8 stations 
-
-# and 691 years from other stations
-tv[!ID%in%utelatt.stations,sum(isutelatt)]
-
-## but how many of the utelatt years would have been removed by the cross-check anyway?
 
 
 # run cross-check before utelatt ------------------------------------------
@@ -170,7 +140,6 @@ data05[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
 data35[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
 
 twentyfour <- 0.00273224 # 24 hours in decimal date
-fortyeight <- twentyfour * 2
 
 # find annual maxima from hydag (data05)
 amhd <- data05[data05[, .I[which.max(cumecs)], by=c("ID","yk")]$V1]
@@ -188,7 +157,7 @@ data35[,dd.dist:=abs(dd.x-dd.y)]
 # (if there is no observation in hykval within +/- 2 days of the needed
 # point), then set discard to TRUE. Then select only rows
 # with discard = FALSE
-data35[,discard:=ifelse(min(dd.dist)>fortyeight,TRUE,FALSE),by=c("ID","yk")]
+data35[,discard:=ifelse(min(dd.dist)>twentyfour,TRUE,FALSE),by=c("ID","yk")]
 
 discard.annmax <- data35[discard==T]
 discard.annmax <- discard.annmax[,unique(yk),by="ID"]
@@ -219,7 +188,7 @@ setkey(discard.fin,ID)
 
 data35 <- data35[.(discard.fin), discard := TRUE][discard == FALSE]
 
-data35[,uniqueN(.SD),.SDcols = c("ID")] # 257 stations
+data35[,uniqueN(.SD),.SDcols = c("ID")] # 256 stations
 
 
 ## ------------------ now: how many utelatt years are still valid?
@@ -233,7 +202,7 @@ utelatt <- fread(paste0(dataPath,"utelatt.csv"),
 tt <- data35[,unique(yk),by="ID"]
 setnames(tt,"V1","yk")
 
-# 652 station-years in utelatt are still valid
+# 636 station-years in utelatt are still valid
 utelatt <- merge(tt,utelatt,by=c("ID","yk"))
 
 # see if the number of utelatt years = N years per station
@@ -246,7 +215,7 @@ tv[,Nyrs:= .N, by ="ID"]
 
 utelatt.stations <- tv[uteyrs==Nyrs,unique(ID)] # so we remove 8 stations 
 
-# and 391 years from other stations
+# and 376 years from other stations
 tv[!ID%in%utelatt.stations,sum(isutelatt)]
 
 utelatt.years <- utelatt[!ID%in%utelatt.stations,]
@@ -256,10 +225,10 @@ utelatt.years[,isutelatt:=NULL]
 # to that messy folder in ClimDesign_PhD
 
 save(utelatt.stations,utelatt.years,file=paste0(dataPath,"utelatt.rda"))
-saveRDS(utelatt,file=paste0(dataPath,"utelatt.rds"))
+saveRDS(utelatt,file=paste0("~/floodGAM/data/raw-data/","utelatt.rds"))
 
-write.csv(utelatt.stations,paste0(dataPath,"utelatt_stations.csv"),row.names=F)
-write.csv(utelatt.years,paste0(dataPath,"utelatt_years.csv"),row.names = F)
+write.csv(utelatt.stations,paste0("~/floodGAM/data/raw-data/","utelatt_stations.csv"),row.names=F)
+write.csv(utelatt.years,paste0("~/floodGAM/data/raw-data/","utelatt_years.csv"),row.names = F)
 
 
 discard.utelatt <- utelatt
@@ -281,22 +250,10 @@ notdiscard[,type:="Data used in analysis"]
 
 discard.all <- rbind(discard.all,notdiscard)
 
-saveRDS(discard.all,file=paste0("~/ClimDesign_PhD/XGBoost-GAM index flood model","/coms/",
-                                       "markdown/","markdown data/","discard_histogram_data.rds"))
+saveRDS(discard.all,file=paste0("~/floodGAM/data/","README_files/",
+                                "discard_histogram_data.rds"))
 
-library(ggplot2)
-library(scico)
 
-ggplot(discard.all[yk<2024]) +
-  geom_histogram(aes(yk,fill=type,alpha=type),binwidth=1) +
-  labs(y = "Count of observed years across all stations",
-       x = " ") +
-  scale_alpha_manual(values=c(0.4,0.8,0.8,0.8,0.8),guide=F) +
-  scale_fill_manual(name = " ",values=c("grey",scico(4,palette = "batlow"))) +
-  theme_minimal() +
-  theme(legend.position = "bottom",
-        text = element_text(size = 16)) +
-  guides(fill=guide_legend(nrow=3,byrow=TRUE))
 
 
 

@@ -84,7 +84,7 @@ data” is defined as a year having at least 200 days where the median
 spacing between observations was less than 24 hours).
 
 We quality control these 274 stations year by year, removing those that
-fail the ‘archive cross-check’ criteria, resulting in 257 stations. We
+fail the ‘archive cross-check’ criteria, resulting in 256 stations. We
 then manually remove 7 stations and several individual years from the
 remaining stations. The final dataset consists of 249 stations, each
 with at least 20 years of total data and 10 years of fine data.
