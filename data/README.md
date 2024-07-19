@@ -13,7 +13,7 @@ flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147)
 identifies 529 stations suitable for flood frequency analysis. We
 independently evaluated each year of data at these stations for ability
 to capture annual maxima at sub-daily sampling frequency. The result was
-a set of 250 stations (the `gamfelt` dataset), each with at least 20
+a set of 249 stations (the `gamfelt` dataset), each with at least 20
 years of total data and at least 10 years of sub-daily data.
 
 We provide both (i) the `gamfelt` dataset and (ii) all scripts and
@@ -86,7 +86,7 @@ spacing between observations was less than 24 hours).
 We quality control these 274 stations year by year, removing those that
 fail the ‘archive cross-check’ criteria, resulting in 257 stations. We
 then manually remove 7 stations and several individual years from the
-remaining stations. The final dataset consists of 250 stations, each
+remaining stations. The final dataset consists of 249 stations, each
 with at least 20 years of total data and 10 years of fine data.
 
 ##### Distribution of data removed vs final dataset
@@ -191,9 +191,9 @@ station - year combinations where we have data in both HYKVALP-ICECORR
 and HYDAG, we perform an annual maximum check:
 
 Calculate the annual maxima using HYDAG. Check if HYKVALP-ICECORR
-contains an observation within +/- 48 hours of the date the annual
+contains an observation within +/- 24 hours of the date the annual
 maximum from HYDAG was observed. If there is no HYKVALP-ICECORR
-observation within +/- 48 hours of the needed point, discard the year.
+observation within +/- 24 hours of the needed point, discard the year.
 
 We can look at some of the years we discard:
 
