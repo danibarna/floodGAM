@@ -1,7 +1,5 @@
 
-<h1 align="center">
-The gamfelt dataset
-</h1>
+# The `gamfelt` dataset
 
 This folder contains the annual maxima and catchment descriptors for the
 `gamfelt` dataset. We summarize some properties of the dataset below.
@@ -54,9 +52,8 @@ made up of fine data. These stations showing a low percentage of fine
 data are characterized by having a long total record length compared to
 the fine (subdaily) record length, i.e. in these cases, the amount of
 subdaily data is not below average; rather, the overall record length is
-extensive. The median total record length at stations with less than
-half the record made up of fine data is 97 years.
+extensive. The median total record length at these stations is 97 years.
 
-## Considerations for the `gamfelt` dataset
+## Considerations when using the `gamfelt` dataset
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->

@@ -21,8 +21,7 @@ percentfin <- readRDS(paste0("~/floodGAM/data/","README_files/",
                                 "findata_stats.rds"))
 ```
 
-
-<h1 align="center">The gamfelt dataset</h1>
+# The `gamfelt` dataset
 
 This folder contains the annual maxima and catchment descriptors for the `gamfelt` dataset. We summarize some properties of the dataset below.
 
@@ -90,9 +89,9 @@ axis(side=1, at=H2$breaks, labels=paste0(H2$breaks, "%"))
 
 Half of the stations (123 stations) have more than 90% of the record made up of fine data.
 
-Around 20% of the stations (49 stations) have less than half the record made up of fine data. These stations showing a low percentage of fine data are characterized by having a long total record length compared to the fine (subdaily) record length, i.e. in these cases, the amount of subdaily data is not below average; rather, the overall record length is extensive. The median total record length at stations with less than half the record made up of fine data is 97 years. 
+Around 20% of the stations (49 stations) have less than half the record made up of fine data. These stations showing a low percentage of fine data are characterized by having a long total record length compared to the fine (subdaily) record length, i.e. in these cases, the amount of subdaily data is not below average; rather, the overall record length is extensive. The median total record length at these stations is 97 years. 
 
-## Considerations for the `gamfelt` dataset
+## Considerations when using the `gamfelt` dataset
 
 
 ```{r,echo=F}
