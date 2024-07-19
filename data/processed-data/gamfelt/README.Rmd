@@ -6,11 +6,59 @@ number_sections: true
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.width=12, fig.height=7.5)
+
+library(data.table)
+library(sp)
+library(ggplot2)
+library(scico)
+
+gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/","gamfelt/",
+                       "gamfelt_catchment_covariates.rds"))
+load(paste0("~/floodGAM/data/processed-data/","gamfelt/",
+            "README_files/","station_selection_map_datafiles.rda"))
+NorgeDF <- fortify(Norge)
 ```
 
 
-```{r}
-plot(1:10,1:10)
+<h1 align="center">The gamfelt dataset</h1>
+
+This folder contains the annual maxima and catchment descriptors for the `gamfelt` dataset. We summarize the dataset below.
+
+## File structure
+
+ - `gamfelt_annual_maxima` - the annual maxima, in $m^3/s$.
+ - `gamfelt_catchment_descriptors` - catchment descriptors for each gamfelt station. 
+ - `README-catchment-descriptors.txt` - description of each variable in the catchment descriptor dataset.
+
+
+## Summarizing the dataset
+
+```{r,echo=F,warning=F,message=F}
+scaleFUN <- function(x) sprintf("%.1f", x) # to get good fraction of rain labels
+
+gfgp <- ggplot() +
+  geom_polygon(data=NorgeDF,aes(long,lat,group=group),
+               fill = "white",color="grey",alpha=0.3) +
+  geom_point(data=gfcov,aes(X_utm,Y_utm,
+                                fill=QD_fgp,
+                                size=A),
+             color="black",
+             inherit.aes = FALSE,
+             pch=21,stroke=0.1) +
+  scale_fill_scico(name = "Fraction of rain\ncontribution to\nflood generating process",
+                   palette = "lapaz",end=0.9,
+                   alpha=1) +
+  scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
+                                                sep = "")) ,
+                        range=c(1.5,12),
+                        breaks = c(10,500,2000))+
+  coord_equal()+
+  theme_void() +
+  theme(legend.position = c(0.65,0.29),
+        text = element_text(family="sans"))
+gfgp
 ```
 
 
+
+## How fine is "fine data"?
