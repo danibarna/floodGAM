@@ -30,23 +30,33 @@ sizes and hydroclimatic regimes:
 |:-----------------------:|:------------:|:-------------:|:--------------:|:---------------:|:----------------:|:-----------:|
 | **Number of stations**  |      2       |      18       |       67       |       27        |        94        |     39      |
 
-``` r
-par(mfrow=c(1,2),mar = c(5,5,1,1))
+### Record lengths
 
-hist(percentfin$N,breaks=20,
-     xlab="Record length (years)",ylab="Stations",main="",
-     col="white")
-H2 <- hist(percentfin$perct,xaxt="n",
-           xlab="Percent of record that is subdaily data",ylab="Stations",
-           main="",
-           col="white")
-axis(side=1, at=H2$breaks, labels=paste0(H2$breaks, "%"))
-```
+Each of the streamflow records contains a variety of collection methods.
+These differing collection methods provide data at different
+frequencies. Generally, the earlier part of the streamflow record has
+daily time resolution, while the later part of the record contains a
+higher frequency of measurements after adoption of digitized limnigraph
+records and/or digital measurements. For our dataset, the shift to a
+higher frequency of measurements is typically around 1980, and stations
+have, on average, 34 years of high frequency (fine) data.
+
+Total record lengths in our data set range from a minimum of 20 years of
+data to 131 years at station 62.5 (Bulken).
 
 ![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-``` r
-# saved manually as data_details_histograms.pdf, landscape, 11.5 
-```
+Half of the stations (123 stations) have more than 90% of the record
+made up of fine data.
 
-## How fine is “fine data”?
+Around 20% of the stations (49 stations) have less than half the record
+made up of fine data. These stations showing a low percentage of fine
+data are characterized by having a long total record length compared to
+the fine (subdaily) record length, i.e. in these cases, the amount of
+subdaily data is not below average; rather, the overall record length is
+extensive. The median total record length at stations with less than
+half the record made up of fine data is 97 years.
+
+## Considerations for the `gamfelt` dataset
+
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->

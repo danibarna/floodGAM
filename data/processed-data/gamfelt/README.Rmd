@@ -69,7 +69,13 @@ gfgp
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Number of stations** | 2 | 18 | 67 | 27 | 94 | 39 |
 
-```{r}
+### Record lengths
+
+Each of the streamflow records contains a variety of collection methods. These differing collection methods provide data at different frequencies. Generally, the earlier part of the streamflow record has daily time resolution, while the later part of the record contains a higher frequency of measurements after adoption of digitized limnigraph records and/or digital measurements. For our dataset, the shift to a higher frequency of measurements is typically around 1980, and stations have, on average, 34 years of high frequency (fine) data.
+
+Total record lengths in our data set range from a minimum of 20 years of data to 131 years at station 62.5 (Bulken).
+
+```{r,echo=F,fig.dim=c(12,4)}
 par(mfrow=c(1,2),mar = c(5,5,1,1))
 
 hist(percentfin$N,breaks=20,
@@ -80,10 +86,34 @@ H2 <- hist(percentfin$perct,xaxt="n",
            main="",
            col="white")
 axis(side=1, at=H2$breaks, labels=paste0(H2$breaks, "%"))
-# saved manually as data_details_histograms.pdf, landscape, 11.5 
+```
+
+Half of the stations (123 stations) have more than 90% of the record made up of fine data.
+
+Around 20% of the stations (49 stations) have less than half the record made up of fine data. These stations showing a low percentage of fine data are characterized by having a long total record length compared to the fine (subdaily) record length, i.e. in these cases, the amount of subdaily data is not below average; rather, the overall record length is extensive. The median total record length at stations with less than half the record made up of fine data is 97 years. 
+
+## Considerations for the `gamfelt` dataset
+
+
+```{r,echo=F}
+ggplot(percentfin) +
+  geom_point(aes(perct,N,
+                 fill=QD_fgp,
+                 size=A),
+             color="black",
+             inherit.aes = FALSE,
+             pch=21,stroke=0.1) +
+  labs(x = "Percent of record that is subdaily data",
+       y = "Record length (years)") +
+  scale_fill_scico(name = "Fraction of rain\ncontribution to\nflood generating process",
+                   palette = "lapaz",end=0.9,
+                   alpha=1) +
+  scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
+                                                sep = "")) ,
+                        range=c(2,17),
+                        breaks = c(10,500,2000)) +
+  theme_bw()+
+  theme(legend.position = "bottom")
 ```
 
 
-
-
-## How fine is "fine data"?
