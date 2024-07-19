@@ -14,7 +14,7 @@
 ## - adds some variable transformations needed to run RFFA_2018
 ## - saves the final covariate file as an .rds file.
 ##
-## NOTE 19.07.2024: missing two stations: 2.457 and 
+## NOTE 19.07.2024: missing two stations: 2.457 and 25.30
 ## -----------------------------------------------------------------------------
 
 library(data.table)
@@ -41,7 +41,7 @@ setdiff(A,B)
 
 ## create some variable transforms. These are needed for RFFA_2018 and
 ## for floodGAM (see Table 2 in paper II "Regional median flood estimation 
-## with generalized additive models: model selection across durations)
+## with generalized additive models: model selection across durations")
 gfcov[,R_L_sqrt:=sqrt(R_L)]
 gfcov[,log_R_G_1085:=log(R_G_1085+1)]
 gfcov[,Q_N_cuberoot:=Q_N^(1/3)]
