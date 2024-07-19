@@ -20,14 +20,14 @@
 library(data.table)
 library(stringr)
 
-gfcov <- fread("~/floodGAM/data/raw-data/gamfelt_catchment_covariates.csv")
+gfcov <- fread("~/floodGAM/data/raw-data/raw_gamfelt_catchment_covariates.csv")
 
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/","gamfelt/",
                        "gamfelt_annual_maxima.rds"))
 
 ## make the "RN" and "HN" (regime nummer og hovednummer) to "ID" format:
 gfcov[,HNpad:=lapply(.SD,str_pad,width=5,pad="0"),.SDcols="HN"]
-gfcov[,ID:=paste0(RN,HNpad)]
+gfcov[,ID:=paste0(as.character(RN),HNpad)]
 
 gfcov[,HNpad:=NULL]
 
