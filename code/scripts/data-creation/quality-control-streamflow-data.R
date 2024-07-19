@@ -143,7 +143,6 @@ data05[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
 data35[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
 
 twentyfour <- 0.00273224 # 24 hours in decimal date
-fortyeight <- twentyfour * 2
 
 # find annual maxima from hydag (data05)
 amhd <- data05[data05[, .I[which.max(cumecs)], by=c("ID","yk")]$V1]
@@ -161,7 +160,7 @@ data35[,dd.dist:=abs(dd.x-dd.y)]
 # (if there is no observation in hykval within +/- 2 days of the needed
 # point), then set discard to TRUE. Then select only rows
 # with discard = FALSE
-data35[,discard:=ifelse(min(dd.dist)>fortyeight,TRUE,FALSE),by=c("ID","yk")]
+data35[,discard:=ifelse(min(dd.dist)>twentyfour,TRUE,FALSE),by=c("ID","yk")]
 
 data35 <- data35[discard == FALSE]
 
