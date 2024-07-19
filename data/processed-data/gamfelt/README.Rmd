@@ -22,7 +22,7 @@ NorgeDF <- fortify(Norge)
 
 <h1 align="center">The gamfelt dataset</h1>
 
-This folder contains the annual maxima and catchment descriptors for the `gamfelt` dataset. We summarize the dataset below.
+This folder contains the annual maxima and catchment descriptors for the `gamfelt` dataset. We summarize some properties of the dataset below.
 
 ## File structure
 
@@ -31,7 +31,11 @@ This folder contains the annual maxima and catchment descriptors for the `gamfel
  - `README-catchment-descriptors.txt` - description of each variable in the catchment descriptor dataset.
 
 
-## Summarizing the dataset
+## Describing the dataset
+
+The `gamfelt` dataset contains annual maxima for 249 stations in Norway. Each station has at least 20 years of total data and 10 years of sub-daily (fine) data. Each year of data has been assessed using the process described in the [data README](/data/README.md). 
+
+The stations represent a reasonably diverse collection of catchment sizes and hydroclimatic regimes:
 
 ```{r,echo=F,warning=F,message=F}
 scaleFUN <- function(x) sprintf("%.1f", x) # to get good fraction of rain labels
@@ -57,6 +61,20 @@ gfgp <- ggplot() +
   theme(legend.position = c(0.65,0.29),
         text = element_text(family="sans"))
 gfgp
+```
+
+| Catchment area ($km^2$)  | 0 - 2 $km^2$ | 2 - 10 $km^2$ | 10 - 60 $km^2$ | 60 - 100 $km^2$ | 100 - 500 $km^2$ | 500+ $km^2$ |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Number of stations** | 2 | 18 | 67 | 27 | 94 | 39 |
+
+The mean annual runoff for the stations ranges from around 8 $l/s/km^2$ to about 145 $l/s/km^2$.
+
+```{r,echo=F, warning=FALSE,message=FALSE,fig.dim=c(6,4),fig.align='center'}
+ggplot(gfcov) +
+  geom_histogram(aes(Q_N),fill="darkgrey",color="black") +
+  labs(y = "Number of stations",
+       x = "Mean annual runoff 1961-1990 (l/s/km2)") + 
+  theme_bw()
 ```
 
 
