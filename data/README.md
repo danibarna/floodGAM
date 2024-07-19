@@ -13,7 +13,7 @@ flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147)
 identifies 529 stations suitable for flood frequency analysis. We
 independently evaluated each year of data at these stations for ability
 to capture annual maxima at sub-daily sampling frequency. The result was
-a set of 249 stations (the `gamfelt` dataset), each with at least 20
+a set of 248 stations (the `gamfelt` dataset), each with at least 20
 years of total data and at least 10 years of sub-daily data.
 
 We provide both (i) the `gamfelt` dataset and (ii) all scripts and
@@ -78,15 +78,15 @@ unsuited for the sub-daily dataset (**manual quality control**).
 
 ### Filtering and quality control by the numbers
 
-Out of 529 stations, 329 have some fine data, but only 274 have at least
+Out of 529 stations, 329 have some fine data, but only 273 have at least
 20 years of total data and 10 years of fine data (where a “year of fine
 data” is defined as a year having at least 200 days where the median
 spacing between observations was less than 24 hours).
 
-We quality control these 274 stations year by year, removing those that
-fail the ‘archive cross-check’ criteria, resulting in 256 stations. We
+We quality control these 273 stations year by year, removing those that
+fail the ‘archive cross-check’ criteria, resulting in 255 stations. We
 then manually remove 7 stations and several individual years from the
-remaining stations. The final dataset consists of 249 stations, each
+remaining stations. The final dataset consists of 248 stations, each
 with at least 20 years of total data and 10 years of fine data.
 
 ##### Distribution of data removed vs final dataset
