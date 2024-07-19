@@ -30,9 +30,4 @@ sizes and hydroclimatic regimes:
 |:-----------------------:|:------------:|:-------------:|:--------------:|:---------------:|:----------------:|:-----------:|
 | **Number of stations**  |      2       |      18       |       67       |       27        |        94        |     39      |
 
-The mean annual runoff for the stations ranges from around 8 $l/s/km^2$
-to about 145 $l/s/km^2$.
-
-<img src="README_files/figure-gfm/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
-
 ## How fine is “fine data”?

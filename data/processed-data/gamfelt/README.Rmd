@@ -67,15 +67,7 @@ gfgp
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Number of stations** | 2 | 18 | 67 | 27 | 94 | 39 |
 
-The mean annual runoff for the stations ranges from around 8 $l/s/km^2$ to about 145 $l/s/km^2$.
 
-```{r,echo=F, warning=FALSE,message=FALSE,fig.dim=c(6,4),fig.align='center'}
-ggplot(gfcov) +
-  geom_histogram(aes(Q_N),fill="darkgrey",color="black") +
-  labs(y = "Number of stations",
-       x = "Mean annual runoff 1961-1990 (l/s/km2)") + 
-  theme_bw()
-```
 
 
 
