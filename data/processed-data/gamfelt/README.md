@@ -30,4 +30,23 @@ sizes and hydroclimatic regimes:
 |:-----------------------:|:------------:|:-------------:|:--------------:|:---------------:|:----------------:|:-----------:|
 | **Number of stations**  |      2       |      18       |       67       |       27        |        94        |     39      |
 
+``` r
+par(mfrow=c(1,2),mar = c(5,5,1,1))
+
+hist(percentfin$N,breaks=20,
+     xlab="Record length (years)",ylab="Stations",main="",
+     col="white")
+H2 <- hist(percentfin$perct,xaxt="n",
+           xlab="Percent of record that is subdaily data",ylab="Stations",
+           main="",
+           col="white")
+axis(side=1, at=H2$breaks, labels=paste0(H2$breaks, "%"))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+``` r
+# saved manually as data_details_histograms.pdf, landscape, 11.5 
+```
+
 ## How fine is “fine data”?

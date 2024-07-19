@@ -274,6 +274,8 @@ saveRDS(discard.all,file=paste0("~/floodGAM/data/","README_files/",
 setkey(utelatt,ID,yk)
 data35 <- data35[.(utelatt), discard := TRUE][discard == FALSE]
 
+data35[,uniqueN(.SD),.SDcols = c("ID")] # 248 stations
+
 ## within each station...
 numdayfin <- data35[,median(gapmin),by=c("yk","mk","dk","ID")]
 numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
@@ -289,9 +291,47 @@ hist(percentfin$perct)
 
 setkey(percentfin,perct)
 
+# 80 stations are entirely findata
+percentfin[perct==100]
+
+percentfin[perct>89] # 124 stations (50% of the stations) have over 90% findata
+
+percentfin <- merge(percentfin,numdayfin[, .N, by="ID"],by="ID")
+
+# for those percentfin < 50, the overall record length is long
+percentfin[perct<50,median(N)]
 
 
+gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
+                "gamfelt_catchment_covariates.rds"))
+
+percentfin <- merge(percentfin,gfcov[,c("ID","A","QD_fgp")],by="ID")
 
 
+## ---- save percentfin
+
+saveRDS(percentfin,file=paste0("~/floodGAM/data/","README_files/",
+                                "findata_stats.rds"))
 
 
+library(ggplot2)
+library(scico)
+
+ggplot(percentfin) +
+  geom_point(aes(perct,N,
+                 fill=QD_fgp,
+                 size=A),
+             color="black",
+             inherit.aes = FALSE,
+             pch=21,stroke=0.1) +
+  labs(x = "Percent of record that is subdaily data",
+       y = "Record length (years)") +
+  scale_fill_scico(name = "Fraction of rain\ncontribution to\nflood generating process",
+                   palette = "lapaz",end=0.9,
+                   alpha=1) +
+  scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
+                                                sep = "")) ,
+                        range=c(1.5,12),
+                        breaks = c(10,500,2000)) +
+  theme_bw()+
+  theme(legend.position = "bottom")
