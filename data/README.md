@@ -18,7 +18,7 @@ years of total data and at least 10 years of sub-daily data.
 
 We provide both (i) the `gamfelt` dataset and (ii) all scripts and
 resources needed to recreate the dataset from the raw data stored in
-HYDRA II. The data for the `gamfelt` dataset comes from the HYKVALP-ICECORR archive, but the HYDAG archive is also used to cross check some of the data. 
+HYDRA II. 
 
 Feedback on the dataset is very welcome.
 
