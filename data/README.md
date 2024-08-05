@@ -10,15 +10,15 @@ on sub-daily (“fine”) sampling frequency.
 
 NVE report 2016:85 [Flomdata: utvalg og kvalitetssikring av flomdata for
 flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147)
-identifies 529 stations suitable for flood frequency analysis. We
-independently evaluated each year of data at these stations for ability
-to capture annual maxima at sub-daily sampling frequency. The result was
+identifies 529 stations suitable for flood frequency analysis. Starting with these 529 stations, we
+independently evaluate each year of data at each station for ability
+to capture annual maxima at sub-daily sampling frequency, discarding years that are inadequate. The result is
 a set of 248 stations (the `gamfelt` dataset), each with at least 20
 years of total data and at least 10 years of sub-daily data.
 
 We provide both (i) the `gamfelt` dataset and (ii) all scripts and
 resources needed to recreate the dataset from the raw data stored in
-HYDRA II.
+HYDRA II. The data for the `gamfelt` dataset comes from the HYKVALP-ICECORR archive, but the HYDAG archive is also used to cross check some of the data. 
 
 Feedback on the dataset is very welcome.
 
@@ -44,7 +44,7 @@ fitting and evaluation).
 ## Data pipeline
 
 The data pipeline is the process of building the `gamfelt` dataset from
-the raw streamflow data provided by NVE. The “findata quality control”
+the raw streamflow data provided by NVE. There are multiple steps in the data pipeline. The “findata quality control”
 step is described in more detail in the following section.
 
 ### Dependencies
@@ -207,7 +207,7 @@ station’s reliability can help in manually validating and removing
 problematic data if necessary.
 
 Since manual removal can be subjective, it is always good to get a
-second opinion on any stations and years removed manually.
+second opinion on any stations and years removed manually. Feedback here is always welcome. 
 
 The files containing the manually removed stations and years are:
 
