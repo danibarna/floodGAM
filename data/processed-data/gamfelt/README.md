@@ -56,4 +56,7 @@ extensive. The median total record length at these stations is 97 years.
 
 ## Considerations when using the `gamfelt` dataset
 
+Although the gamfelt datast focuses on fine data, it is not comprised
+entirely of fine data.
+
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->

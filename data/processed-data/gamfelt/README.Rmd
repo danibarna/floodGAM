@@ -93,6 +93,7 @@ Around 20% of the stations (49 stations) have less than half the record made up 
 
 ## Considerations when using the `gamfelt` dataset
 
+Although the gamfelt datast focuses on fine data, it is not comprised entirely of fine data. 
 
 ```{r,echo=F}
 ggplot(percentfin) +
