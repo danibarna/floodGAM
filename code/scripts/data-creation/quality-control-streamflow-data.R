@@ -22,8 +22,8 @@ library(lubridate)
 dataPath
 
 ## ---read in data
-data35 <- readRDS(paste0(dataPath,"arkiv35","data.rds")) # not stored on github
-data05 <- readRDS(paste0(dataPath,"arkiv05","data.rds")) # not stored on github
+data35 <- readRDS(paste0("arkiv35","data.rds")) # not stored on github
+data05 <- readRDS(paste0("arkiv05","data.rds")) # not stored on github
 
 # load in utelatt (all stations and years)
 utelatt <- readRDS(paste0("~/floodGAM/data/raw-data/","utelatt.rds"))
@@ -156,8 +156,8 @@ data35 <- merge(data35, amhd, all.x = T)
 # of annual maxima from hydag
 data35[,dd.dist:=abs(dd.x-dd.y)]
 
-# find minimum distance by station-year. If minimum distance is > 48 hrs
-# (if there is no observation in hykval within +/- 2 days of the needed
+# find minimum distance by station-year. If minimum distance is > 24 hrs
+# (if there is no observation in hykval within +/- 1 day of the needed
 # point), then set discard to TRUE. Then select only rows
 # with discard = FALSE
 data35[,discard:=ifelse(min(dd.dist)>twentyfour,TRUE,FALSE),by=c("ID","yk")]
@@ -165,7 +165,7 @@ data35[,discard:=ifelse(min(dd.dist)>twentyfour,TRUE,FALSE),by=c("ID","yk")]
 data35 <- data35[discard == FALSE]
 
 # after filtering on the hydag-annmax criteria, we have
-# 14030 unique ID-yk tuples:
+# this many unique ID-yk tuples:
 data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
 
@@ -223,6 +223,11 @@ data35[,uniqueN(.SD),.SDcols = c("ID")]
 
 
 # Save data ---------------------------------------------------------------
+
+data35 <- data35[,c("ID","cumecs.x","date","yk","mk","dk","dd.x","gapmin")]
+setnames(data35,
+         c("cumecs.x","yk","mk","dk","dd.x"),
+         c("Qm3_s","year_key","month_key","day_key","decimaldate"))
 
 save(data35,file=paste0("cleaned_archive35.rda"))
 
