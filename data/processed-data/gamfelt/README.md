@@ -14,7 +14,7 @@ This folder contains the annual maxima and catchment descriptors for the
 
 ## Describing the dataset
 
-The `gamfelt` dataset contains annual maxima for 249 stations in Norway.
+The `gamfelt` dataset contains annual maxima for 248 stations in Norway.
 Each station has at least 20 years of total data and 10 years of
 sub-daily (fine) data. Each year of data has been assessed using the
 process described in the [data README](/data/README.md).
@@ -27,6 +27,9 @@ sizes and hydroclimatic regimes:
 | Catchment area ($km^2$) | 0 - 2 $km^2$ | 2 - 10 $km^2$ | 10 - 60 $km^2$ | 60 - 100 $km^2$ | 100 - 500 $km^2$ | 500+ $km^2$ |
 |:-----------------------:|:------------:|:-------------:|:--------------:|:---------------:|:----------------:|:-----------:|
 | **Number of stations**  |      2       |      18       |       67       |       27        |        94        |     39      |
+
+*note: adds up to 247 right now because missing covariates for station
+25.30*
 
 ### Record lengths
 
@@ -56,7 +59,18 @@ extensive. The median total record length at these stations is 97 years.
 
 ## Considerations when using the `gamfelt` dataset
 
-Although the gamfelt datast focuses on fine data, it is not comprised
-entirely of fine data.
+Although the `gamfelt` dataset focuses on fine data, it is not made up
+entirely of fine data. Users should consider whether this is acceptable
+for their particular analysis.
+
+In the floodGAM analysis, which analyzed models fit on annual maxima of
+different duration, the `gamfelt` dataset was sufficient to to make a
+statistically significant distinction between models fit on 24-hour
+(daily averaged) data and models fit on fine (1-hour) data.
+
+The question of “what data to include” will always be relevant to
+observation-based analyses. If the resolution of the data is a question
+in a particular analysis, users can start by investigating the 20% of
+stations that have less than half their record made up of fine data.
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
