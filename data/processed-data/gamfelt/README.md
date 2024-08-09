@@ -6,11 +6,15 @@ This folder contains the annual maxima and catchment descriptors for the
 
 ## File structure
 
-- `gamfelt_annual_maxima` - the annual maxima, in $m^3/s$.
-- `gamfelt_catchment_descriptors` - catchment descriptors for each
-  gamfelt station.
-- `README-catchment-descriptors.txt` - description of each variable in
+- `gamfelt_annual_maxima` - the annual maxima, in $m^3/s$. Saved as both
+  `.csv` and `.rds`.
+- `gamfelt_catchment_covariates` - catchment descriptors for each
+  gamfelt station. Saved as both `.csv` and `.rds`.
+- `README-catchment-covariates.txt` - description of each variable in
   the catchment descriptor dataset.
+- `gamfelt_descriptive_table.xlsx` - summary table matching Table A2 in
+  report
+  [2016:85](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147).
 
 ## Describing the dataset
 
