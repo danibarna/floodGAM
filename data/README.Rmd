@@ -23,7 +23,7 @@ hist.discard <- readRDS(paste0(savePath,"discard_histogram_data.rds"))
 ## Overview
 As part of the floodGAM analysis, we developed a flood dataset focused on sub-daily ("fine") sampling frequency. 
 
-NVE report 2016:85 [Flomdata: utvalg og kvalitetssikring av flomdata for flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147) identifies 529 stations suitable for flood frequency analysis. We independently evaluated each year of data at these stations for ability to capture annual maxima at sub-daily sampling frequency. The result was a set of 248 stations (the `gamfelt` dataset), each with at least 20 years of total data and at least 10 years of sub-daily data.
+NVE report 2016:85 [Flomdata: utvalg og kvalitetssikring av flomdata for flomfrekvensanalyser](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147) identifies 529 stations suitable for flood frequency analysis. Starting with these 529 stations, we independently evaluate each year of data at each station for ability to capture annual maxima at sub-daily sampling frequency, discarding years that are inadequate.  The result is a set of 248 stations (the `gamfelt` dataset), each with at least 20 years of total data and at least 10 years of sub-daily data.
 
 We provide both (i) the `gamfelt` dataset and (ii) all scripts and resources needed to recreate the dataset from the raw data stored in HYDRA II.
 
@@ -31,7 +31,7 @@ Feedback on the dataset is very welcome.
 
 ## How to get the data
 
-The annual maxima, catchment descriptors, descriptive table and statistical summary of the `gamfelt` dataset are stored in [`/data/processed-data/gamfelt/`](/data/processed-data/gamfelt/)
+The annual maxima, catchment descriptors, descriptive table and summary of the `gamfelt` dataset are stored in [`/data/processed-data/gamfelt/`](/data/processed-data/gamfelt/)
 
 
 ## File structure
@@ -47,23 +47,23 @@ In addition to the `gamfelt` dataset, this data folder contains many data produc
 
 ## Data pipeline
 
-The data pipeline is the process of building the `gamfelt` dataset from the raw streamflow data provided by NVE. The "findata quality control" step is described in more detail in the following section.
+The data pipeline is the process of building the `gamfelt` dataset from the raw streamflow data provided by NVE. There are multiple steps in the data pipeline. The "findata quality control" step is described in more detail in the following section.
 
 ### Dependencies
 
-Building the dataset with the scripts in this repository requires: 
+Recreating the dataset with the scripts in this repository requires: 
 
  - the NVE database **HYDRA II**
  - access to the internal NVE system **lescon_var**
  - the programming language **R**.  
 
-Some of the intermediate data files are large (part of the quality control requires downloading and cross-checking the HYKVALP-ICECORR database with HYDAG). Any data file over 50 Mb is stored on zenodo. 
+Some of the intermediate data files are large (part of the quality control requires downloading and cross-checking the HYKVALP-ICECORR database with HYDAG). Any data file over 50 Mb is stored on the shared NVE drive under /Brukere/daba/. 
 
 | Action | Description | Requires | Output saved? | Where? |
 | --- | --- | --- | :---: | :---: |
 | Get streamflow data | Download data from HYDRA II | lescon_var (internal system), [`lescon_var_commands.txt`](/data/raw-data/), [lescon_var user guide](/data/how-to-guides/hvordan_henter_jeg_data_med_lescon_var.md) | - | - |
-| Change formatting | Change downloaded data to .rds format  | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/) | yes | zenodo |
-| Findata quality control | Handle missing data, check time spacing at annual maxima, enforce minimum record length, choose excluded years/stations | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/) | yes | zenodo |
+| Change formatting | Change downloaded data to .rds format  | [`clean-and-process-rawdata-from-database.R`](/code/scripts/data-creation/) | yes | [daba](\\nve.no\fil\h\HM\Brukere\daba) |
+| Findata quality control | Handle missing data, check time spacing at annual maxima, enforce minimum record length, choose excluded years/stations | [`quality-control-streamflow-data.R`](/code/scripts/data-creation/) | yes | [daba](\\nve.no\fil\h\HM\Brukere\daba) |
 | Process data | Select annual maxima | [`get-annual-maxima.R`](/code/scripts/data-creation/) | yes | [github](/data/processed-data/gamfelt/) |
 
 
@@ -182,7 +182,7 @@ ggplot(lookAMgap.hykval[.(these.AMgap)]) +
 
 The archive cross-check criteria systematically removes some problematic years, but may not catch all issues. External knowledge about a station's reliability can help in manually validating and removing problematic data if necessary.
 
-Since manual removal can be subjective, it is always good to get a second opinion on any stations and years removed manually.
+Since manual removal can be subjective, it is always good to get a second opinion on any stations and years removed manually. Feedback here is always welcome.
 
 The files containing the manually removed stations and years are:
 
