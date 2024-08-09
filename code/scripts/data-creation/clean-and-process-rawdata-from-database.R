@@ -26,7 +26,7 @@ alltxtfiles <- list.files(pattern = ".txt")
 ## differentiate between files from arkiv 5 and arkiv 35:
 fl05 <- list.files(pattern = "5_")
 fl35 <- alltxtfiles[-which(alltxtfiles %in% fl05)]
-fl35 <- fl35[-which(grepl("table", fl35))]
+fl35 <- fl35[-which(grepl("lescon", fl35))]
 
 flList <- list(fl05,fl35)
 
