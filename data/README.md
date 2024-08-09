@@ -24,8 +24,7 @@ Feedback on the dataset is very welcome.
 
 ## How to get the data
 
-The annual maxima, catchment descriptors, descriptive table and
-statistical summary of the `gamfelt` dataset are stored in
+The annual maxima, catchment descriptors, descriptive table and summary of the `gamfelt` dataset are stored in
 [`/data/processed-data/gamfelt/`](/data/processed-data/gamfelt/)
 
 ## File structure
