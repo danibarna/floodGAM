@@ -205,7 +205,7 @@ We can look at some of the years we discard:
 ### Manually exclude years / stations
 
 The archive cross-check criteria systematically removes some problematic
-years, but may not catch all issues. External knowledge about a
+years, but will not catch all issues. External knowledge about a
 station’s reliability can help in manually validating and removing
 problematic data if necessary.
 

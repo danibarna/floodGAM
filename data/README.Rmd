@@ -82,7 +82,7 @@ We quality control these 273 stations year by year, removing those that fail the
 ```{r, warning = F, echo=F}
 ggplot(hist.discard[yk<2024]) +
   geom_histogram(aes(yk,fill=type,alpha=type),binwidth=1) +
-  labs(y = "Count of observed years across all stations",
+  labs(y = "Number of stations",
        x = " ") +
   scale_alpha_manual(values=c(0.4,0.8,0.8,0.8,0.8),guide=F) +
   scale_fill_manual(name = " ",values=c("grey",scico(4,palette = "batlow"))) +
@@ -180,7 +180,7 @@ ggplot(lookAMgap.hykval[.(these.AMgap)]) +
 
 ### Manually exclude years / stations
 
-The archive cross-check criteria systematically removes some problematic years, but may not catch all issues. External knowledge about a station's reliability can help in manually validating and removing problematic data if necessary.
+The archive cross-check criteria systematically removes some problematic years, but will not catch all issues. External knowledge about a station's reliability can help in manually validating and removing problematic data if necessary.
 
 Since manual removal can be subjective, it is always good to get a second opinion on any stations and years removed manually. Feedback here is always welcome.
 
