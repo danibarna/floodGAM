@@ -17,9 +17,6 @@ zfcov <- zfcov[grad1085>0]
 ## this matches what Kolbjørn and Trond did in the 2018 report
 zfcov <- zfcov[effsjoPro <= 30]
 
-## remove all z felt with NA for W_Apr (378 zfelt)
-zfcov <- zfcov[!is.na("qtt_Apr (mm)")]
-
 ## compute covariates H_F and A_P
 zfcov[,H_F:=heightMax-heightMin]
 zfcov[,A_P:=`Ap (km)`/1000]
@@ -32,7 +29,13 @@ setnames(zfcov,
            "qtt_Apr (mm)","P_Sep (mm)"),
          c("ID","Q_N","A_LE","H_F","R_G_1085","W_Apr","P_Sep"))
 
+## remove all z felt with NA for W_Apr (378 zfelt)
+zfcov <- zfcov[!is.na(W_Apr),]
+
 ## save zfelt in processed-data folder
 saveRDS(zfcov,file=paste0("~/floodGAM/data/processed-data/zfelt/",
                           "zfelt_catchment_covariates.rds"))
+
+
+
 
