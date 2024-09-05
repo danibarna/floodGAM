@@ -6,7 +6,6 @@
 ## -----------------------------------------------------------------------------
 
 library(data.table)
-library(ggplot2)
 
 # load the zfelt covariates
 zfcov <- fread("~/floodGAM/data/raw-data/zfelt_catchment_covariates.csv")
