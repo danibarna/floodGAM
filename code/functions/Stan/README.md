@@ -1,0 +1,1 @@
+`ifgev_prior1.stan` is for catchments with a median flood <= 1000 l/s/km2. `ifgev_prior2.stan` is for catchments with a median flood > 1000 l/s/km2. The difference is the priors on eta. All other priors are identical between the two files. 
