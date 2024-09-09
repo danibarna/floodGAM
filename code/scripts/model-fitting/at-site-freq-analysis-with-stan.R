@@ -116,9 +116,9 @@ for(station in stationlist){
   
 }
 
-names(result) <- unique(singleduration$ID)
+names(result) <- stationlist
 
 
-
+saveRDS(result,file="gamfeltstanresult.rds")
 
 
