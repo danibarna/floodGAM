@@ -119,6 +119,6 @@ for(station in stationlist){
 names(result) <- stationlist
 
 
-saveRDS(result,file="gamfeltstanresult.rds")
+saveRDS(result,file="~/floodGAM/results/output/gamfeltstanresult.rds")
 
 
