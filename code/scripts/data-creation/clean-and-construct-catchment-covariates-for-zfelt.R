@@ -36,6 +36,9 @@ setnames(zfcov,
 ## remove all z felt with NA for W_Apr (378 zfelt)
 zfcov <- zfcov[!is.na(W_Apr),]
 
+## add log_r_g_1085
+zfcov[,log_R_G_1085:=log(R_G_1085+1)]
+
 ## save zfelt in processed-data folder
 saveRDS(zfcov,file=paste0("~/floodGAM/data/processed-data/zfelt/",
                           "zfelt_catchment_covariates.rds"))
