@@ -69,6 +69,10 @@ for(station in stationlist){
       seed = 42)
   }
   
+  ## very often, issues with the fit are minor computational issues 
+  ## due to the complicated geometry of the posterior and can be fixed by 
+  ## re-running with a different seed
+  
   # check for any divergences
   # if n > 0, the model has not converged and more investigation is needed
   # (may need extra tuning, such as altering adapt_delta)
