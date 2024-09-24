@@ -17,6 +17,10 @@ zfcov <- zfcov[grad1085>0]
 ## this matches what Kolbjørn and Trond did in the 2018 report
 zfcov <- zfcov[effsjoPro <= 30]
 
+## remove all z felt with A < 1 km2 (0 zfelt, in this case)
+## this matches what Kolbjørn and Trond did in the 2018 report
+zfcov <- zfcov[arealEnh >= 1]
+
 ## compute covariates H_F and A_P
 zfcov[,H_F:=heightMax-heightMin]
 zfcov[,A_P:=`Ap (km)`/1000]
