@@ -122,3 +122,23 @@ names(result) <- stationlist
 saveRDS(result,file="~/floodGAM/results/output/gamfeltstanresult.rds")
 
 
+## load in the data object (if necessary) and check that everything 
+## has converged
+
+StanDT <- readRDS("~/floodGAM/results/output/gamfeltstanresult.rds")
+
+StanDT[[202]] = NULL # it's just index 202 that did not converge
+
+StanDT <- rbind(rbindlist(StanDT)) 
+
+# then we have these 8 that have Rhat problems...
+exclude <- unique(StanDT[which(StanDT$Rhat>1.005),]$ID)
+
+
+
+
+
+
+
+
+
