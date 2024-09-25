@@ -91,10 +91,87 @@ plot(xi)
 
 # Use the fitted models to predict at zfelt locations ---------------------
 
-## make the predictions
+## make the predictions for the zfelt
 zfelt.eta <- predict.gam(eta, newdata = zfcov, type="response")
 zfelt.beta <- predict.gam(beta, newdata = zfcov, type="response")
 zfelt.xi <- predict.gam(xi, newdata = zfcov, type="response")
+
+## this just predicts at the in-sample locations for gamfelt
+g.eta <- predict.gam(eta, newdata = gamdat, type="response")
+g.beta <- predict.gam(beta, newdata = gamdat, type="response")
+g.xi <- predict.gam(xi, newdata = gamdat, type="response")
+
+## ---- make the histograms
+
+par(mfrow=c(1,3))
+
+# ETA
+p1 <- hist(g.eta, nclass=20, plot=F)
+p2 <- hist(zfelt.eta, nclass=30, plot=F)
+plot(0,0,type="n",xlim=c(0,5000),ylim=c(0,1*10^-2.6),xlab="",ylab="")
+title("eta (median flood)",line=0.5)
+plot(p1,col="darkgrey",add=TRUE, freq=F)
+plot(p2,col="brown",density=25,angle=135,add=TRUE, freq=F)
+legend("topright", 
+       legend = c("gamfelt", "zfelt"), 
+       col = c("darkgrey","brown"), 
+       pch = c(15,15), 
+       bty = "n", 
+       pt.cex = 2, 
+       cex = 1.2, 
+       text.col = "black", 
+       horiz = F , 
+       inset = c(0.15, 0.02))
+
+
+# BETA
+p1 <- hist(g.beta, nclass=20, plot=F)
+p2 <- hist(zfelt.beta, nclass=30, plot=F)
+plot(0,0,type="n",xlim=c(-1.75,-0.75),ylim=c(0,4),xlab="",ylab="")
+title("beta",line=0.5)
+plot(p1,col="darkgrey",add=TRUE, freq=F)
+plot(p2,col="brown",density=25,angle=135,add=TRUE, freq=F)
+
+
+
+# XI
+p1 <- hist(g.xi, nclass=20, plot=F)
+p2 <- hist(zfelt.xi, nclass=30, plot=F)
+plot(0,0,type="n",xlim=c(-0.05,0.12),ylim=c(0,35),xlab="",ylab="")
+title("xi",line=0.5)
+plot(p1,col="darkgrey",add=TRUE, freq=F)
+plot(p2,col="brown",density=25,angle=135,add=TRUE, freq=F)
+
+
+
+# Scatterplots for predicted values ---------------------------------------
+
+par(mfrow=c(1,2))
+
+plot(zfelt.eta,zfelt.xi)
+points(g.eta,g.xi,col="magenta",pch=18)
+
+plot(zfelt.eta,zfelt.beta)
+points(g.eta,g.beta,col="magenta",pch=18)
+
+
+
+
+
+neg.xi <- which(zfelt.xi<0)
+
+
+zfcov[neg.xi]
+
+rawzfcov <- fread("~/floodGAM/data/raw-data/zfelt_catchment_covariates.csv")
+
+rawzfcov[OBJECTID%in%neg.xi]
+
+
+
+
+
+
 
 
 
