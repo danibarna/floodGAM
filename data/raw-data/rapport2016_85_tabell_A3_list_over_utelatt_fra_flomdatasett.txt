@@ -1,0 +1,249 @@
+1.110 Skjenna Bruker 2.614 Rosten
+1.200 Lierelv x x Søkt nedlagt. Dårlig oppmålt kurve.
+2.10 Sogna x x For lite og dårlige data
+2.17 Blaker x Stor usikkerhet på flomverdier
+2.111 Aursunden Bruker 2.603 Glåmos
+2.292 Skjøli 1966-1968 x Usikkert kurvegrunnlag, Finner bare versj. 2. Ikke brukbar!
+2.295 Tundra x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+2.299 Sulheim Finner ikke digitaliserte feltgrenser
+2.303 Dombås x x Store hastigheter og antatt ubrukelig på stor flom.
+2.346 Lesjaverk x x Utløpet i vest til Rauma er ustabilt og påvirker vf til Lågen.
+2.455 Elveseter x x Store hastigheter og antatt ubrukelig på stor flom.
+2.473 Frya Forlenget serie med 2.63. - For kort
+2.481 Jora v/Nysetra x x Kraftig profilendring 2011. Ny kurve ikke oppmålt ennå.
+2.590 Vikka x x Data fra denne stasjonen er veldig usikre
+2.595 FaukstadxDårlig til veldig dårlig kurvekvalitet på flom
+2.601 Slemdalsbekken 1 x xFlomvannføringer beheftet med betydelige tilfeldige og systematiske feil. Står i fallsonenmellom under- og overkritisk strømning
+2.613 Ossjø ndf.Regulert. Bruker stasjon 2.140 for perioden 1909-1934
+2.1109 Storbreagrove x xMå ikke brukes. Feil i registreringer. Årsak ikke klarlagt ennå.
+3.33 Guthusbekken v/Vansjø x x Ubrukelig. Er bestemt lagt ned.
+5.17 Rustadskogen x xUrbanstasjon
+6.12 Vestli xxUrbanstasjon
+11.5 Justad xxRegulert. Lite data. Dårlig på flom.
+11.6 Oppsal xxAnbefalt utelatt i flomsonekartrapport for Lierelva. Problemer med kurve
+12.65 Skjerdal (Tyrifjorden) x Svært dårlig kurvekvalitet på flom
+12.98 Krøderen Bruker 12.99 Skålfoss
+12.119 Strandvatn ndf. Liten regulering. Se også 12.100.
+12.154 Lio Se også 12.215. Bruker kin 12.215 Storeskar
+12.188 Langtjernbekk xx Alltid oppstuvning på flom grunnet oppstrøms bru. Veldig usikre data på flom. Ogsåflompåvirkning grunnet overbygg/lokk på vst over 0,5
+12.192 Sundbyfoss xx Vannstander over 2,4m før 2009 er svært usikre pga store svingninger ivannstand.Flomtopper er simulerte før 2009. Også problemer med mindre damoppstrøms som har plutselige tømminger (for å bli kvitt bever).
+12.297 Hvalskvern x xNedlagt pga ubrukelige data på flom. Høge hastigheter og sprang.
+15.54 Skrykken Data påvirket av grunnvann
+15.74 Skorge x xProfil er ødelagt. Bare vst-reg nå etter ønske fra flomvarslingen.
+15.101 Dokkeberg Forlenget serie med 15.7 og 15.19. - bruker 15.19
+16.33 Seljordvatn Bruker 16.51 Hagadrag
+16.34 Totak x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+16.85 Hovdevatn x Svært dårlig kurvekvalitet på flom
+16.112 Byrteåi x xUsikkerhet på flom, ingen målinger over 18 m3/s
+16.128 Austbygdåi x xUsikker på flom, koker utenfor stasjonen på høye vannstander. Ser ut for at den gåroverkritisk når den kommer over 100 m3/s.
+16.135 Tyri Liten regulering. Lavvannsverdier og trolig flomverdier påvirket av regulering
+16.154 Brusetbekken x xIsproblemer, kan gi store"flomtopper" i vinterperioden.
+19.55 Jørundland Bruker 19.72
+19.72 Jørundland Visuell inspeksjon tyder på at data trenger ytterligere kvaliteskontroll
+19.89 Skornetten x Usikkert kurvegrunnlag, bare en måling
+19.91 Åbogstjønn ndf. x Usikkert kurvegrunnlag, ingen målinger
+20.6 Ogge x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+20.11 Tveitdalen xxV-profil-betongterskel. Kun teoretisk kurve, ikke kontrollmålt mot flomverdier.
+21.17 Bjørgåni x xStasjonen er ny etter at profil har blitt utbedret og sikret i forhold til erosjon. Kurven ermidlertidig pga få målinger og vil bli revidert etter det harblitt utført flere målinger.Kurve meget usikker på flom
+21.31 Lislevatn Kontrollstasjon for tapping
+21.49 Sømskleiva x xUrbanstasjon
+21.51 Fardal Finner ikke digitaliserte feltgrenser
+22.7 Nedre Skjerkevatn x Svært dårlig kurvekvalitet på flom
+22.20 Håverstadx Usikkert kurvegrunnlag, dårlig kurvekvalitet på flom
+25.32 Knabåni xxUsikker kurve på flom. Driftes av sira Kvina
+26.9 Valevatn x Svært dårlig kurvekvalitet på flom
+26.10 Liland x Svært dårlig kurvekvalitet på flom
+26.22 Deg x xDårlig kurve på flom. Driftes av Sira Kvina
+26.26 Jogla xTrend i tid, alle målinger etter 2005 gir høyere Q enn kurve. Store relative avvik.
+26.32 Holmavatn x xSparsommelig oppmålt kurve, mangler særlig lavvann og flommålinger. Driftes av SiraKvina
+27.14 Saglandsvatn x Svært dårlig kurvekvalitet på flom
+27.20 Gya xxFor dårlig oppmålt på flom. Meget usikkert flomsegment. Ikke homogen på flom.
+27.26 Ogna v/Hetland xx Enorm usikkerhet i flomsegmentet. Må få inn flommålinger før den kan brukes.
+28.6 Bryne x xDårleg på flaum. Problem med kommunikasjon og tappetunnell som munnar ut på høgrebredd. Vurderast nedlagt.
+28.11 Lye 2 x xUrbanstasjon
+29.4 Aspervik x xUrbanstasjon
+30.2 Byrkjedal bru 1978-1982 x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+31.10 Venekvev xx Mangler det kontrollmålinger av teoretisk kurve. De få som er gjort indikerer rimelig feilkurve og har ingenting å styre etter mot flomverdier.
+35.4 Undeknut Finner ikke digitaliserte feltgrenser
+35.5 Moavatn Finner ikke digitaliserte feltgrenser
+35.6 Tøtlandsvik x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+35.17 Førre Limnigraf x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+36.1 Suldalsoset Bruker 36.11 Stråpa
+36.9 Middal x xDårlige data og dårlig kurve.
+36.34 Prestvika x xUkjent kurvekvalitet. Driftes ikke av HH. Vannføringer over 3,8 m3/s er veldig usikre. 1-segment kurve, som ikke tar hensyn til at støpt overløp slutter ved dennehøyde/vannføring. Heller ingen VF-målinger
+36.52 Kvanndalså xx Dårlig målt opp på flom. Noen av målingene som er utført virker suspekt. Trengermålinger > 15 m³/s og lavvann.
+36.56 Stølsåna x xIngen reel VF-stasjon. Driftes ikke.
+41.8 Hellaugvatn xx Revidert kurve, men for stor usikkerhet i flomsegmentet til å kunne brukes. Trenger flereVF-målinger på alle vannstander, spesielt flom og lavvann.
+42.6 Baklihøl x xDårlig kvalitet på data. Regulert fra 2013. Mulig nedlegging.
+47.11 Jondalstjern xxFor kort serie. Oppstart 2013
+50.4 Viveli x xDårlig kvalitet på data.
+50.13 Bjoreio x xStørrelse på vårflommer kan være påvirket av snø- og isoppstuving
+50.38 Leiro x xKort tidsserie.
+55.11 Kleivevatn x Ukjent kurvegrunnlag
+56.1 Sandsli x xUrbanstasjon
+56.2 Håvardstun x xVatn renn ut av vassdraget pga urbanisering.
+61.7 Sedal x Svært dårlig kurvekvalitet på flom
+62.3 Rjoande x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+62.4 Rjoande x Ukjent kurvegrunnlag
+62.12 Hielva x Svært dårlig kurvekvalitet på flom
+62.13 Årmot x Ukjent kurvegrunnlag
+62.16 Kvitno x Svært dårlig kurvekvalitet på flom
+64.2 Steindalsvatn x Ukjent kurvegrunnlag
+65.1 Hunvensvatn x Svært dårlig kurvekvalitet på flom
+67.1 Fossevatn x Svært dårlig kurvekvalitet på flom
+70.7 Tistel xxManglende data for vf kurve. Mangler nyere data her og bare en Q-måling.
+73.14 Valdresdøla x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+74.16 Langedalen x xVårflom preges av snøoppstuvning eller frost i stigerør. Trykksensor fra juni 2012
+74.24 Nysetvatn x xKurve veldig usikker på flom, ved stor flom kan vann komme opp i inntaket fraoverførsingstunnel å stuve opp.
+75.24 Øygarden x Svært dårlig kurvekvalitet på flom
+76.3 Fondøla x Ukjent kurvegrunnlag
+76.15 Bruvollelvi xxBekkeinntak Jostedalen. Dataene er kun brukbare for sommerhalvåret.
+76.76 Kroken x Svært dårlig kurvekvalitet på flom
+77.21 Grindselvi x xProfil og dalsider ustabile etter Dagmar. Vurderes nedlagt.
+78.2 Suphellerelv x Svært dårlig kurvekvalitet på flom
+79.1 Nessadalsvatn x Svært dårlig kurvekvalitet på flom
+82.3 Håland bru x Ukjent kurvegrunnlag
+83.5 Gjermundstad x Svært dårlig kurvekvalitet på flom
+83.8 Yndestad x Svært dårlig kurvekvalitet på flom
+83.13 Nysnaelv x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+83.29 Selselva v/Bygstad x x Kort serie. Ukjent status. Kommer ikke inn data.
+84.1 Jølstervatn x Ukjent kurvegrunnlag
+84.2 Movatn x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+84.11 Hovefoss xxUstabil på store flommer. Mulig nedleggelse. Alle kurveperioder bør revideres hvis denneskal brukes
+84.12 Ytste Langvatn x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+84.14 Prestfossen x Svært dårlig kurvekvalitet på flom
+84.51 Norddøla v/Holsen x xKort serie. Ukjent status. Kommer ikke inn data.
+85.3 Svartebotten xxMangler målinger på flom. Helikopterstasjon som ikke har tilgang når det ikke er flyvær.
+86.7 Bortne x Ukjent kurvegrunnlag
+86.23 Breelva v/Ålfotbreen xxMangler målinger på flom. Helikopterstasjon som ikke har tilgang når det ikke er flyvær.
+87.3 Teita bru Overlapp med 87.10. Bruke den
+88.16 Hjelledøla x xVedtatt nedlagt
+91.3 Ervik x Svært dårlig kurvekvalitet på flom
+97.1 Fetvatn (Fitjavatnet) xxVed stormflo stuver fjorden opp og gir for høye flomverdier
+97.4 Skjåstad x Svært dårlig kurvekvalitet på flom
+97.5 Sleddalen xxMålinger avviker fra kurva og svært dårlig oppmålt mot flom. Må revideres.
+101.2 Engsetvatn ndf. Overlapp med 101.1. Bruker den
+103.2 Lesjaskogvatn xUtløpet til Rauma er ustabilt
+103.7 Dalehaug x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+103.20 Isa v/Morstel bru xxDårlig på flom. Høg vannhastighet. Ikke stabilt profil.
+104.2 Eikesdalsvatnxustabil profil, feil kurve, må ikke brukes. Kurerevisjon planlegges
+104.4 Store Kvervin x Usikkert kurvegrunnlag, trend i flommer
+104.17 Mardalstjern 1958-1969 x Tidsoppløsning over 1 døgn før 1970, svært usikker på flom etter 1969
+104.18 Mardalsvatn x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag, Dårlig kvalitet på tidsserier
+107.2 Hustad x Svært dårlig kurvekvalitet på flom
+107.3 Farstadelva v/Farstad xxHyppig endring i profil. Stor usikkerhet generelt, og spesielt på flom.
+108.1 Nåsvatn x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+109.7 Festa Overlapp med 109.4
+110.1 Karihola x x Urbanstasjon
+110.2 Draget xxKurve er ikke verifisert mot flom. Store endringer i nedbørfeltet, fraføring av ca 2/3 avfeltet. Mulig oppstuva på stor flom før det. Ikke homogen.
+111.5 Talgøyfoss X Dårlig kurvekvalitet på flom.
+111.8 Nerdal 1991-null x Usikkert kurvegrunnlag, Lita regulering. Kan påvirke flomverdier
+112.1 Fugleåsbekken x Sperret (men Bra kvalitet)
+112.2 Gravvoll x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+112.8 Rinna xx Dårlig oppmålt på flom
+113.3 Svorka x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+117.4 Valen (Laksvatnet) xx Mangler høye målinger, må tas ut pga for stor usikkerhet.
+120.1 Brattfoss x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+121.29 Gisnås x xKraftig isoppstuing hver vinter. Uryddig hydraulikk på flom. Vanskelig å få gode vfmålinger.
+122.2 Haga bru x x
+Ustabilt profil og uryddig hydraulikk ved VM/sensorer på flom. Bruk heller Gaulfoss.
+122.14 Lillebudal bru x xUstabilt profil og noe isoppstuving. Gammel kurve.
+122.16 Gaua x xMeget ustabilt profil. Vanskelig å få gode vf-målinger. Meget uryddig hydraulikk på flom.
+123.4 Selbusjø x Ukjent kurvegrunnlag
+123.20 RathexUkjent kurvegrunnlag før 1899, bare få år med data før 1900
+123.28 Hokfossen xx Store instrumentelle problemer, usikker kurve, mye kompelemntering
+123.30 Øvre Hestsjøbekk x xStore instrumentelle problemer. Driften fra NVE sin side opphører ila 2014. NTNU tarover alt ansvar. Isoppstuving. Data kan tidvis over lengreperioder være komplettert motSvarttjørnbekken og Hokfossen. Hva med uavhengighet?
+123.38 Risvollan x xUrbanstasjon, kapasitetsproblemer
+123.95 Kobberdammen x xKun teoretisk kurve (midlertidig)
+127.5 Lillelunet Liten regulering. Bruker 127.11. Feltareal overlapper mye
+128.5 Støafoss x xDårlig oppmålt på flom. NTE overtatt driftsansvar.
+128.12 Holobekken x Ukjent kurvegrunnlag
+131.1 Oppgrande bruxData har ujevn tidsoppløsning, samme verdi over flere dager, senere regulert
+131.2 Store Grønsjø x Kurve dårlig oppmålt på flom.
+139.3 Formofoss x Ukjent kurvegrunnlag
+139.12 Otersjø ovf. x Usikkert kurvegrunnlag
+139.14 Eidsvatn x Usikkert kurvegrunnlag
+139.19 Iskvernfoss x xElendig. Nedlegges sannsynligvis etter hvert.
+139.26 Embrethølen x xDårlig oppmålt på flom. NTE overtatt driftsansvar.
+144.6 Saglivatn x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+149.1 Møllehusfoss xx Foreløpig kurve, data brukes med forbehold.
+150.2 TormodsvollxVeldig uregelmessig, stor vannføring mellom 1962-1963
+151.3 Hundålvatn x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+151.7 Kapskarmo x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+151.11 Lavvatn xx Høyeste måling i evt kurvegrunnlag er på 30 % av middelflom. Meget usikker på omdenne bør være med videre.
+151.13 Øvre Glugvatn x xUsikkerhet ifm oppstuving fra tunellinntak ndf målested på flom
+156.3 Store Akersvatn x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag, bare 2 punkter
+156.7 Jordbru x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+156.19 Bredek xx Få målinger i kurvegrunnlag. Usikker på flom.
+156.21 Lille UmvatnxSvært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+156.23 Søndre Bjøllåvatn 1984-nullLEP x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+157.4 Flostrand xx Foreløpig for usikker kurve på alle vannstander. Profilendringer.
+159.5 Strømdalen xx Treng flommåling. Må gå gjennom alle kurveperioder.
+159.36 Østre Sandvikvatn x xProsjektstasjon. Dårlig oppmålt på flom.
+159.37 Nye Heimervatn x xProsjektstasjon. Dårlig oppmålt på flom.
+160.2 Fykanvatn xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+160.7 Skauvoll xx Sprikende flommålinger. Må vurderes etter nygenerering.
+160.14 Navnløsvatn x xMulig profilforandring. Dårlig oppmålt på flom.
+161.9 Gråtåga 1983 - null LEP x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+161.50 GovddesAAga x xNedlagt prosjektstasjon. Usikker på flom.
+162.8 Valnesvatn xxDårlig oppmålt på flom.
+163.2 RussånesxSvært usikker på flom, alle perioder. Feltareal overlapper med 163.9
+163.18 Lillevatn 1978-1987 x Svært dårlig kurvekvalitet på flom
+165.6 Strandå xxIkke stabilt profil. Svært usikker periodeinndeling, og sprikande målegrunnla. Myevanngress. Skal erstattes av 165.13 etter hvert
+168.3 Lakså bru xxVeldig usikker på flom
+170.5 Kaldvågvatn xxUsikker på flom. Periode 1 og 2 må genererast på nytt.
+171.2 Fordalsvatn xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+172.7 Leirpoldvatn xx Må utføre målinger på flom, gjeldende kuve antas å gi for mye vann på flom. Raskt felt,men mulig å måle.
+172.8 Rauvatn xx trenger flommålinger, oppdragsgiver ikke interessert i ekstra kostnader
+173.4 Nordelvkors xDårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+174.1 Hundal x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+174.8 SildvikvatnxKun 5 år uregulert før 1920, dårlig kurvekvalitet på flom
+176.2 Spannbogvatn x xProsjektstasjon, få år med data, antas nedlagt om få år
+179.6 Jordelv xxUtenfor 95% troverdighetsband. Må nygenereres. Ingen målinger på flom.
+181.1 Solbjørnvatn xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+186.2 Ånesvatn xxUtenfor 95% troverdighetsband. Nye flommålinger. Må nygenereres. 0-versjon (dvs datafør 18.09.1997) bør ikkje brukast.
+190.4 Foldvikvatn ndf x xProsjektstasjon, få år med data, antas nedlagt om få år
+190.5 Foldvikelv x xProsjektstasjon, få år med data, antas nedlagt om få år
+190.6 Keipen x xProsjektstasjon, få år med data, antas nedlagt om få år
+190.7 Dudalselv x xProsjektstasjon, få år med data, antas nedlagt om få år
+194.4 Mevatn xxSystematiske feil. Trenger høye vf-målinger
+196.53 Koievasselv x xStasjonen er pr. dags dato ikke i funksjon, har aldri fungert tilfredstillende på vinteren,kurve basert på meget få målinger
+197.4 Storelv xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+204.1 Solli xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk. 204.6
+204.6 Kavlefoss xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+205.5 Helligskogen (1) xRegulert, stasjoner er flyttet fra (1) til (2). Bruk 205.1 for uregulert periode (1927-1977)
+205.6 Didnojokka x xStasjonen fungerer ikke på flom\høye vannføringer. Da koker det det ved stasjonen ogtrolig liten sammenheng mellom vst og vf. Vanskelige måleforhold.
+205.8 HelligskogenRegulert, stasjoner er flyttet fra (1) til (2). Bruk 205.1 for uregulert periode (1927-1977)
+208.1 Moskudal x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+209.4 Lillefossen x x
+211.1 Langfjordhamn x xEn del datatap, dårlig oppmålte kurver, bør ha flere målinger høy og lave, vanskeligtilgjengelig
+211.2 Andrevatn x xEn del datatap, dårlig oppmålte kurver, bør ha flere målinger høy og lave, vanskeligtilgjengelig
+211.3 Tredjevatn x xEn del datatap, dårlig oppmålte kurver, bør ha flere målinger høy og lave, vanskeligtilgjengelig
+212.2 Stengelsen x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+212.3 Jotkajavrre xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+212.13 Kautokeino x Sterk hysterese påvirker vannføringskurve, bør ikke brukes til analyser
+220.1 Hamnevatn xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+221.1 Magerøy x xTrenger flere flommålinger, vanskelig å treffe\komme tidsnok, utilgjengelig
+222.2 Ørretvatn x Ingen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+223.2 Lombola x xTrenger flere flommålinger
+230.1 Nordmannset x xTrenger flere flommålinger, vanskelig å treffe\komme tidsnok, utilgjengelig
+231.1 Sandfjordelv x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+234.14 Cærrogæsjokka xxTvilsom kurve, særlig for periode 1! Ikkje kontrollerte data siden midt på 90-tallet. myesprik mellom måingen på høye vf.
+234.16 Julelv x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+237.2Lillefossen xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+242.1 Fuglevatn xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+244.5 Kjerringvatn xxTrend i tid, trend i vannføring og svært usikker på flom. trenger høye målinger, vanskeligå treffe\komme tidsnok, utilgjengelig
+246.4 Lille Ropelvvatn x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
+247.3 Karpelva x xTrenger flere flommålinger
+303.2 Kobvatn x xTrenger flere flommålinger
+307.3 Limingen x Ukjent kurvegrunnlag
+307.7 Landbru x xKarstområder
+310.1 Støa x Ukjent kurvegrunnlag
+311.11 Isteren x Ukjent kurvegrunnlag
+311.12 Ørbak x Ukjent kurvegrunnlag
+311.16 Galten x Ukjent kurvegrunnlag
+312.1 Rotna bru 1911-1924 x Svært dårlig kurvekvalitet på flom
+312.1 Rotna bru Visuell inspeksjon viser at dataserien trenger ekstra kvalitetskontroll
+313.4 Bolfoss bru Liten regulering.
+313.8 Holmen bruxKun 4 år med data fra 1920-tallet i uregulert periode. Dårlig datakvalitet
+313.10 Magnor x xKan ikke brukes pga naturlig overføring fra Glomma.
