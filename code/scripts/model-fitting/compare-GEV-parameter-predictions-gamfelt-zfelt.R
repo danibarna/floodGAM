@@ -22,9 +22,13 @@ gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
 gfam[,specQ:=Qm3_s/A*1000]
 
-# select only the floodGAM covariates
-gfcov <- gfcov[,c("ID","Q_N","A_LE","A_P","H_F",
-                  "R_G_1085","log_R_G_1085","W_Apr","P_Sep")]
+# select only the floodGAM & RFFA_2018 covariates
+gfcov <- gfcov[,c("ID","Q_N","A_LE","A_P","H_F", #floodGAM
+                  "R_G_1085","log_R_G_1085","W_Apr","P_Sep", #floodGAM
+                  "Q_N_cuberoot","R_L_sqrt","T_Feb_sqrd", #RFFA_2018 eta
+                  "T_Mar_cubed","W_Mai_sqrt", #RFFA_2018 eta
+                  "A_Glac","A_For","H_10","P_Jul","W_Jun", #RFFA_2018 beta
+                  "R_TL_net")] #RFFA_2018 xi
 
 gamfelt <- merge(gfcov,gfam,by="ID")
 
@@ -59,7 +63,6 @@ eta <- gam(qind ~ s(Q_N,k=6)+
            method = "REML",
            data = gamdat,
            family = gaussian(link=log))
-plot(eta)
 
 
 ## ---- beta
@@ -70,8 +73,6 @@ beta <- gam(beta ~ s(Q_N,k=6)+
             data = gamdat,
             family = gaussian(link=identity))
 
-plot(beta)
-
 ## ---- xi
 xi <- gam(xi ~ s(A_LE,k=6)+
             s(log_R_G_1085,k=6) +
@@ -80,26 +81,110 @@ xi <- gam(xi ~ s(A_LE,k=6)+
           data = gamdat,
           family = gaussian(link=identity))
 
-plot(xi)
+
+# Fit RFFA_2018 models ----------------------------------------------------
+
+eta.RFFA2018 <- gam(qind ~ I(Q_N_cuberoot) + I(R_L_sqrt) + A_LE + 
+                      I(T_Feb_sqrd) + I(T_Mar_cubed) + I(W_Mai_sqrt),
+                    method = "REML",
+                    data = gamdat,
+                    family = gaussian(link=log))
+
+beta.RFFA2018 <- gam(beta ~ I(A_Glac) + I(A_For) + I(H_10) + 
+                       I(P_Jul) + I(W_Jun),
+                     method = "REML",
+                     data = gamdat,
+                     family = gaussian(link = identity))
+
+xi.RFFA2018 <- gam(xi ~ I(A_LE) + I(R_TL_net),
+                   method = "REML",
+                   data = gamdat,
+                   family = gaussian(link = identity))
+
+
+# Check the support of the eta, beta, xi combos for gamfelt ------------------
+
+## this predicts at the in-sample locations for gamfelt
+g.eta <- predict.gam(eta, newdata = gamdat, type="response")
+g.beta <- predict.gam(beta, newdata = gamdat, type="response")
+g.xi <- predict.gam(xi, newdata = gamdat, type="response")
+
+## add predictions and observed data to a data table:
+gDT <- gamdat[,"ID"]
+gDT[,c("eta","beta","xi"):=list(g.eta,g.beta,g.xi)]
+gDT <- merge(gDT,
+             gfam[,.(min.y = min(specQ), max.y = max(specQ)),by="ID"],
+             by="ID")
+# convert to location-scale parameterization:
+gDT[,sigma:=eta*exp(beta)]
+gDT[,mu:=eta - sigma*(log(2)^(-xi)-1)/xi]
+
+# none of the parameter combinations for gamfelt data are outside the support:
+which(gDT[,(1 + xi*(max.y-mu)/sigma)]<=0)
+
+which(gDT[,(1 + xi*(min.y-mu)/sigma)]<=0)
+
+## calculate the lower (or upper) bound imposed by the parameter combos:
+gDT[,bound:=mu-sigma/xi]
+
+## there are no estimated xi parameters < 0:
+gDT[xi<0]
+
+
+# Check the support of the eta, beta, xi combos for RFFA_2018 ------------------
+
+## this predicts at the in-sample locations 
+r.eta <- predict.gam(eta.RFFA2018, newdata = gamdat, type="response")
+r.beta <- predict.gam(beta.RFFA2018, newdata = gamdat, type="response")
+r.xi <- predict.gam(xi.RFFA2018, newdata = gamdat, type="response")
+
+## add predictions and observed data to a data table:
+rDT <- gamdat[,"ID"]
+rDT[,c("eta","beta","xi"):=list(r.eta,r.beta,r.xi)]
+rDT <- merge(rDT,
+             gfam[,.(min.y = min(specQ), max.y = max(specQ)),by="ID"],
+             by="ID")
+# convert to location-scale parameterization:
+rDT[,sigma:=eta*exp(beta)]
+rDT[,mu:=eta - sigma*(log(2)^(-xi)-1)/xi]
+
+# one of the parameter combinations for gamfelt data is outside the support:
+which(rDT[,(1 + xi*(max.y-mu)/sigma)]<=0)
+
+which(rDT[,(1 + xi*(min.y-mu)/sigma)]<=0)
+
+## calculate the lower (or upper) bound imposed by the parameter combos:
+rDT[,bound:=mu-sigma/xi]
+
+## there are no estimated xi parameters < 0:
+rDT[xi<0]
 
 
 
-# Check the support of the eta, beta, xi combos ---------------------------
 
 
 
-
-# Use the fitted models to predict at zfelt locations ---------------------
+# Use the fitted floodGAM models to predict at zfelt locations -----------------
 
 ## make the predictions for the zfelt
 zfelt.eta <- predict.gam(eta, newdata = zfcov, type="response")
 zfelt.beta <- predict.gam(beta, newdata = zfcov, type="response")
 zfelt.xi <- predict.gam(xi, newdata = zfcov, type="response")
 
-## this just predicts at the in-sample locations for gamfelt
-g.eta <- predict.gam(eta, newdata = gamdat, type="response")
-g.beta <- predict.gam(beta, newdata = gamdat, type="response")
-g.xi <- predict.gam(xi, newdata = gamdat, type="response")
+## add zfelt predictions to a data.table:
+zDT <- zfcov[,"ID"]
+zDT[,c("eta","beta","xi"):=list(zfelt.eta,zfelt.beta,zfelt.xi)]
+# convert to location-scale parameterization:
+zDT[,sigma:=eta*exp(beta)]
+zDT[,mu:=eta - sigma*(log(2)^(-xi)-1)/xi]
+
+## calculate the lower (or upper) bound imposed by the parameter combos:
+zDT[,bound:=mu-sigma/xi]
+
+## in most cases the bound is negative (interpretation: zero, since it's streamflow)
+## but in 9 cases the bound is positive:
+zDT[bound>0]
+
 
 ## ---- make the histograms
 
