@@ -102,6 +102,7 @@ xi.RFFA2018 <- gam(xi ~ I(A_LE) + I(R_TL_net),
                    family = gaussian(link = identity))
 
 
+
 # Check the support of the eta, beta, xi combos for gamfelt ------------------
 
 ## this predicts at the in-sample locations for gamfelt
@@ -156,11 +157,8 @@ which(rDT[,(1 + xi*(min.y-mu)/sigma)]<=0)
 ## calculate the lower (or upper) bound imposed by the parameter combos:
 rDT[,bound:=mu-sigma/xi]
 
-## there are no estimated xi parameters < 0:
+## there are four estimated xi parameters < 0:
 rDT[xi<0]
-
-
-
 
 
 
