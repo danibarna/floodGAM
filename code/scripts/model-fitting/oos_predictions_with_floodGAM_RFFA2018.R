@@ -29,6 +29,12 @@ gfcov <- gfcov[,c("ID","Q_N","A_LE","A_P","H_F", #floodGAM
                   "A_Glac","A_For","H_10","P_Jul","W_Jun", #RFFA_2018 beta
                   "R_TL_net")] #RFFA_2018 xi
 
+# standardize values by dividing by 2 standard deviations
+coltab = names(gfcov)[-1]
+gfcov[, 
+      (coltab) := lapply(.SD, function(Xw) (Xw - mean(Xw)) / (sd(Xw) * 2)), 
+      .SDcols = coltab]
+
 gamfelt <- merge(gfcov,gfam,by="ID")
 
 ## ----- load in the response variables (GEV parameters from Stan fits to each 
