@@ -5,14 +5,14 @@ createdurations <- function(DT, dvec){
   # to the duration of interest.
   # -----------------
   # DT - streamflow data. table, containing at least:
-  #      date, streamflow
+  #      date, streamflow, year_key
   # dvec - vector of desired durations (hours)
   # -------------------------------------------------
   
   # output: data.table 'out'
   #         year_key, decimal_date - date items
-  #         Qm3_s - streamflow, cubic meters per second, original resolution
-  #         sQm3_s - 'smoothed streamflow', centered moving average
+  #         Qm3_s - streamflow, annual maxima, cubic meters per second, original resolution
+  #         sQm3_s - 'smoothed streamflow', annual maxima, smoothed with centered moving average
   #         d - window width (hours) of centered moving average
   #         ID - station ID
   # -------------------------------------------------
@@ -49,6 +49,8 @@ createdurations <- function(DT, dvec){
     ), 
     .SDcols = c("decimaldate","Qm3_s"),
     by=c("year_key")]
+    
+    # rename some columns
     hourlystreamflow[,decimaldate:=NULL]
     setnames(hourlystreamflow,"grdpts","decimaldate")
     

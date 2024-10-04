@@ -13,7 +13,8 @@ library(lubridate)
 
 ## ---define paths
 dataPath <- paste0("~/ClimDesign_PhD/XGBoost-GAM index flood model",
-                   "/src/","dataset_construction/","publishable/") # zenodo download
+                   "/src/","dataset_construction/","publishable/") 
+# ^this is not saved in github because it's too big
 
 load(paste0(dataPath,"cleaned_archive35.rda"))
 
@@ -29,6 +30,15 @@ saveRDS(am,file = paste0("~/floodGAM/data/processed-data/gamfelt/",
 fwrite(am,file = paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_annual_maxima.csv"))
 
+
+
+# Process the data into different durations -------------------------------
+
+source(paste0("~/floodGAM/code/functions/","fn_durations_streamflow.R"))
+
+dvec = c(1, 6, 12, 18, 24, 36, 48) #durations (hours)
+
+am.d <- createdurations(data35,dvec)
 
 
 
