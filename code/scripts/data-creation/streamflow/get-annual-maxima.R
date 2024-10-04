@@ -40,6 +40,12 @@ dvec = c(1, 6, 12, 18, 24, 36, 48) #durations (hours)
 
 am.d <- createdurations(data35,dvec)
 
+# a few lines of messy code to make into true long format:
+tt <- am.d[d==1][,d:=0][,sQm3_s:=NULL]
+am.d[,Qm3_s:=NULL]; setnames(am.d,"sQm3_s","Qm3_s")
+am.d <- rbind(tt,am.d)
 
+saveRDS(am.d,file = paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
+                         "durations_gamfelt_annual_maxima.rds"))
 
 
