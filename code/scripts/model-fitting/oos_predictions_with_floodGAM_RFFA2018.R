@@ -15,8 +15,9 @@ library(caret)
 ## ----- load in the gamfelt dataset
 gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
-gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
-                       "gamfelt_annual_maxima.rds"))
+
+gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
+                       "durations_gamfelt_annual_maxima.rds"))
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
 gfam[,specQ:=Qm3_s/A*1000]

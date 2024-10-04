@@ -23,15 +23,22 @@ setwd("~/floodGAM/code/functions/Stan")
 ## ----- load in the gamfelt dataset
 gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
-gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
-                       "gamfelt_annual_maxima.rds"))
+# ^ gfcov loaded only to convert to specific discharge
+
+gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
+                       "durations_gamfelt_annual_maxima.rds"))
+
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
 gfam[,specQ:=Qm3_s/A*1000]
 
 # gfam = gamfelt annual maxima
 
-# Loop over the stations --------------------------------------------------
+## 04.10.2024:
+## to get results before meeting, run just once with 24 hour ann max
+gfam <- gfam[d==24]
+
+# Loop over the stations and durations -----------------------------------------
 
 stationlist <- gfam[,unique(ID)]
 
@@ -143,9 +150,9 @@ for(station in stationlist){
 
 names(result) <- stationlist
 
-saveRDS(result,file="~/floodGAM/results/output/temp_gamfeltstanresult.rds")
+saveRDS(result,file="~/floodGAM/results/output/temp_gamfeltstanresult_24.rds")
 
 result <- rbind(rbindlist(result)) # if all converged, this will work
 
-saveRDS(result,file="~/floodGAM/results/output/gamfeltstanresult.rds")
+saveRDS(result,file="~/floodGAM/results/output/gamfeltstanresult_24.rds")
 
