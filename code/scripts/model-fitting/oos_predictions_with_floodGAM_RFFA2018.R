@@ -13,6 +13,10 @@ library(mgcv)
 library(caret)
 library(ggplot2)
 
+## ----- source small function to simulate from the posterior of the
+## predicted parameter values:
+source("~/floodGAM/code/functions/fn_posterior_simulation_GAM.R")
+
 ## ----- load in the gamfelt dataset
 gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
@@ -62,15 +66,16 @@ k = 10
 fidx <- createFolds(gamdat[d==0,get("qind")],k) 
 
 
-# Fit the GAMs on the folds and save just the predicted values ------------
+# Fit the GAMs on the folds and save the predicted values ------------
 
 oos.predictions <- data.table(eta=numeric(),beta=numeric(),xi=numeric(),
                               model=character(),fold=numeric(),d=numeric(),
                               ID=character())
-posterior.draws <- data.table(ID=character(),
+posterior.draws <- data.table(eta.draws=numeric(),
+                              beta.draws=numeric(),
                               xi.draws=numeric(),
-                              model=character())
-
+                              model=character(),fold=numeric(),d=numeric(),
+                              ID=character())
 
 for(di in c(0,24)){
   
@@ -117,45 +122,8 @@ for(di in c(0,24)){
                        data = gamdat_d,
                        family = gaussian(link = identity))
     
-    ## ---------------- extra for xi: predictive uncertainty for xi parameter
     
-      ## simulate from posterior distribution of xi parameter
-      ## for each station in the test set:
-    
-      ## first get prediction matrix:
-      Xp.floodGAM <- predict(xi.floodGAM, newdata=test.gamdat_d, 
-                             type="lpmatrix")
-      Xp.RFFA2018 <- predict(xi.RFFA2018, newdata=test.gamdat_d, 
-                             type="lpmatrix")
-    
-      ## simulate from posterior distribution of parameters
-      br1.floodGAM <- rmvn(n=5000,
-                           coef(xi.floodGAM),
-                           vcov(xi.floodGAM,unconditional = T))
-      ## where unconditional = T adds smoothing parameter uncertainty correction
-      br1.RFFA2018 <- rmvn(n=5000,
-                           coef(xi.RFFA2018),
-                           vcov(xi.RFFA2018,unconditional = T))
-  
-      xi.draws.floodGAM <- Xp.floodGAM%*%t(br1.floodGAM)
-      xi.draws.RFFA2018 <- Xp.RFFA2018%*%t(br1.RFFA2018)
-    
-      ## change to long format for function output:
-      posterior.draws <- rbind(posterior.draws,
-                               data.table(ID=rep(test.gamdat_d[,get("ID")],
-                                                 each=5000),
-                                          xi.draws=as.vector(
-                                            t(xi.draws.floodGAM)),
-                                          model=rep("floodGAM",5000)
-                                          ),
-                               data.table(ID=rep(test.gamdat_d[,get("ID")],
-                                                 each=5000),
-                                          xi.draws=as.vector(
-                                            t(xi.draws.RFFA2018)),
-                                          model=rep("RFFA2018",5000))
-                               )
-    
-    ## ------- generate and save the predictions --------
+    ## ------- generate and save the predictions & predictive uncertainty ------
     n = dim(test.gamdat_d)[1]
     oos.predictions <- rbind(oos.predictions,
                              data.table(eta=predict.gam(eta.floodGAM, 
@@ -186,6 +154,38 @@ for(di in c(0,24)){
                                         fold=rep(i,n),
                                         d=rep(di,n),
                                         ID=test.gamdat_d[,get("ID")]))
+    
+    posterior.draws <- rbind(posterior.draws,
+                             data.table(
+                               eta.draws=simulateFromPosterior(eta.floodGAM,
+                                                               "eta", 
+                                                          test.gamdat_d)$draws,
+                               beta.draws=simulateFromPosterior(beta.floodGAM,
+                                                               "beta", 
+                                                          test.gamdat_d)$draws,
+                               xi.draws=simulateFromPosterior(xi.floodGAM,
+                                                               "xi", 
+                                                          test.gamdat_d)$draws,
+                               model=rep("floodGAM",n*5000),
+                               fold=rep(i,n*5000),
+                               d=rep(di,n*5000),
+                               ID=rep(test.gamdat_d[,get("ID")],each=5000)))
+    
+    posterior.draws <- rbind(posterior.draws,
+                             data.table(
+                               eta.draws=simulateFromPosterior(eta.RFFA2018,
+                                                               "eta", 
+                                                          test.gamdat_d)$draws,
+                               beta.draws=simulateFromPosterior(beta.RFFA2018,
+                                                                "beta", 
+                                                          test.gamdat_d)$draws,
+                               xi.draws=simulateFromPosterior(xi.RFFA2018,
+                                                              "xi", 
+                                                          test.gamdat_d)$draws,
+                               model=rep("RFFA2018",n*5000),
+                               fold=rep(i,n*5000),
+                               d=rep(di,n*5000),
+                               ID=rep(test.gamdat_d[,get("ID")],each=5000)))
     
   }
 }
@@ -218,6 +218,16 @@ oos.predictions[ID=="23400018"]
 
 oos.predictions[xi<0,c("ID","eta","xi","model","d","min.y","max.y","bound")]
 
+
+# Look at the prediction uncertainty for the xi parameters ----------------
+
+negxi.ID <- oos.predictions[xi<0,get("ID")]
+
+ggplot(posterior.draws[ID %in% negxi.ID]) + 
+  geom_density(aes(xi.draws, fill = model),alpha=0.5) +
+  geom_vline(xintercept = 0)+
+  facet_grid(ID~d) +
+  theme_bw()
 
 
 # Compute return levels ---------------------------------------------------
