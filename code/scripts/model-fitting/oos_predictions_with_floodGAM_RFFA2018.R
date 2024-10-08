@@ -67,6 +67,10 @@ fidx <- createFolds(gamdat[d==0,get("qind")],k)
 oos.predictions <- data.table(eta=numeric(),beta=numeric(),xi=numeric(),
                               model=character(),fold=numeric(),d=numeric(),
                               ID=character())
+posterior.draws <- data.table(ID=character(),
+                              xi.draws=numeric(),
+                              model=character())
+
 
 for(di in c(0,24)){
   
@@ -112,6 +116,44 @@ for(di in c(0,24)){
                        method = "REML",
                        data = gamdat_d,
                        family = gaussian(link = identity))
+    
+    ## ---------------- extra for xi: predictive uncertainty for xi parameter
+    
+      ## simulate from posterior distribution of xi parameter
+      ## for each station in the test set:
+    
+      ## first get prediction matrix:
+      Xp.floodGAM <- predict(xi.floodGAM, newdata=test.gamdat_d, 
+                             type="lpmatrix")
+      Xp.RFFA2018 <- predict(xi.RFFA2018, newdata=test.gamdat_d, 
+                             type="lpmatrix")
+    
+      ## simulate from posterior distribution of parameters
+      br1.floodGAM <- rmvn(n=5000,
+                           coef(xi.floodGAM),
+                           vcov(xi.floodGAM,unconditional = T))
+      ## where unconditional = T adds smoothing parameter uncertainty correction
+      br1.RFFA2018 <- rmvn(n=5000,
+                           coef(xi.RFFA2018),
+                           vcov(xi.RFFA2018,unconditional = T))
+  
+      xi.draws.floodGAM <- Xp.floodGAM%*%t(br1.floodGAM)
+      xi.draws.RFFA2018 <- Xp.RFFA2018%*%t(br1.RFFA2018)
+    
+      ## change to long format for function output:
+      posterior.draws <- rbind(posterior.draws,
+                               data.table(ID=rep(test.gamdat_d[,get("ID")],
+                                                 each=5000),
+                                          xi.draws=as.vector(
+                                            t(xi.draws.floodGAM)),
+                                          model=rep("floodGAM",5000)
+                                          ),
+                               data.table(ID=rep(test.gamdat_d[,get("ID")],
+                                                 each=5000),
+                                          xi.draws=as.vector(
+                                            t(xi.draws.RFFA2018)),
+                                          model=rep("RFFA2018",5000))
+                               )
     
     ## ------- generate and save the predictions --------
     n = dim(test.gamdat_d)[1]
