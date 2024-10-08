@@ -17,6 +17,9 @@ library(ggplot2)
 ## predicted parameter values:
 source("~/floodGAM/code/functions/fn_posterior_simulation_GAM.R")
 
+
+# Data preparation --------------------------------------------------------
+
 ## ----- load in the gamfelt dataset
 gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
@@ -125,63 +128,38 @@ for(di in c(0,24)){
     
     ## ------- generate and save the predictions & predictive uncertainty ------
     n = dim(test.gamdat_d)[1]
-    oos.predictions <- rbind(oos.predictions,
-                             data.table(eta=predict.gam(eta.floodGAM, 
-                                                        newdata = test.gamdat_d, 
-                                                        type="response"),
-                                        beta=predict.gam(beta.floodGAM, 
-                                                         newdata = test.gamdat_d, 
-                                                         type="response"),
-                                        xi=predict.gam(xi.floodGAM, 
-                                                       newdata = test.gamdat_d, 
-                                                       type="response"),
-                                        model=rep("floodGAM",n),
-                                        fold=rep(i,n),
-                                        d=rep(di,n),
-                                        ID=test.gamdat_d[,get("ID")]))
     
     oos.predictions <- rbind(oos.predictions,
-                             data.table(eta=predict.gam(eta.RFFA2018, 
-                                                        newdata = test.gamdat_d, 
-                                                        type="response"),
-                                        beta=predict.gam(beta.RFFA2018, 
-                                                         newdata = test.gamdat_d, 
-                                                         type="response"),
-                                        xi=predict.gam(xi.RFFA2018, 
-                                                       newdata = test.gamdat_d, 
-                                                       type="response"),
-                                        model=rep("RFFA2018",n),
-                                        fold=rep(i,n),
-                                        d=rep(di,n),
-                                        ID=test.gamdat_d[,get("ID")]))
+     data.table(
+       eta = predict.gam(eta.floodGAM,newdata=test.gamdat_d,type="response"),
+       beta = predict.gam(beta.floodGAM,newdata = test.gamdat_d,type="response"),
+       xi = predict.gam(xi.floodGAM,newdata = test.gamdat_d,type="response"),
+       model = rep("floodGAM",n),fold=rep(i,n),d=rep(di,n),
+       ID = test.gamdat_d[,get("ID")]))
+    
+    oos.predictions <- rbind(oos.predictions,
+      data.table(
+        eta = predict.gam(eta.RFFA2018,newdata = test.gamdat_d,type="response"),
+        beta=predict.gam(beta.RFFA2018,newdata = test.gamdat_d,type="response"),
+        xi=predict.gam(xi.RFFA2018, newdata = test.gamdat_d,type="response"),
+        model=rep("RFFA2018",n),fold=rep(i,n),d=rep(di,n),
+        ID=test.gamdat_d[,get("ID")]))
     
     posterior.draws <- rbind(posterior.draws,
-                             data.table(
-                               eta.draws=simulateFromPosterior(eta.floodGAM,
-                                                               "eta", 
-                                                          test.gamdat_d)$draws,
-                               beta.draws=simulateFromPosterior(beta.floodGAM,
-                                                               "beta", 
-                                                          test.gamdat_d)$draws,
-                               xi.draws=simulateFromPosterior(xi.floodGAM,
-                                                               "xi", 
-                                                          test.gamdat_d)$draws,
+      data.table(
+        eta.draws=simulateFromPosterior(eta.floodGAM,"eta",test.gamdat_d)$draws,
+        beta.draws=simulateFromPosterior(beta.floodGAM,"beta",test.gamdat_d)$draws,
+        xi.draws=simulateFromPosterior(xi.floodGAM,"xi",test.gamdat_d)$draws,
                                model=rep("floodGAM",n*5000),
                                fold=rep(i,n*5000),
                                d=rep(di,n*5000),
                                ID=rep(test.gamdat_d[,get("ID")],each=5000)))
     
     posterior.draws <- rbind(posterior.draws,
-                             data.table(
-                               eta.draws=simulateFromPosterior(eta.RFFA2018,
-                                                               "eta", 
-                                                          test.gamdat_d)$draws,
-                               beta.draws=simulateFromPosterior(beta.RFFA2018,
-                                                                "beta", 
-                                                          test.gamdat_d)$draws,
-                               xi.draws=simulateFromPosterior(xi.RFFA2018,
-                                                              "xi", 
-                                                          test.gamdat_d)$draws,
+      data.table(
+        eta.draws=simulateFromPosterior(eta.RFFA2018,"eta",test.gamdat_d)$draws,
+        beta.draws=simulateFromPosterior(beta.RFFA2018,"beta",test.gamdat_d)$draws,
+        xi.draws=simulateFromPosterior(xi.RFFA2018,"xi",test.gamdat_d)$draws,
                                model=rep("RFFA2018",n*5000),
                                fold=rep(i,n*5000),
                                d=rep(di,n*5000),
@@ -246,4 +224,3 @@ ggplot(oos.rp) +
   labs(x = "Return period (years)",
        y = bquote("Return level"~"("~l/s/km^2~")")) +
   theme_bw()
-gg''''vfdc bujhntfgbqasrh
