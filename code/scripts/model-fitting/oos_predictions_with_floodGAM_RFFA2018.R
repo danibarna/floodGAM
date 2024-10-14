@@ -30,15 +30,16 @@ gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
 gfam[,specQ:=Qm3_s/A*1000]
 
-# select only the floodGAM & RFFA_2018 covariates
+# select only the floodGAM & RFFA_2018 covariates & plotting things
 gfcov <- gfcov[,c("ID","Q_N","A_LE","A_P","H_F", #floodGAM
                   "R_G_1085","log_R_G_1085","W_Apr","P_Sep", #floodGAM
                   "Q_N_cuberoot","R_L_sqrt","T_Feb_sqrd", #RFFA_2018 eta
                   "T_Mar_cubed","W_Mai_sqrt", #RFFA_2018 eta
                   "A_Glac","A_For","H_10","P_Jul","W_Jun", #RFFA_2018 beta
-                  "R_TL_net")] #RFFA_2018 xi
+                  "R_TL_net",#RFFA_2018 xi
+                  "A","QD_fgp")] # for plotting 
 
-# standardize cov values by dividing by 2 standard deviations
+# standardize cov values by centering and dividing by 2 standard deviations
 coltab = names(gfcov)[-1]
 gfcov[, 
       (coltab) := lapply(.SD, function(Xw) (Xw - mean(Xw)) / (sd(Xw) * 2)), 
@@ -224,3 +225,68 @@ ggplot(oos.rp) +
   labs(x = "Return period (years)",
        y = bquote("Return level"~"("~l/s/km^2~")")) +
   theme_bw()
+
+
+# Calculate quantile score ------------------------------------------------
+
+## first, the 10-year return level:
+rp = 10
+oos.predictions[,`10.rl`:=mu+sigma/xi * ((-log(1-1/rp))^(-xi)-1),
+                by = c("model","d")]
+
+## the quantile score is averaged over data points per station. 
+qs <- function(obs.y,predicted.rl,rp){
+  return(mean((obs.y-predicted.rl)*((1-1/rp)-ifelse(obs.y<=predicted.rl,1,0))))
+}
+
+## data points are in object 'gfam'
+## merge in the calculated return level from oos.predictions to gfam:
+rpten <- merge(gfam,
+               dcast(oos.predictions[,c("ID","model","d","10.rl")],
+                     ID + d ~ model, value.var = "10.rl"),
+               by=c("ID","d"))
+
+rpten <- rpten[,.(RFFA.QS = qs(specQ,RFFA2018,10),
+         floodGAM.QS = qs(specQ,floodGAM,10)),
+      by = c("ID","d")]
+
+
+rpten[,mean(RFFA.QS),by="d"]
+rpten[,mean(floodGAM.QS),by="d"]
+
+
+rpten <- merge(rpten,gfcov,by="ID")
+
+
+library(ggplot2)
+scaleFUN <- function(x) sprintf("%.1f", x)
+ggplot(rpten) +
+  geom_point(aes(floodGAM.QS,RFFA.QS,color=QD_fgp,size=A)) +
+  scale_color_scico(name = "Fraction of rain",
+                    palette = "lapaz",end=0.95,
+                    labels=scaleFUN) +
+  geom_abline(slope=1,size=0.6) +
+  scale_x_sqrt(limits = c(1,300)) + 
+  scale_y_sqrt(limits = c(1,300)) + 
+  scale_shape_manual(values = 22, name="") +
+  scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
+                                                sep = "")) ,
+                        range=c(1.5,7),
+                        breaks = c(50,1000,2000))+
+  labs(y = paste0("<span style='font-size: 18pt'>",
+                  "RFFA2018",
+                  " </span><span style='font-size: 12pt'>  Quantile score [ l/s/",
+                  expression(km^2)," ]","</span>"),
+       x = paste0("<span style='font-size: 18pt'>",
+                  "floodGAM",
+                  " </span><span style='font-size: 12pt'>  Quantile score [ l/s/",
+                  expression(km^2)," ]</span>")) +
+  theme_bw() +
+  facet_wrap(vars(d),nrow = 1) +
+  theme(text = element_text(family="serif",size = 18),
+        aspect.ratio = 1,
+        legend.position = "bottom",
+        legend.spacing.x = unit(1.0, 'cm'),
+        axis.title.x = ggtext::element_markdown(),
+        axis.title.y = ggtext::element_markdown(),
+        strip.background = element_blank()) 
