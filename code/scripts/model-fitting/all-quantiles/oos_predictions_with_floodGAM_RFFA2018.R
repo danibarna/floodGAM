@@ -230,7 +230,7 @@ ggplot(oos.rp) +
 # Calculate quantile score ------------------------------------------------
 
 ## first, the 10-year return level:
-rp = 10
+rp = 20
 oos.predictions[,`10.rl`:=mu+sigma/xi * ((-log(1-1/rp))^(-xi)-1),
                 by = c("model","d")]
 
@@ -246,8 +246,8 @@ rpten <- merge(gfam,
                      ID + d ~ model, value.var = "10.rl"),
                by=c("ID","d"))
 
-rpten <- rpten[,.(RFFA.QS = qs(specQ,RFFA2018,10),
-         floodGAM.QS = qs(specQ,floodGAM,10)),
+rpten <- rpten[,.(RFFA.QS = qs(specQ,RFFA2018,rp),
+         floodGAM.QS = qs(specQ,floodGAM,rp)),
       by = c("ID","d")]
 
 
