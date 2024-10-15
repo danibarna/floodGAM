@@ -100,7 +100,7 @@ for(di in unique(gamdat[,get("d")])){
     ## ------- generate and save the predictions & predictive uncertainty ------
     n = dim(test.gamdat_d)[1]
     
-    ## --- predictions
+    ## --- store the predictions
     
     ## ------------------ floodGAM
     ## from the GAM: get mu (prediction for the test set on the log scale)
@@ -132,7 +132,7 @@ for(di in unique(gamdat[,get("d")])){
                                model=rep("RFFA2018",n),fold=rep(i,n),d=rep(di,n),
                                ID=test.gamdat_d[,get("ID")]))
     
-    ## --- simulate from the posterior 
+    ## --- store the simulations from the posterior 
     
     ## ------------------ floodGAM
     posterior.draws <- rbind(posterior.draws,
@@ -160,8 +160,15 @@ for(di in unique(gamdat[,get("d")])){
 }
 
 
+## save the data objects oos.predictions and posterior.draws:
 
+saveRDS(oos.predictions,
+        file = paste0("~/floodGAM/results/output/median-(index-flood)/",
+                           "median-index-flood-oos-predictions.rds"))
 
+saveRDS(posterior.draws,
+        file = paste0("~/floodGAM/results/output/median-(index-flood)/",
+                      "median-index-flood-posterior-draws.rds"))
 
 
 
