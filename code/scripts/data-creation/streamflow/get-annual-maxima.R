@@ -36,14 +36,14 @@ fwrite(am,file = paste0("~/floodGAM/data/processed-data/gamfelt/",
 
 source(paste0("~/floodGAM/code/functions/","fn_durations_streamflow.R"))
 
-dvec = c(1, 6, 12, 18, 24, 36, 48) #durations (hours)
+dvec = c(1, 6, 12, 18, 24, 36, 48, 72, 168, 336, 720) #durations (hours)
 
 am.d <- createdurations(data35,dvec)
+setnames(am.d,"sQm3_s","Qm3_s") # fix naming convention
 
-# a few lines of messy code to make into true long format:
-tt <- am.d[d==1][,d:=0][,sQm3_s:=NULL]
-am.d[,Qm3_s:=NULL]; setnames(am.d,"sQm3_s","Qm3_s")
-am.d <- rbind(tt,am.d)
+# bind raw data (no interpolaation, no smoothing, d=0):
+am[,d:=0]
+am.d <- rbind(am[,c("year_key","decimaldate","Qm3_s","d","ID")],am.d)
 
 saveRDS(am.d,file = paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
                          "durations_gamfelt_annual_maxima.rds"))
