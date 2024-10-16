@@ -26,10 +26,6 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
                        "durations_gamfelt_annual_maxima.rds"))
 
-gfam0 <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
-                       "gamfelt_annual_maxima.rds"))
-gfam0[,d:=0]
-gfam <- rbind(gfam0[,c("ID","d","Qm3_s","decimaldate","year_key")], gfam[d!=0,])
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
 gfam[,specQ:=Qm3_s/A*1000]
@@ -60,7 +56,7 @@ gamdat <- merge(gfcov,gfam,by="ID")
 # Define the data folds ---------------------------------------------------
 set.seed(42)
 k = 10
-# use the median to sort the stations into folds
+# use the instantaneous duration
 fidx <- createFolds(gamdat[d==0,get("qind")],k) 
 
 
@@ -165,7 +161,7 @@ for(di in unique(gamdat[,get("d")])){
 saveRDS(oos.predictions,
         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
                            "median-index-flood-oos-predictions.rds"))
-
+# this one has to be in gitignore because it is too large:
 saveRDS(posterior.draws,
         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
                       "median-index-flood-posterior-draws.rds"))
