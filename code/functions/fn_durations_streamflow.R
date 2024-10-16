@@ -11,14 +11,13 @@ createdurations <- function(DT, dvec){
   
   # output: data.table 'out'
   #         year_key, decimal_date - date items
-  #         Qm3_s - streamflow, annual maxima, cubic meters per second, original resolution
   #         sQm3_s - 'smoothed streamflow', annual maxima, smoothed with centered moving average
   #         d - window width (hours) of centered moving average
   #         ID - station ID
   # -------------------------------------------------
   
   out <- data.table(year_key=numeric(),decimaldate=numeric(),
-                    Qm3_s=numeric(),sQm3_s=numeric(),d=numeric(),
+                    sQm3_s=numeric(),d=numeric(),
                     ID=character())
   
   # don't have enough R memory to interpolate the entire dataset
@@ -71,7 +70,7 @@ createdurations <- function(DT, dvec){
       
       # select the annual maxima 
       am <- hourlystreamflow[idx,]
-      am[,d:=di]; am[,ID:=i]
+      am[,d:=di]; am[,ID:=i]; am[,Qm3_s:=NULL]
       
       # save the annual maxima
       out <- rbind(out,am)
