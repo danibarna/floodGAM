@@ -9,6 +9,7 @@
 
 library(data.table)
 library(mgcv)
+library(xgboost)
 library(caret)
 library(ggplot2)
 
@@ -30,17 +31,20 @@ gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
 gfam[,specQ:=Qm3_s/A*1000]
 
-# select only the floodGAM & RFFA_2018 covariates & plotting things
-gfcov <- gfcov[,c("ID","Q_N","A_LE","A_P","H_F", #floodGAM
-                  "R_G_1085","log_R_G_1085","W_Apr","P_Sep", #floodGAM
-                  "Q_N_cuberoot","R_L_sqrt","T_Feb_sqrd", #RFFA_2018 eta
-                  "T_Mar_cubed","W_Mai_sqrt", #RFFA_2018 eta
-                  "A_Glac","A_For","H_10","P_Jul","W_Jun", #RFFA_2018 beta
-                  "R_TL_net",#RFFA_2018 xi
-                  "A","QD_fgp")] # for plotting 
+# remove the id and lat/long columns
+gfcov <- gfcov[,-c("RN","HN","Y_lat","X_long","Y_utm","X_utm")]
+
+# # select only the floodGAM & RFFA_2018 covariates & plotting things
+# gfcov <- gfcov[,c("ID","Q_N","A_LE","A_P","H_F", #floodGAM
+#                   "R_G_1085","log_R_G_1085","W_Apr","P_Sep", #floodGAM
+#                   "Q_N_cuberoot","R_L_sqrt","T_Feb_sqrd", #RFFA_2018 eta
+#                   "T_Mar_cubed","W_Mai_sqrt", #RFFA_2018 eta
+#                   "A_Glac","A_For","H_10","P_Jul","W_Jun", #RFFA_2018 beta
+#                   "R_TL_net",#RFFA_2018 xi
+#                   "A","QD_fgp")] # for plotting 
 
 # standardize cov values by centering and dividing by 2 standard deviations
-coltab = names(gfcov)[-1]
+coltab = names(gfcov)[-which(names(gfcov)=="ID")]
 gfcov[, 
       (coltab) := lapply(.SD, function(Xw) (Xw - mean(Xw)) / (sd(Xw) * 2)), 
       .SDcols = coltab]
@@ -75,10 +79,20 @@ for(di in unique(gamdat[,get("d")])){
   
   gamdat_d <- gamdat[d==di]
   
+  # load XGBoost hyperparameters for this duration:
+  hpXGB = readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
+                                "xgboost-hyperparameters/",
+                                "xgbpurehp_",di,".rds"))
+  
   for(i in 1:k){
     
     train.gamdat_d <- gamdat_d[-fidx[[i]]]
     test.gamdat_d <- gamdat_d[fidx[[i]]]
+    
+    trainXGB.d <- xgb.DMatrix(as.matrix(train.gamdat_d[,!c("ID","d","qind")]),
+                              label = log(train.gamdat_d[,get("qind")]))
+    testXGB.d <- xgb.DMatrix(as.matrix(test.gamdat_d[,!c("ID","d","qind")]),
+                             label = log(test.gamdat_d[,get("qind")]))
     
     ## ------- eta --------
     eta.floodGAM <- gam(qind ~ s(Q_N,k=6)+s(A_LE,k=6)+s(A_P,k=6)+s(H_F,k=6)+
@@ -92,6 +106,11 @@ for(di in unique(gamdat[,get("d")])){
                         method = "REML",
                         data = gamdat_d,
                         family = gaussian(link=log))
+    
+    eta.xgboost <- xgb.train(data = trainXGB.d,
+                             param = hpXGB[[1]],
+                             nrounds = hpXGB[[3]],
+                             objective = "reg:squarederror")
     
     ## ------- generate and save the predictions & predictive uncertainty ------
     n = dim(test.gamdat_d)[1]
@@ -127,6 +146,18 @@ for(di in unique(gamdat[,get("d")])){
                                mu.gam = mu.gam, sigma.gam = sigma.gam,
                                model=rep("RFFA2018",n),fold=rep(i,n),d=rep(di,n),
                                ID=test.gamdat_d[,get("ID")]))
+    
+    
+    ## ------------------ XGBoost
+    ## no mu and sigma from xgboost, so these fields are null
+    oos.predictions <- rbind(oos.predictions,
+                             data.table(
+                               eta = exp(predict(eta.xgboost,testXGB.d)),
+                               eta.obs = test.gamdat_d[,get("qind")],
+                               mu.gam = NA, sigma.gam = NA,
+                               model=rep("xgboost",n),fold=rep(i,n),d=rep(di,n),
+                               ID=test.gamdat_d[,get("ID")]))
+    
     
     ## --- store the simulations from the posterior 
     

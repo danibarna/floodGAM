@@ -33,12 +33,30 @@ oos.pred[,crps:=scoringRules::crps_lnorm(eta.obs, mu.gam, sigma.gam)]
 ## Absolute Error (AE)
 oos.pred[,ae:=abs( (eta.obs-eta) )]
 
+## Proportional error metrics: RE and APE
+## These take a while to get the approx to the optimal predictor...
+oos.pred[, rowpos:= .I]
+## Relative error
+oos.pred[model!="xgboost",
+         eta.re:=optimal.predictor.re(sigma.gam,mu.gam,eta.obs),
+         by=rowpos]
+oos.pred[,re:=abs( (eta.obs-eta.re)/eta.re )]
+## Absolute percent error
+oos.pred[model!="xgboost",
+         eta.ape:=optimal.predictor.ape(sigma.gam,mu.gam,eta.obs),
+         by=rowpos]
+oos.pred[,ape:=abs( (eta.obs-eta.ape)/eta.obs )]
 
-oos.pred[,lapply(.SD,mean),.SDcols = c("crps","ae"),by=c("model","d")]
+saveRDS(oos.pred,
+        file = paste0("~/floodGAM/results/output/median-(index-flood)/",
+                      "median-index-flood-predictive-accuracy.rds"))
+
+
+oos.pred[,lapply(.SD,mean),.SDcols = c("crps","ae","re","ape"),by=c("model","d")]
 oos.pred[,sqrt(mean(se)),by=c("model","d")]
 
 
-permutationTest(oos.pred,"RFFA2018","floodGAM",1000,"se",720)
+permutationTest(oos.pred,"floodGAM","xgboost",1000,"ae",6)
 
 
 
