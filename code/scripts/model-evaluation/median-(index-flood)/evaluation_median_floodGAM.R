@@ -27,7 +27,7 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
 # Predictive accuracy -----------------------------------------------------
 
 ## Squared Error (SE)
-oos.pred[,se:= (eta.obs-eta)^2 ]
+oos.pred[model!="xgboost",se:= (eta.obs-eta)^2 ]
 ## CRPS -- requires package scoringRules
 oos.pred[,crps:=scoringRules::crps_lnorm(eta.obs, mu.gam, sigma.gam)]
 ## Absolute Error (AE)
@@ -37,12 +37,12 @@ oos.pred[,ae:=abs( (eta.obs-eta) )]
 ## These take a while to get the approx to the optimal predictor...
 oos.pred[, rowpos:= .I]
 ## Relative error
-oos.pred[model!="xgboost",
+oos.pred[model!="xgboost"&d>6,
          eta.re:=optimal.predictor.re(sigma.gam,mu.gam,eta.obs),
          by=rowpos]
 oos.pred[,re:=abs( (eta.obs-eta.re)/eta.re )]
 ## Absolute percent error
-oos.pred[model!="xgboost",
+oos.pred[model!="xgboost"&d>6,
          eta.ape:=optimal.predictor.ape(sigma.gam,mu.gam,eta.obs),
          by=rowpos]
 oos.pred[,ape:=abs( (eta.obs-eta.ape)/eta.obs )]
@@ -52,12 +52,15 @@ saveRDS(oos.pred,
                       "median-index-flood-predictive-accuracy.rds"))
 
 
-oos.pred[,lapply(.SD,mean),.SDcols = c("crps","ae","re","ape"),by=c("model","d")]
+oos.pred[,
+         lapply(.SD,mean),.SDcols = c("crps","ae","re","ape"),
+         by=c("model","d")]
 oos.pred[,sqrt(mean(se)),by=c("model","d")]
 
 
-permutationTest(oos.pred,"floodGAM","xgboost",1000,"ae",6)
+permutationTest(oos.pred,"floodGAM","RFFA2018",1000,"ape",24)
 
+permutationTest(oos.pred,"floodGAM","RFFA2018",1000,"ae",36)
 
 
 # Duration consistency ----------------------------------------------------
@@ -157,22 +160,28 @@ ggplot(pit) + geom_histogram(aes(V1,group=d,color=d),alpha=0.2) +
 
 oos.pred <- merge(oos.pred,gfcov[,c("ID","A","QD_fgp")])
 
-library(ggplot2)
+library(scico)
 
 # go long to wide:
-ggcrps <- dcast(oos.pred[d==720], ID + A + QD_fgp ~ model, value.var = "crps")
+ggcrps <- dcast(oos.pred[d==0], ID + A + QD_fgp ~ model, value.var = "re")
 
 
 scaleFUN <- function(x) sprintf("%.1f", x)
 
-ggplot(ggcrps) + geom_point(aes(floodGAM,RFFA2018,size=A,color=QD_fgp)) +
+ggplot(ggcrps) + 
+  stat_density_2d(geom="polygon",aes(floodGAM,RFFA2018,
+                                     fill = after_stat(level)),
+                  bins=5,alpha=0.5) +
+  geom_point(aes(floodGAM,RFFA2018,size=A,color=QD_fgp)) +
   scale_color_scico(name = "Fraction of rain",
                     palette = "lapaz",end=0.95,
                     labels=scaleFUN) +
+  
   geom_abline(slope=1,size=0.6) +
-  scale_x_sqrt(limits = c(1,200)) + 
-  scale_y_sqrt(limits = c(1,200)) + 
+  scale_x_sqrt(limits = c(0,7)) + 
+  scale_y_sqrt(limits = c(0,7)) + 
   scale_shape_manual(values = 22, name="") +
+  scale_fill_scico(palette = "oslo",direction=-1,begin=0.4,end=0.95) +
   scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
                                                 sep = "")) ,
                         range=c(1.5,7),
