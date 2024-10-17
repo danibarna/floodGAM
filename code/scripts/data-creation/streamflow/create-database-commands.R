@@ -75,12 +75,12 @@ Nrlescon$kvnum[idx] <- Nrlescon$version[idx]
 
 ## name the executable lescon_var file (here we name it 
 ## "my_lescon_var_commands.txt") and open the connection
-f <- file("my_lescon_var_commands.txt", open="wb")
+f <- file("lescon_var_commands_arkiv_37_gamfelt.txt", open="wb")
 
 ## write text to file using cat command
 cat("# !/bin/bash",file=f,append=F,sep="\n")
 for(i in 1:dim(Nrlescon)[1]){
-  cat(paste0("lescon_var -b 0 -f timevalue 35 ",
+  cat(paste0("lescon_var -b 0 -f timevalue 37 ",
              Nrlescon$RN[i], " ", Nrlescon$HN[i],
              " 0 1001 ",Nrlescon$kvnum[i]," > ",
              Nrlescon$flnm[i]),
