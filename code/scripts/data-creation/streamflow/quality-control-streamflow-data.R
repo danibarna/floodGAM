@@ -1,6 +1,8 @@
 ##
 ##
+## 
 ##
+## OLD:
 ## Vi bruker data fra arkiv HYKALP-ICECORR (arkiv 35), som har 
 ## primærtkontrollerte data med fin/variabel tidsoppløsning og er virtuelt 
 ## isreduserte. HYKVALP-ICECORR er ikke sekundærkontrollert eller kompletterte. 
@@ -17,26 +19,23 @@
 library(data.table)
 library(lubridate)
 
-## ---define a local path to wherever you have stored the 
-## .rds files (see /code/scripts/data-creation/clean-and-process-rawdata-from-database.R) 
-dataPath
 
 ## ---read in data
-data35 <- readRDS(paste0("arkiv35","data.rds")) # not stored on github
-data05 <- readRDS(paste0("arkiv05","data.rds")) # not stored on github
+data39 <- readRDS(paste0("~/floodGAM/data/raw-data/","arkiv39","data.rds")) # not stored on github
+data37 <- readRDS(paste0("~/floodGAM/data/raw-data/","arkiv37","data.rds")) # not stored on github
 
 # load in utelatt (all stations and years)
 utelatt <- readRDS(paste0("~/floodGAM/data/raw-data/","utelatt.rds"))
 
 ## hykvalp-icecorr dataset is a few gigabytes:
-print(object.size(data35), units = "Gb")
+print(object.size(data39), units = "Gb")
 
 ## to speed up operations we set up the 
 ## key columns for binary searches:
 # make year column
-data05[,yk:=year(date)]; data35[,yk:=year(date)]
+data37[,yk:=year(date)]; data39[,yk:=year(date)]
 # set the key
-setkey(data05,ID,yk); setkey(data35,ID,yk)
+setkey(data37,ID,yk); setkey(data39,ID,yk)
 
 
 # Steg 2: manuell fjerning ------------------------------------------------
@@ -51,20 +50,20 @@ setkey(data05,ID,yk); setkey(data35,ID,yk)
 setkey(utelatt,ID,yk)
 
 # define column to filter out discarded values
-data05[,discard:=FALSE]; data35[,discard:=FALSE]
+data37[,discard:=FALSE]; data39[,discard:=FALSE]
 
 # discard all utelatt data:
 # subset all rows of data using key columns from utelatt where first key 
 # matches ID and second key matches year. Return the 'discard' column
 # and set discard value = T for utelatt subset. Then, use chaining 
 # to select only rows that have discard values = F. 
-data05 <- data05[.(utelatt), discard := TRUE][discard == FALSE]
-data35 <- data35[.(utelatt), discard := TRUE][discard == FALSE]
+data37 <- data37[.(utelatt), discard := TRUE][discard == FALSE]
+data39 <- data39[.(utelatt), discard := TRUE][discard == FALSE]
 
 # Steg 3: Fjern year med manglende data -------------------------------------
 
 # This many unique ID-yk (station-year) tuples before filtering
-data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
+data39[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
 # create month column, day column and search for
 # unique tuples:
@@ -72,13 +71,13 @@ data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
 keyGenerator <- function(x){list(month(x),day(x))}
 
 # add month and day
-data35[,c("mk","dk"):=sapply(.SD,keyGenerator),.SDcols = "date"]
-data05[,c("mk","dk"):=sapply(.SD,keyGenerator),.SDcols = "date"]
+data39[,c("mk","dk"):=sapply(.SD,keyGenerator),.SDcols = "date"]
+data37[,c("mk","dk"):=sapply(.SD,keyGenerator),.SDcols = "date"]
 
 # count number of days in a year (unique tuples of month key and
 # day key grouped by year)
-data35[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
-data05[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
+data39[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
+data37[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
 
 
 ## --- filter out station-years that have less than 200 days 
@@ -86,17 +85,17 @@ data05[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
 
 # find the ID-yk (station-year) tuples that have less than 200 days of data
 # in hykvalp-icecorr (database 35)
-discard.hykval200 <- data35[numdays<200,unique(.SD),.SDcols=c("ID","yk")]
+discard.hykval200 <- data39[numdays<200,unique(.SD),.SDcols=c("ID","yk")]
 
 # set key for cache-efficient indexing
 setkey(discard.hykval200,"ID","yk")
 
-data05 <- data05[.(discard.hykval200), discard := TRUE][discard == FALSE]
-data35 <- data35[.(discard.hykval200), discard := TRUE][discard == FALSE]
+data37 <- data37[.(discard.hykval200), discard := TRUE][discard == FALSE]
+data39 <- data39[.(discard.hykval200), discard := TRUE][discard == FALSE]
 
 # after filtering on the hykval-200 days criteria, we have
 # this many unique ID-yk tuples:
-data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
+data39[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
 
 ## --- filter out station-years that have less than 300 days 
@@ -104,23 +103,23 @@ data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
 ## --- and hydag (database 05)
 
 # find the ID-yk tuples that have < 300 days in *both* databases:
-discard.both300 <- merge(data35[numdays<300,unique(.SD),.SDcols=c("ID","yk")],
-                         data05[numdays<300,unique(.SD),.SDcols=c("ID","yk")])
+discard.both300 <- merge(data39[numdays<300,unique(.SD),.SDcols=c("ID","yk")],
+                         data37[numdays<300,unique(.SD),.SDcols=c("ID","yk")])
 
-data05 <- data05[.(discard.both300), discard := TRUE][discard == FALSE]
-data35 <- data35[.(discard.both300), discard := TRUE][discard == FALSE]
+data37 <- data37[.(discard.both300), discard := TRUE][discard == FALSE]
+data39 <- data39[.(discard.both300), discard := TRUE][discard == FALSE]
 
 # after filtering on the both-300 days criteria, we have
 # this many unique ID-yk tuples:
-data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
+data39[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
 
 ## --- filter out station-years based on annual maxima - Hydag criteria
 
 # hydag and hykvalp-icecorr are not a perfect match. There are some
 # stations and years that are in hykval but not hydag and vice versa:
-hykval.sy <- data35[,unique(.SD),.SDcols = c("ID","yk")]
-hydag.sy <- data05[,unique(.SD),.SDcols = c("ID","yk")]
+hykval.sy <- data39[,unique(.SD),.SDcols = c("ID","yk")]
+hydag.sy <- data37[,unique(.SD),.SDcols = c("ID","yk")]
 setkey(hykval.sy,ID,yk); setkey(hydag.sy,ID,yk)
 
 # station-years in hykvalp-icecorr *not* in hydag:
@@ -139,51 +138,53 @@ hydag.sy[in.hykval==FALSE]
 ## run the annual maxima check against hykval:
 
 # switch to working with decimal dates instead of POSIXt format:
-data05[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
-data35[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
+data37[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
+data39[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
 
 twentyfour <- 0.00273224 # 24 hours in decimal date
 
-# find annual maxima from hydag (data05)
-amhd <- data05[data05[, .I[which.max(cumecs)], by=c("ID","yk")]$V1]
+# find annual maxima from hydag (data37)
+amhd <- data37[data37[, .I[which.max(cumecs)], by=c("ID","yk")]$V1]
 # only keep a few relevant columns:
 amhd <- amhd[,c("ID","yk","cumecs","dd")]
 
 # take the intersection of station-years in hydag and hykval:
-data35 <- merge(data35, amhd, all.x = T)
+data39 <- merge(data39, amhd, all.x = T)
 
 # compute distance between points in hykval and decimal date
 # of annual maxima from hydag
-data35[,dd.dist:=abs(dd.x-dd.y)]
+data39[,dd.dist:=abs(dd.x-dd.y)]
 
 # find minimum distance by station-year. If minimum distance is > 24 hrs
 # (if there is no observation in hykval within +/- 1 day of the needed
 # point), then set discard to TRUE. Then select only rows
 # with discard = FALSE
-data35[,discard:=ifelse(min(dd.dist)>twentyfour,TRUE,FALSE),by=c("ID","yk")]
+data39[,discard:=ifelse(min(dd.dist)>twentyfour,TRUE,FALSE),by=c("ID","yk")]
 
-data35 <- data35[discard == FALSE]
+
+data39 <- data39[discard == FALSE]
 
 # after filtering on the hydag-annmax criteria, we have
 # this many unique ID-yk tuples:
-data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
+data39[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
 
 
 # Steg 4: Fjern stasjoner < 20 years -------------------------------------------
 
-data35 <- data35[ID %in% data35[,uniqueN(.SD),by=ID,.SDcols = "yk"][V1>=20]$ID,]
+data39 <- data39[ID %in% data39[,uniqueN(.SD),by=ID,.SDcols = "yk"][V1>=20]$ID,]
 
 # after filtering on the hydag-annmax criteria, we have
 # this many unique ID-yk tuples:
-data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
+data39[,uniqueN(.SD),.SDcols = c("ID","yk")]
 
 # and this many stations:
-data35[,uniqueN(.SD),.SDcols = c("ID")]
+data39[,uniqueN(.SD),.SDcols = c("ID")]
 
 ## distribution of the number of years per station:
-hykval.sy <- data35[,uniqueN(.SD),.SDcols = c("yk"),by="ID"]
+hykval.sy <- data39[,uniqueN(.SD),.SDcols = c("yk"),by="ID"]
 hist(hykval.sy$V1)
+
 
 
 # Steg 5: Fjern stasjoner < 10 år findata ---------------------------------
@@ -196,12 +197,12 @@ difftimeFn <- function(x){
   return(c(0,dtvec))
 }
 
-data35[, gapmin := lapply(.SD,difftimeFn), .SDcols = "date", by = c("ID","yk")]
+data39[, gapmin := lapply(.SD,difftimeFn), .SDcols = "date", by = c("ID","yk")]
 
 # what station-years have at least 200 days of findata?
-setkey(data35,ID,yk,mk,dk)
+setkey(data39,ID,yk,mk,dk)
 
-numdayfin <- data35[,median(gapmin),by=c("yk","mk","dk","ID")]
+numdayfin <- data39[,median(gapmin),by=c("yk","mk","dk","ID")]
 numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
 setnames(numdayfin,"V1","nfin.yk")
 
@@ -216,20 +217,20 @@ setkey(numyrsfin,ID)
 # remove the nine stations with less than 10 years of findata
 discard.fin <- numyrsfin[N<10]
 
-data35 <- data35[.(discard.fin), discard := TRUE][discard == FALSE]
+data39 <- data39[.(discard.fin), discard := TRUE][discard == FALSE]
 
 # now we have this many stations:
-data35[,uniqueN(.SD),.SDcols = c("ID")]
+data39[,uniqueN(.SD),.SDcols = c("ID")]
 
 
 # Save data ---------------------------------------------------------------
 
-data35 <- data35[,c("ID","cumecs.x","date","yk","mk","dk","dd.x","gapmin")]
-setnames(data35,
+data39 <- data39[,c("ID","cumecs.x","date","yk","mk","dk","dd.x","gapmin")]
+setnames(data39,
          c("cumecs.x","yk","mk","dk","dd.x"),
          c("Qm3_s","year_key","month_key","day_key","decimaldate"))
 
-save(data35,file=paste0("cleaned_archive35.rda"))
+save(data39,file=paste0("~/floodGAM/data/cleaned-data/","cleaned_archive39.rda"))
 
 
 
