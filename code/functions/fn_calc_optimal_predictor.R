@@ -85,11 +85,10 @@ optimal.predictor.ape <- function(sigma,mu,y){
 
 
 
-permutationTest <- function(modelscores,modelA,modelB,n,type,d){
+permutationTest <- function(ms,modelA,modelB,n,type,di){
   ## From Thorarinsdottir (2020): Evaluation of CMIP5 and CMIP6...
-  ms <- modelscores
-  avec <- ms[model==modelA&d==d,get(type)] 
-  bvec <- ms[model==modelB&d==d,get(type)]
+  avec <- ms[model==modelA&d==di,get(type)] 
+  bvec <- ms[model==modelB&d==di,get(type)]
   svec = avec-bvec
   permvec = rep(NA,n)
   for(i in 1:n){
