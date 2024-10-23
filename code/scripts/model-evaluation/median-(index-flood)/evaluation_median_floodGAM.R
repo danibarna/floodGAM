@@ -37,12 +37,12 @@ oos.pred[,ae:=abs( (eta.obs-eta) )]
 ## These take a while to get the approx to the optimal predictor...
 oos.pred[, rowpos:= .I]
 ## Relative error
-oos.pred[model!="xgboost"&d>6,
+oos.pred[model!="xgboost",
          eta.re:=optimal.predictor.re(sigma.gam,mu.gam,eta.obs),
          by=rowpos]
 oos.pred[,re:=abs( (eta.obs-eta.re)/eta.re )]
 ## Absolute percent error
-oos.pred[model!="xgboost"&d>6,
+oos.pred[model!="xgboost",
          eta.ape:=optimal.predictor.ape(sigma.gam,mu.gam,eta.obs),
          by=rowpos]
 oos.pred[,ape:=abs( (eta.obs-eta.ape)/eta.obs )]
@@ -52,15 +52,17 @@ saveRDS(oos.pred,
                       "median-index-flood-predictive-accuracy.rds"))
 
 
-oos.pred[,
+scre <- oos.pred[,
          lapply(.SD,mean),.SDcols = c("crps","ae","re","ape"),
          by=c("model","d")]
-oos.pred[,sqrt(mean(se)),by=c("model","d")]
 
+setkey(scre,d)
+scre
 
-permutationTest(oos.pred,"floodGAM","RFFA2018",1000,"ape",24)
+for(di in unique(oos.pred$d)){
+  print(paste0(di," - ",permutationTest(oos.pred,"floodGAM","RFFA2018",1000,"ape",di)) )
+}
 
-permutationTest(oos.pred,"floodGAM","RFFA2018",1000,"ae",36)
 
 
 # Duration consistency ----------------------------------------------------
@@ -123,14 +125,14 @@ ggplot(pred.draws[ID=="15700003"]) +
 
 pit <- oos.pred[,pnorm(log(eta.obs),mu.gam,sigma.gam),by=c("model","d")]
 
-N <- dim(pit[d==0])[1]/2 # number of stations
+N <- dim(pit[d==0])[1]/3 # number of stations
 NC <- 10
 
 ctab = scico(2, palette = "turku",
              begin=0.3,end=0.5,direction=1)
 
-p1 <- hist(pit[d==168&model=="floodGAM",get("V1")], nclass=NC, plot=F)
-p2 <- hist(pit[d==720&model=="floodGAM",get("V1")], nclass=NC, plot=F)
+p1 <- hist(pit[d==0&model=="floodGAM",get("V1")], nclass=NC, plot=F)
+p2 <- hist(pit[d==24&model=="floodGAM",get("V1")], nclass=NC, plot=F)
 plot(0,0,type="n",xlim=c(0,1),ylim=c(0,40),xlab="",ylab="")
 title("floodGAM",line=0.5)
 plot(p1,col=ctab[1],add=TRUE)
@@ -148,17 +150,12 @@ legend("topright",
        inset = c(-0.05, 0.02))
 
 
-ggplot(pit) + geom_histogram(aes(V1,group=d,color=d),alpha=0.2) +
-  facet_wrap(vars(model))
-
-
-
 
 # scrap -------------------------------------------------------------------
 
 
 
-oos.pred <- merge(oos.pred,gfcov[,c("ID","A","QD_fgp")])
+oos.pred <- merge(oos.pred,gfcov[,c("ID","A","QD_fgp")],by="ID")
 
 library(scico)
 
@@ -178,8 +175,8 @@ ggplot(ggcrps) +
                     labels=scaleFUN) +
   
   geom_abline(slope=1,size=0.6) +
-  scale_x_sqrt(limits = c(0,7)) + 
-  scale_y_sqrt(limits = c(0,7)) + 
+  scale_x_sqrt(limits = c(0,2)) + 
+  scale_y_sqrt(limits = c(0,2)) + 
   scale_shape_manual(values = 22, name="") +
   scale_fill_scico(palette = "oslo",direction=-1,begin=0.4,end=0.95) +
   scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
