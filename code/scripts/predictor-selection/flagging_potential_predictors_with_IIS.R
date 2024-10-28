@@ -30,7 +30,10 @@ gfam[,specQ:=Qm3_s/A*1000]
 
 # remove the id and lat/long columns
 # XGBoost gets access to the full covariate set
-gfcov <- gfcov[,-c("RN","HN","Y_lat","X_long","Y_utm","X_utm")]
+gfcov <- gfcov[,-c("RN","HN","Y_lat","X_long","Y_utm","X_utm",
+                   "Y_G_Lat","X_G_Long","Y_G_UTM","X_G_UTM",
+                   "QD_fgp","R_L_sqrt","log_R_G_1085","Q_N_cuberoot",
+                   "T_Feb_sqrd","T_Mar_cubed","W_Mai_sqrt")]
 
 # standardize cov values by centering and dividing by 2 standard deviations
 coltab = names(gfcov)[-which(names(gfcov)=="ID")]
@@ -46,7 +49,7 @@ gamdat <- merge(gfcov,gfam,by="ID")
 
 # Choose which durations to run the analysis on ---------------------------
 
-mydurations <- c(1,12,24,36,48,168,720)
+mydurations <- c(1,6,12,18,24,36,48,72,168,336,720)
 
 # Define the data folds ---------------------------------------------------
 set.seed(42)
