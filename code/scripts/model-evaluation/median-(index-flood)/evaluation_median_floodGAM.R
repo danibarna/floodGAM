@@ -10,14 +10,18 @@
 ## -----------------------------------------------------------------------------
 
 library(data.table)
-library(scoringRules)
+library(ggplot2)
+library(ggpubr)
+library(scico)
 
-## ----- source function to calculate optimal predictor for APE and RE:
+## source function permutation test:
 source("~/floodGAM/code/functions/fn_calc_optimal_predictor.R")
+## source functions to quickly plot and check results:
+source("~/floodGAM/code/functions/fn_check_results_with_plots.R")
 
-## ----- load in the predictions from the models:
+## ----- load in the predictions and error metrics:
 oos.pred <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                      "median-index-flood-oos-predictions.rds"))
+                           "median-index-flood-predictive-accuracy.rds"))
 
 ## ----- for plotting of evaluation metrics:
 gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
@@ -26,42 +30,95 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
 
 # Predictive accuracy -----------------------------------------------------
 
-## Squared Error (SE)
-oos.pred[model!="xgboost",se:= (eta.obs-eta)^2 ]
-## CRPS -- requires package scoringRules
-oos.pred[,crps:=scoringRules::crps_lnorm(eta.obs, mu.gam, sigma.gam)]
-## Absolute Error (AE)
-oos.pred[,ae:=abs( (eta.obs-eta) )]
-
-## Proportional error metrics: RE and APE
-## These take a while to get the approx to the optimal predictor...
-oos.pred[, rowpos:= .I]
-## Relative error
-oos.pred[model!="xgboost",
-         eta.re:=optimal.predictor.re(sigma.gam,mu.gam,eta.obs),
-         by=rowpos]
-oos.pred[,re:=abs( (eta.obs-eta.re)/eta.re )]
-## Absolute percent error
-oos.pred[model!="xgboost",
-         eta.ape:=optimal.predictor.ape(sigma.gam,mu.gam,eta.obs),
-         by=rowpos]
-oos.pred[,ape:=abs( (eta.obs-eta.ape)/eta.obs )]
-
-saveRDS(oos.pred,
-        file = paste0("~/floodGAM/results/output/median-(index-flood)/",
-                      "median-index-flood-predictive-accuracy.rds"))
-
-
 scre <- oos.pred[,
          lapply(.SD,mean),.SDcols = c("crps","ae","re","ape"),
          by=c("model","d")]
 
-setkey(scre,d)
-scre
+scre <- merge(scre,
+              oos.pred[,sqrt(mean(se)),by=c("model","d")],
+              by=c("model","d"))
 
+setnames(scre,"V1","rmse")
+
+scre[,re:=re*100]
+scre[,ape:=ape*100]
+
+scre[,c("rmse","crps","ae","re","ape") := lapply(.SD,round,1),
+     .SDcols= c("rmse","crps","ae","re","ape")]
+
+setkey(scre,d)
+
+## TABLE 4 - error metrics
+scre[,c("model","d","rmse","crps","ae","re","ape")]
+
+## statistical significance of different error metrics:
 for(di in unique(oos.pred$d)){
-  print(paste0(di," - ",permutationTest(oos.pred,"floodGAM","RFFA2018",1000,"ape",di)) )
+  print(paste0(di," - ",permutationTest(oos.pred,
+                                        "floodGAM","RFFA2018",
+                                        1000,
+                                        "ape",di)) )
 }
+
+
+## ------- Dotplots - predictive accuracy
+
+oos.pred <- merge(oos.pred,gfcov[,c("ID","A","QD_fgp")],by="ID")
+
+glist <- list()
+i = 1
+for(di in unique(oos.pred$d)){
+ 
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "crps")
+  
+  glist[[i]] <- dotplotRFFA2018floodGAM(ggdat,0,1000,paste0("CRPS, d = ",di))
+  
+  i = i+1
+}
+
+figure <- ggarrange(glist[[1]],glist[[2]],glist[[3]],glist[[4]],
+                    glist[[5]],glist[[6]],glist[[7]],glist[[8]],
+                    nrow=2,ncol = 4,
+                    common.legend = T, legend = "bottom")
+
+figure
+
+glist[[5]]
+
+
+
+# Reliability -------------------------------------------------------------
+
+# use the model mu and model sigma to PIT the eta.obs:
+
+pit <- oos.pred[,pnorm(log(eta.obs),mu.gam,sigma.gam),by=c("model","d")]
+
+PITplot(pit,"floodGAM",1,24)
+
+PITplot(pit,"RFFA2018",1,24)
+
+
+## TABLE 5 - coverage and width
+
+N <- length(unique(oos.pred$ID)) # number of stations
+
+## there's a more elegant way to do this...
+coverage <- pit[, .(round(sum(V1 > 0.25 & V1 < 0.75) / N * 100, 2),
+        round(sum(V1 > 0.10 & V1 < 0.90) / N * 100, 2),
+        round(sum(V1 > 0.05 & V1 < 0.95) / N * 100, 2)), 
+    by = c("d","model")]
+setnames(coverage,c("V1","V2","V3"),c("cov.50","cov.80","cov.90"))
+
+width <- oos.pred[, .(round(mean(qlnorm(0.75, mu.gam, sigma.gam) - qlnorm(0.25, mu.gam, sigma.gam)),0),
+             round(mean(qlnorm(0.90, mu.gam, sigma.gam) - qlnorm(0.10, mu.gam, sigma.gam)),0),
+             round(mean(qlnorm(0.95, mu.gam, sigma.gam) - qlnorm(0.05, mu.gam, sigma.gam)),0)),
+         by=c("d","model")]
+setnames(width,c("V1","V2","V3"),c("wid.50","wid.80","wid.90"))
+
+covwid <- merge(coverage,width,by=c("d","model"))
+
+## print the table
+covwid[,c("d","model","cov.50","wid.50","cov.80","wid.80","cov.90","wid.90")]
+
 
 
 
@@ -119,35 +176,6 @@ ggplot(pred.draws[ID=="15700003"]) +
 
 
 
-# Reliability -------------------------------------------------------------
-
-# use the model mu and model sigma to PIT the eta.obs:
-
-pit <- oos.pred[,pnorm(log(eta.obs),mu.gam,sigma.gam),by=c("model","d")]
-
-N <- dim(pit[d==0])[1]/3 # number of stations
-NC <- 10
-
-ctab = scico(2, palette = "turku",
-             begin=0.3,end=0.5,direction=1)
-
-p1 <- hist(pit[d==0&model=="floodGAM",get("V1")], nclass=NC, plot=F)
-p2 <- hist(pit[d==24&model=="floodGAM",get("V1")], nclass=NC, plot=F)
-plot(0,0,type="n",xlim=c(0,1),ylim=c(0,40),xlab="",ylab="")
-title("floodGAM",line=0.5)
-plot(p1,col=ctab[1],add=TRUE)
-plot(p2,col=ctab[2],density=10,angle=135,add=TRUE)
-abline(a=N/NC, b=0)
-legend("topright", 
-       legend = c("1 hour", "24 hours"), 
-       col = ctab, 
-       pch = c(15,15), 
-       bty = "n", 
-       pt.cex = 2, 
-       cex = 1.2, 
-       text.col = "black", 
-       horiz = F , 
-       inset = c(-0.05, 0.02))
 
 
 
@@ -163,40 +191,7 @@ library(scico)
 ggcrps <- dcast(oos.pred[d==0], ID + A + QD_fgp ~ model, value.var = "re")
 
 
-scaleFUN <- function(x) sprintf("%.1f", x)
 
-ggplot(ggcrps) + 
-  stat_density_2d(geom="polygon",aes(floodGAM,RFFA2018,
-                                     fill = after_stat(level)),
-                  bins=5,alpha=0.5) +
-  geom_point(aes(floodGAM,RFFA2018,size=A,color=QD_fgp)) +
-  scale_color_scico(name = "Fraction of rain",
-                    palette = "lapaz",end=0.95,
-                    labels=scaleFUN) +
-  
-  geom_abline(slope=1,size=0.6) +
-  scale_x_sqrt(limits = c(0,2)) + 
-  scale_y_sqrt(limits = c(0,2)) + 
-  scale_shape_manual(values = 22, name="") +
-  scale_fill_scico(palette = "oslo",direction=-1,begin=0.4,end=0.95) +
-  scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
-                                                sep = "")) ,
-                        range=c(1.5,7),
-                        breaks = c(50,1000,2000))+
-  labs(y = paste0("<span style='font-size: 18pt'>",
-                  "RFFA2018",
-                  expression(km^2)," ]","</span>"),
-       x = paste0("<span style='font-size: 18pt'>",
-                  "floodGAM",
-                  expression(km^2)," ]</span>")) +
-  theme_bw() +
-  theme(text = element_text(family="serif",size = 18),
-        aspect.ratio = 1,
-        legend.position = "bottom",
-        legend.spacing.x = unit(1.0, 'cm'),
-        axis.title.x = ggtext::element_markdown(),
-        axis.title.y = ggtext::element_markdown(),
-        strip.background = element_blank()) 
 
 
 
