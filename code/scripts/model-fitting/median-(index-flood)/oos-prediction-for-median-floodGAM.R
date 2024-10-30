@@ -32,16 +32,8 @@ gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
 gfam[,specQ:=Qm3_s/A*1000]
 
 # remove the id and lat/long columns
-gfcov <- gfcov[,-c("RN","HN","Y_lat","X_long","Y_utm","X_utm")]
-
-# # select only the floodGAM & RFFA_2018 covariates & plotting things
-# gfcov <- gfcov[,c("ID","Q_N","A_LE","A_P","H_F", #floodGAM
-#                   "R_G_1085","log_R_G_1085","W_Apr","P_Sep", #floodGAM
-#                   "Q_N_cuberoot","R_L_sqrt","T_Feb_sqrd", #RFFA_2018 eta
-#                   "T_Mar_cubed","W_Mai_sqrt", #RFFA_2018 eta
-#                   "A_Glac","A_For","H_10","P_Jul","W_Jun", #RFFA_2018 beta
-#                   "R_TL_net",#RFFA_2018 xi
-#                   "A","QD_fgp")] # for plotting 
+gfcov <- gfcov[,-c("RN","HN","Y_lat","X_long","Y_utm","X_utm",
+                   "Y_G_Lat","X_G_Long","Y_G_UTM","X_G_UTM")]
 
 # standardize cov values by centering and dividing by 2 standard deviations
 coltab = names(gfcov)[-which(names(gfcov)=="ID")]
