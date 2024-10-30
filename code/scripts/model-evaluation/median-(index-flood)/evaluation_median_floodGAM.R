@@ -82,7 +82,7 @@ figure <- ggarrange(glist[[1]],glist[[2]],glist[[3]],glist[[4]],
 
 figure
 
-glist[[5]]
+glist[[6]]
 
 
 
@@ -91,6 +91,8 @@ glist[[5]]
 # use the model mu and model sigma to PIT the eta.obs:
 
 pit <- oos.pred[,pnorm(log(eta.obs),mu.gam,sigma.gam),by=c("model","d")]
+
+par(mfrow=c(1,2),mar = c(3,3,3,1))
 
 PITplot(pit,"floodGAM",1,24)
 
@@ -117,7 +119,7 @@ setnames(width,c("V1","V2","V3"),c("wid.50","wid.80","wid.90"))
 covwid <- merge(coverage,width,by=c("d","model"))
 
 ## print the table
-covwid[,c("d","model","cov.50","wid.50","cov.80","wid.80","cov.90","wid.90")]
+covwid[model!="xgboost",c("d","model","cov.50","wid.50","cov.80","wid.80","cov.90","wid.90")]
 
 
 
@@ -129,16 +131,7 @@ setkey(oos.pred,ID,model,d)
 
 ics <- which(oos.pred[,.(difc = c(diff(eta),0), d=d),by=c("ID","model")]$difc>0)
 
-oos.ics <- oos.pred[ics,] # so 801 out of 5904 are inconsistent. how many are repeats?
-
-oos.ics[,.N,by=c("ID","model")]
-oos.ics[,max(d),by=c("ID","model")]
-
-oos.ics[,.N,by="model"] # 463 = RFFA2018, 338 = floodGAM
-
-tt <- oos.ics[,.N,by=c("d","model")]
-setkey(tt,d,model)
-tt
+oos.ics <- oos.pred[ics,] 
 
 ## (can also check the predictive uncertainty for the inconsistent stations)
 ## how many are *significantly* inconsistent? 
@@ -155,29 +148,121 @@ tv <- merge(tt,
             oos.pred[ID%in%unique(oos.ics$ID),c("ID","eta","eta.obs","model","d")],
                   by=c("ID","model","d"))
 
+ct <- merge(dcast(tv, ID + model ~ d, value.var = "V1"),
+      dcast(tv, ID + model ~ d, value.var = "V2"),
+      by=c("ID","model"))
 
-## where are the stations (if any) where there is no overlap in CI between durations?
+## check for instances where d1.x > d2.y
 
-ggplot(pred.draws[ID=="9900017"]) +
-  geom_density(aes(eta.draws,group=d,fill=d),alpha=0.2)+
-  facet_wrap(vars(model))
+ct[`12.x`>`1.y`,.N,by=c("model")]
+
+ct[`24.x`>`1.y`,.N,by=c("model")]
+
+ct[`48.x`>`1.y`,.N,by=c("model")]
+
+ct[`72.x`>`1.y`,.N,by=c("model")]
+
+ct[`168.x`>`1.y`,.N,by=c("model")]
+
+ct[`72.x`>`24.y`,.N,by=c("model")]
+
+dvec <- unique(oos.pred$d)
+dcgrid <- data.table(i=c(rep( dvec, each = length(dvec)),
+                         rep( dvec, each = length(dvec))),
+                     j=c(rep( dvec, length(dvec)),
+                         rep( dvec, length(dvec))),
+                     model=rep(c("RFFA2018","floodGAM"),
+                               each=length(dvec)*length(dvec)))
+
+zvec <- rep(NA,dim(dcgrid)[1])
+zi = 1
+
+for(navn in c("RFFA2018","floodGAM")){
+  for(i in dvec){
+    
+    for(j in dvec){
+      
+      if(i<=j){
+        zvec[zi] = NA
+        zi=zi+1
+      }else{
+        zvec[zi] = ct[model == navn & get(paste0(i,".x")) > get(paste0(j,".y")), .N] 
+        zi=zi+1
+      }
+    }
+  }
+}
+
+
+dcgrid[,z:=zvec]
+
+
+ggplot(dcgrid[i!=0&j!=0], 
+       aes(as.factor(j),as.factor(i),fill=as.factor(z))) +
+  geom_tile() +
+  scale_fill_scico_d(name = "Num. inconsistent",
+                     palette = "batlowW",direction=-1) +
+  labs(x = "duration (hours)", y = "duration (hours)") +
+  facet_wrap(vars(model)) +
+  theme(legend.position = "bottom") +
+  guides(fill=guide_legend(nrow=1))
+
+dcgrid[,sum(z,na.rm=T),by="model"]
+
+
+
+
+
+
+
+
+
+
 
 ggplot(pred.draws[ID=="10100001"]) +
   geom_density(aes(eta.draws,group=d,fill=d),alpha=0.2)+
   facet_wrap(vars(model))
 
-ggplot(pred.draws[ID=="8900001"]) +
+gt <- oos.pred[model!="xgboost"&ID=="8900001"&d%in%c(1,12,24,48,72,168)]
+
+ggplot(pred.draws[ID=="8900001"&d%in%c(1,12,24,48,72,168)]) +
   geom_density(aes(eta.draws,group=d,fill=as.factor(d)),alpha=0.2)+
+  geom_vline(data=gt,aes(xintercept = eta.obs,color=as.factor(d))) +
+  facet_wrap(vars(model)) +
+  theme_bw()
+
+
+
+##..what? need to check this station more...
+ggplot(pred.draws[ID=="23400018"]) +
+  geom_density(aes(eta.draws,group=d,fill=as.factor(d)),alpha=0.2)+
+  lims(x=c(0,250)) +
   facet_wrap(vars(model))
 
-ggplot(pred.draws[ID=="15700003"]) +
+
+ggplot(pred.draws[ID=="15700003"&d%in%c(1,12,24,48,72,168)]) +
   geom_density(aes(eta.draws,group=d,fill=as.factor(d)),alpha=0.2)+
-  facet_wrap(vars(model))
+  geom_vline(data=oos.pred[model!="xgboost"&ID=="15700003"&d%in%c(1,12,24,48,72,168)],
+             aes(xintercept = eta.obs,color=as.factor(d))) +
+  facet_wrap(vars(model)) +
+  theme_bw()
 
 
+station = "19600011"
+ggplot(pred.draws[ID==station&d%in%c(1,12,24,48,72,168)]) +
+  geom_density(aes(eta.draws,group=d,fill=as.factor(d)),alpha=0.2)+
+  geom_vline(data=oos.pred[model!="xgboost"&ID==station&d%in%c(1,12,24,48,72,168)],
+             aes(xintercept = eta.obs,color=as.factor(d))) +
+  facet_wrap(vars(model)) +
+  theme_bw()
 
 
+171.833/170.4
 
+oos.pred[model=="RFFA2018",which.max(re)]
+oos.pred[model=="RFFA2018"][1897]
+
+pred.draws[ID=="23400018",max(eta.draws),by="model"]
 
 # scrap -------------------------------------------------------------------
 
