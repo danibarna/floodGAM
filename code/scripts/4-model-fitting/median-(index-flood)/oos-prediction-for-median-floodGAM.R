@@ -28,7 +28,7 @@ gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
                        "durations_gamfelt_annual_maxima.rds"))
 
 # convert to specific discharge
-gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
+gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID") # we lost 4 stations here...check this out
 gfam[,specQ:=Qm3_s/A*1000]
 
 # remove the id and lat/long columns
@@ -52,8 +52,8 @@ gamdat <- merge(gfcov,gfam,by="ID")
 # Define the data folds ---------------------------------------------------
 set.seed(42)
 k = 10
-# use the instantaneous duration
-fidx <- createFolds(gamdat[d==0,get("qind")],k) 
+# use the 24 hour duration
+fidx <- createFolds(gamdat[d==24,get("qind")],k) 
 
 
 # Fit the GAMs on the folds and save the predicted values ------------
@@ -69,7 +69,7 @@ posterior.draws <- data.table(eta.draws=numeric(),
 
 for(di in unique(gamdat[,get("d")])){
   
-  gamdat_d <- gamdat[d==di]
+  gamdat.d <- gamdat[d==di]
   
   # load XGBoost hyperparameters for this duration:
   hpXGB = readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
@@ -78,25 +78,28 @@ for(di in unique(gamdat[,get("d")])){
   
   for(i in 1:k){
     
-    train.gamdat_d <- gamdat_d[-fidx[[i]]]
-    test.gamdat_d <- gamdat_d[fidx[[i]]]
+    train.gamdat.d <- gamdat.d[-fidx[[i]]]
+    test.gamdat.d <- gamdat.d[fidx[[i]]]
     
-    trainXGB.d <- xgb.DMatrix(as.matrix(train.gamdat_d[,!c("ID","d","qind")]),
-                              label = log(train.gamdat_d[,get("qind")]))
-    testXGB.d <- xgb.DMatrix(as.matrix(test.gamdat_d[,!c("ID","d","qind")]),
-                             label = log(test.gamdat_d[,get("qind")]))
+    trainXGB.d <- xgb.DMatrix(as.matrix(train.gamdat.d[,!c("ID","d","qind")]),
+                              label = log(train.gamdat.d[,get("qind")]))
+    testXGB.d <- xgb.DMatrix(as.matrix(test.gamdat.d[,!c("ID","d","qind")]),
+                             label = log(test.gamdat.d[,get("qind")]))
     
     ## ------- eta --------
     eta.floodGAM <- gam(qind ~ s(Q_N,k=6)+s(A_LE,k=6)+s(A_P,k=6)+s(H_F,k=6)+
                           s(log_R_G_1085,k=6)+s(W_Apr,k=3)+s(P_Sep,k=3),
                         method = "REML",
-                        data = gamdat_d,
+                        data = train.gamdat.d,
                         family = gaussian(link=log))
+    
+    print(paste0("******************DURATION ",di,"***************"))
+    print(summary(eta.floodGAM))
     
     eta.RFFA2018 <- gam(qind ~ I(Q_N_cuberoot) + I(R_L_sqrt) + A_LE + 
                           I(T_Feb_sqrd) + I(T_Mar_cubed) + I(W_Mai_sqrt),
                         method = "REML",
-                        data = gamdat_d,
+                        data = train.gamdat.d,
                         family = gaussian(link=log))
     
     eta.xgboost <- xgb.train(data = trainXGB.d,
@@ -105,39 +108,39 @@ for(di in unique(gamdat[,get("d")])){
                              objective = "reg:squarederror")
     
     ## ------- generate and save the predictions & predictive uncertainty ------
-    n = dim(test.gamdat_d)[1]
+    n = dim(test.gamdat.d)[1]
     
     ## --- store the predictions
     
     ## ------------------ floodGAM
     ## from the GAM: get mu (prediction for the test set on the log scale)
-    mu.gam <- predict(eta.floodGAM,newdata=test.gamdat_d,type="link")
+    mu.gam <- predict(eta.floodGAM,newdata=test.gamdat.d,type="link")
     ## then estimate standard dev based on in-sample residuals for training data
     sigma.gam <- sd(log(eta.floodGAM$y) - eta.floodGAM$linear.predictor)
     
     oos.predictions <- rbind(oos.predictions,
                              data.table(
                                eta = predict.gam(eta.floodGAM,
-                                                 newdata=test.gamdat_d,
+                                                 newdata=test.gamdat.d,
                                                  type="response"),
-                               eta.obs = test.gamdat_d[,get("qind")],
+                               eta.obs = test.gamdat.d[,get("qind")],
                                mu.gam = mu.gam, sigma.gam = sigma.gam,
                                model = rep("floodGAM",n),fold=rep(i,n),d=rep(di,n),
-                               ID = test.gamdat_d[,get("ID")]))
+                               ID = test.gamdat.d[,get("ID")]))
     
     ## ------------------ RFFA2018
-    mu.gam <- predict(eta.RFFA2018,newdata=test.gamdat_d,type="link")
+    mu.gam <- predict(eta.RFFA2018,newdata=test.gamdat.d,type="link")
     sigma.gam <- sd(log(eta.RFFA2018$y) - eta.RFFA2018$linear.predictor)
     
     oos.predictions <- rbind(oos.predictions,
                              data.table(
                                eta = predict.gam(eta.RFFA2018,
-                                                 newdata = test.gamdat_d,
+                                                 newdata = test.gamdat.d,
                                                  type="response"),
-                               eta.obs = test.gamdat_d[,get("qind")],
+                               eta.obs = test.gamdat.d[,get("qind")],
                                mu.gam = mu.gam, sigma.gam = sigma.gam,
                                model=rep("RFFA2018",n),fold=rep(i,n),d=rep(di,n),
-                               ID=test.gamdat_d[,get("ID")]))
+                               ID=test.gamdat.d[,get("ID")]))
     
     
     ## ------------------ XGBoost
@@ -145,10 +148,10 @@ for(di in unique(gamdat[,get("d")])){
     oos.predictions <- rbind(oos.predictions,
                              data.table(
                                eta = exp(predict(eta.xgboost,testXGB.d)),
-                               eta.obs = test.gamdat_d[,get("qind")],
+                               eta.obs = test.gamdat.d[,get("qind")],
                                mu.gam = NA, sigma.gam = NA,
                                model=rep("xgboost",n),fold=rep(i,n),d=rep(di,n),
-                               ID=test.gamdat_d[,get("ID")]))
+                               ID=test.gamdat.d[,get("ID")]))
     
     
     ## --- store the simulations from the posterior 
@@ -158,22 +161,22 @@ for(di in unique(gamdat[,get("d")])){
                              data.table(
                                eta.draws=simulateFromPosterior(eta.floodGAM,
                                                                "eta",
-                                                               test.gamdat_d)$draws,
+                                                               test.gamdat.d)$draws,
                                model=rep("floodGAM",n*5000),
                                fold=rep(i,n*5000),
                                d=rep(di,n*5000),
-                               ID=rep(test.gamdat_d[,get("ID")],each=5000)))
+                               ID=rep(test.gamdat.d[,get("ID")],each=5000)))
     
     ## ------------------ RFFA2018
     posterior.draws <- rbind(posterior.draws,
                              data.table(
                                eta.draws=simulateFromPosterior(eta.RFFA2018,
                                                                "eta",
-                                                               test.gamdat_d)$draws,
+                                                               test.gamdat.d)$draws,
                                model=rep("RFFA2018",n*5000),
                                fold=rep(i,n*5000),
                                d=rep(di,n*5000),
-                               ID=rep(test.gamdat_d[,get("ID")],each=5000)))
+                               ID=rep(test.gamdat.d[,get("ID")],each=5000)))
     
   }
 }

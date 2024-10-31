@@ -34,10 +34,8 @@ faclev[2] <- "A[LE]"
 iisDE[, navn := factor(navn, levels = faclev)]
 
 # Filter data
-gdat <- iisDE[fc >= 15]
+gdat <- iisDE[fc>=25]
 
-# Define color palette
-ctab <- scico(17, palette = "grayC", end = 0.9)[c(1, 4, 7, 10, 13, 14:17)]
 
 # Plot
 ggplot(gdat, aes(fill = as.factor(ordFeat), y = as.factor(d), x = dum.y)) + 

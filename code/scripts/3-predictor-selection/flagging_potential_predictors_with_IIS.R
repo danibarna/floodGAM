@@ -96,7 +96,7 @@ for(di in mydurations){
 # step 2: run IIS with XGBoost --------------------------------------------
 
 p = 15 # we evaluate the top p features at each step (in order of avg gain)
-eps = 1e-1 # stop algorithm when improvement drops below this level
+eps = 1e-2 # stop algorithm when improvement drops below this level
 
 
 ## data table to store output
@@ -137,4 +137,4 @@ for(di in mydurations){
 }
 
 saveRDS(iisDE,file=paste0("~/floodGAM/results/output/median-(index-flood)/",
-                          "featuresFromIIS.rds"))
+                          "smallepsfeaturesFromIIS.rds"))

@@ -5,8 +5,6 @@
 ##
 ## Evaluate fitted models on:
 ## - predictive accuracy at oos locations (5 metrics)
-## - duration consistency
-## - reliability (PIT)
 ## -----------------------------------------------------------------------------
 
 library(data.table)
@@ -56,11 +54,11 @@ for(di in unique(oos.pred$d)){
   print(paste0(di," - ",permutationTest(oos.pred,
                                         "floodGAM","RFFA2018",
                                         1000,
-                                        "se",di)) )
+                                        "ape",di)) )
 }
 
 
-## ------- Dotplots - predictive accuracy
+## ------- Dotplots - predictive accuracy check 
 
 oos.pred <- merge(oos.pred,gfcov[,c("ID","A","QD_fgp")],by="ID")
 
@@ -68,9 +66,9 @@ glist <- list()
 i = 1
 for(di in unique(oos.pred$d)){
   
-  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "se")
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "re")
   
-  glist[[i]] <- dotplotRFFA2018floodGAM(ggdat,0,500000,paste0("SE, d = ",di))
+  glist[[i]] <- dotplotRFFA2018floodGAM(ggdat,0,6,paste0("RE, d = ",di))
   
   i = i+1
 }
@@ -82,4 +80,11 @@ figure <- ggarrange(glist[[1]],glist[[2]],glist[[3]],glist[[4]],
 
 figure
 
-glist[[6]]
+
+
+
+
+oos.pred[oos.pred[,.I[which.max(ape)],by=c("d","model")]$V1]
+
+
+oos.pred[ID=="23400018"&model=="RFFA2018"]

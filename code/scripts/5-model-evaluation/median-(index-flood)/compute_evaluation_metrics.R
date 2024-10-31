@@ -34,12 +34,12 @@ oos.pred[,ae:=abs( (eta.obs-eta) )]
 oos.pred[, rowpos:= .I]
 ## Relative error
 oos.pred[model!="xgboost",
-         eta.re:=optimal.predictor.re(sigma.gam,mu.gam,eta.obs),
+         eta.re:=optimal.predictor.re(sigma.gam,mu.gam,eta),
          by=rowpos]
 oos.pred[,re:=abs( (eta.obs-eta.re)/eta.re )]
 ## Absolute percent error
 oos.pred[model!="xgboost",
-         eta.ape:=optimal.predictor.ape(sigma.gam,mu.gam,eta.obs),
+         eta.ape:=optimal.predictor.ape(sigma.gam,mu.gam,eta),
          by=rowpos]
 oos.pred[,ape:=abs( (eta.obs-eta.ape)/eta.obs )]
 
