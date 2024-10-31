@@ -30,22 +30,23 @@ optimal.predictor.re <- function(sigma,mu,y){
   
   ## now we have density given by g(x) = 1/A*x*f(x).
   ## approximate the integral \int_0^m g(x) dx:
-  integrand <- function(x,sigma,mu,A){
-    return(1/A*(1/(sigma*sqrt(2*pi)))*exp(-(log(x) - mu)^2 / (2*sigma^2)))
+  gx <- function(x,mu,sigma,A){
+    return( 1/A*(1/(sigma*sqrt(2*pi)))*exp(-(log(x) - mu)^2 / (2*sigma^2)) )
   }
-  myintegral <- Vectorize(function(m) integrate(integrand,lower = 0,upper = m,
-                                                sigma = sigma, 
-                                                mu = mu, 
-                                                A = A)$value)
-  ## find where this integral == 0.5:
-  #x <- seq(1,3500,by=0.01) # NB! this range is tied to range of data
-  x <- seq(y-0.90*y,y+0.90*y,by=0.01) # NB! this assumes est is in window
-  out <- myintegral(x)
   
-  ## this is the predicted value for the inputted mu and sigma:
-  return(x[which.min(abs(0.5-out))])
+  ## find where this integral == 0.5.
+  ## Give optimize an interval between 0 and 5 times the observed value.
+  ## This upper limit is important to stop optimize from wandering into
+  ## the long flat region of the function (beyond any reasonable values)
+  ## Because of this, should always manually check the large relative errors
+  med <- optimize(function(m) abs(integrate(gx, lower = 0, upper = m,
+                                            mu = mu,
+                                            sigma = sigma,
+                                            A = A)$value - 0.5),
+                  interval = c(0,5*y))$minimum
+  
+  return(med)
 } 
-
 
 
 optimal.predictor.ape <- function(sigma,mu,y){
@@ -61,26 +62,24 @@ optimal.predictor.ape <- function(sigma,mu,y){
   ## output: (abs(s) e^(s^2/2 - μ))/s
   A = abs(sigma)*exp(sigma^2/2-mu) / sigma
   
-  ## now we have density given by g(x) = 1/A*f(x)/x.
+  ## now we have density given by g(x) = 1/A*x*f(x).
   ## approximate the integral \int_0^m g(x) dx:
-  integrand <- function(x,sigma,mu,A){
+  gx <- function(x,mu,sigma,A){
     return(1/A*(1/x^2)*(1/(sigma*sqrt(2*pi)))*exp(-(log(x) - mu)^2/(2*sigma^2)))
   }
-  myintegral <- Vectorize(function(m) integrate(integrand,lower = 0,upper = m,
-                                                sigma = sigma, 
-                                                mu = mu, 
-                                                A = A)$value)
-  ## find where this integral == 0.5:
-  #x <- seq(1,3500,by=0.01) # NB! this range is tied to range of data
-  x <- seq(y-0.90*y,y+0.90*y,by=0.01) # NB! this assumes est is in window
-  out <- myintegral(x)
   
-  end.time <- Sys.time()
-  time.taken <- end.time - start.time
-  print(time.taken)
+  ## find where this integral == 0.5.
+  ## Give optimize an interval between 0 and 5 times the observed value.
+  ## This upper limit is important to stop optimize from wandering into
+  ## the long flat region of the function (beyond any reasonable values)
+  ## Because of this, should always manually check the large percent errors
+  med <- optimize(function(m) abs(integrate(gx, lower = 0, upper = m,
+                                            mu = mu,
+                                            sigma = sigma,
+                                            A = A)$value - 0.5),
+                  interval = c(0,5*y))$minimum
   
-  ## this is the predicted value for the inputted mu and sigma:
-  return(x[which.min(abs(0.5-out))])
+  return(med)
 } 
 
 
