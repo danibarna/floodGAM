@@ -145,8 +145,7 @@
 117.4 Valen (Laksvatnet) xx Mangler høye målinger, må tas ut pga for stor usikkerhet.
 120.1 Brattfoss x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
 121.29 Gisnås x xKraftig isoppstuing hver vinter. Uryddig hydraulikk på flom. Vanskelig å få gode vfmålinger.
-122.2 Haga bru x x
-Ustabilt profil og uryddig hydraulikk ved VM/sensorer på flom. Bruk heller Gaulfoss.
+122.2 Haga bru x x Ustabilt profil og uryddig hydraulikk ved VM/sensorer på flom. Bruk heller Gaulfoss.
 122.14 Lillebudal bru x xUstabilt profil og noe isoppstuving. Gammel kurve.
 122.16 Gaua x xMeget ustabilt profil. Vanskelig å få gode vf-målinger. Meget uryddig hydraulikk på flom.
 123.4 Selbusjø x Ukjent kurvegrunnlag
@@ -230,7 +229,7 @@ Ustabilt profil og uryddig hydraulikk ved VM/sensorer på flom. Bruk heller Gaul
 231.1 Sandfjordelv x Svært dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
 234.14 Cærrogæsjokka xxTvilsom kurve, særlig for periode 1! Ikkje kontrollerte data siden midt på 90-tallet. myesprik mellom måingen på høye vf.
 234.16 Julelv x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
-237.2Lillefossen xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
+237.2 Lillefossen xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
 242.1 Fuglevatn xIngen vf-målinger funnet for denne perioden. Trolig er grunnlaget for kurven er rentteoretisk
 244.5 Kjerringvatn xxTrend i tid, trend i vannføring og svært usikker på flom. trenger høye målinger, vanskeligå treffe\komme tidsnok, utilgjengelig
 246.4 Lille Ropelvvatn x Dårlig kurvekvalitet på flom, usikkert kurvegrunnlag
