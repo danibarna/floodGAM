@@ -27,6 +27,12 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
                        "durations_gamfelt_annual_maxima.rds"))
 
+## ---- load in the selected covariates from the IIS runs
+iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
+                             "gamfeaturesFromIIS.rds"))
+# choose only covariates that were *not* shrunk out of the model:
+iis.models <- iis.models[edf>0.001]
+
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID") # we lost 4 stations here...check this out
 gfam[,specQ:=Qm3_s/A*1000]
@@ -67,7 +73,7 @@ posterior.draws <- data.table(eta.draws=numeric(),
                               model=character(),fold=numeric(),d=numeric(),
                               ID=character())
 
-for(di in unique(gamdat[,get("d")])){
+for(di in unique(iis.models[,get("d")])){
   
   gamdat.d <- gamdat[d==di]
   
@@ -81,10 +87,17 @@ for(di in unique(gamdat[,get("d")])){
     train.gamdat.d <- gamdat.d[-fidx[[i]]]
     test.gamdat.d <- gamdat.d[fidx[[i]]]
     
+    ## XGBoost prep
     trainXGB.d <- xgb.DMatrix(as.matrix(train.gamdat.d[,!c("ID","d","qind")]),
                               label = log(train.gamdat.d[,get("qind")]))
     testXGB.d <- xgb.DMatrix(as.matrix(test.gamdat.d[,!c("ID","d","qind")]),
                              label = log(test.gamdat.d[,get("qind")]))
+    
+    ## auto-data-driven prep
+    stack <- iis.models[d==di,get("Feature")]
+    rhs <- paste('s(', stack, ',k=6)', sep = '', collapse = ' + ')
+    fml <- paste('qind', '~', rhs, collapse = ' ')
+    fml <- as.formula(fml)
     
     ## ------- eta --------
     eta.floodGAM <- gam(qind ~ s(Q_N,k=6)+s(A_LE,k=6)+s(A_P,k=6)+s(H_F,k=6)+
@@ -92,9 +105,6 @@ for(di in unique(gamdat[,get("d")])){
                         method = "REML",
                         data = train.gamdat.d,
                         family = gaussian(link=log))
-    
-    print(paste0("******************DURATION ",di,"***************"))
-    print(summary(eta.floodGAM))
     
     eta.RFFA2018 <- gam(qind ~ I(Q_N_cuberoot) + I(R_L_sqrt) + A_LE + 
                           I(T_Feb_sqrd) + I(T_Mar_cubed) + I(W_Mai_sqrt),
@@ -106,6 +116,12 @@ for(di in unique(gamdat[,get("d")])){
                              param = hpXGB[[1]],
                              nrounds = hpXGB[[3]],
                              objective = "reg:squarederror")
+    
+    eta.datadrive <- gam(fml,
+                         method = "REML",
+                         data = train.gamdat.d,
+                         family = gaussian(link=log))
+    
     
     ## ------- generate and save the predictions & predictive uncertainty ------
     n = dim(test.gamdat.d)[1]
@@ -152,6 +168,22 @@ for(di in unique(gamdat[,get("d")])){
                                mu.gam = NA, sigma.gam = NA,
                                model=rep("xgboost",n),fold=rep(i,n),d=rep(di,n),
                                ID=test.gamdat.d[,get("ID")]))
+    
+    ## ------------------ auto-data-driven
+    ## from the GAM: get mu (prediction for the test set on the log scale)
+    mu.gam <- predict(eta.datadrive,newdata=test.gamdat.d,type="link")
+    ## then estimate standard dev based on in-sample residuals for training data
+    sigma.gam <- sd(log(eta.datadrive$y) - eta.datadrive$linear.predictor)
+    
+    oos.predictions <- rbind(oos.predictions,
+                             data.table(
+                               eta = predict.gam(eta.datadrive,
+                                                 newdata=test.gamdat.d,
+                                                 type="response"),
+                               eta.obs = test.gamdat.d[,get("qind")],
+                               mu.gam = mu.gam, sigma.gam = sigma.gam,
+                               model = rep("datadrive",n),fold=rep(i,n),d=rep(di,n),
+                               ID = test.gamdat.d[,get("ID")]))
     
     
     ## --- store the simulations from the posterior 

@@ -44,18 +44,22 @@ scre[,ape:=ape*100]
 scre[,c("rmse","crps","ae","re","ape") := lapply(.SD,round,1),
      .SDcols= c("rmse","crps","ae","re","ape")]
 
-setkey(scre,d)
+setkey(scre,d,re)
 
 ## TABLE 4 - error metrics
 scre[,c("model","d","rmse","crps","ae","re","ape")]
 
 ## statistical significance of different error metrics:
-for(di in unique(oos.pred$d)){
-  print(paste0(di," - ",permutationTest(oos.pred,
-                                        "floodGAM","RFFA2018",
-                                        1000,
-                                        "ape",di)) )
+for(m in c("se","crps","ae","re","ape")){
+  print(paste0("********",m))
+  for(di in unique(oos.pred$d)){
+    print(paste0(di," - ",permutationTest(oos.pred,
+                                          "floodGAM","datadrive",
+                                          1000,
+                                          m,di)) )
+  }
 }
+
 
 
 ## ------- Dotplots - predictive accuracy check 
