@@ -13,7 +13,7 @@ library(caret)
 
 ## ----- source custom functions:
 source("~/floodGAM/code/functions/fn_xgtune.R")
-source("~/floodGAM/code/functions/fn_IIS.R")
+source("~/floodGAM/code/functions/fn_IIS_gam.R")
 
 # Data preparation --------------------------------------------------------
 
@@ -49,7 +49,7 @@ gamdat <- merge(gfcov,gfam,by="ID")
 
 # Choose which durations to run the analysis on ---------------------------
 
-mydurations <- c(1,6,12,18,24,36,48,72,168,336,720)
+mydurations <- c(1,6,12,18,24,36,48,72)
 
 # Define the data folds ---------------------------------------------------
 set.seed(42)
@@ -95,15 +95,54 @@ for(di in mydurations){
 
 # step 2: run IIS with XGBoost --------------------------------------------
 
-p = 15 # we evaluate the top p features at each step (in order of avg gain)
+p = 10 # we evaluate the top p features at each step (in order of avg gain)
 eps = 1e-2 # stop algorithm when improvement drops below this level
 
 
 ## data table to store output
 iisDE <- data.table(Feature=character(), ordFeat=numeric(), maeFeat = numeric(), 
-                    fold = numeric(), model = character(), d = numeric())
+                    model = character(), d = numeric())
+
+for(di in mydurations){
+  
+  gamdat.d <- gamdat[d==di]
+  
+  # load XGBoost hyperparameters for this duration:
+  hpXGB = readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
+                         "xgboost-hyperparameters/",
+                         "xgb1hp_",di,".rds"))
+  
+  X <- gamdat.d[,!c("ID","d","qind")]
+  y <- gamdat.d[,get("qind")]
+  
+  gamfeatIIS <- IIS(y,X,10,p,eps, # 10 is internal IIS cv folds
+                     hpXGB[[3]],hpXGB[[1]])
+  
+  iisDE <- rbind(iisDE,data.table(Feature = gamfeatIIS$Feature,
+                                  ordFeat = gamfeatIIS$ord,
+                                  maeFeat = gamfeatIIS$errormetric,
+                                  model = rep("gam",
+                                              length(gamfeatIIS$Feature)),
+                                  d = rep(di,length(gamfeatIIS$Feature))))
+  print(paste0("Duration ", di,
+               " model gam", " for DE"))
+  
+}
 
 
+
+saveRDS(iisDE,file=paste0("~/floodGAM/results/output/median-(index-flood)/",
+                          "gamfeaturesFromIIS.rds"))
+
+
+
+
+
+
+
+
+
+## XGBoost stuff
 for(di in mydurations){
   
   gamdat.d <- gamdat[d==di]
