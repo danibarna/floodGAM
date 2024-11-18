@@ -44,6 +44,15 @@ sma.tab[,c("RN","HN") := tstrsplit(
 sma.tab <- sma.tab[,c("RN","HN")]
 sma.tab[,SMA:="sma"]
 
+# load in table from Anja
+d1 <- fread("~/floodGAM/data/raw-data/d1.csv")
+setnames(d1,c("regine_area","main_no"),c("RN","HN"))
+d1[,RN:=as.character(RN)]; d1[,HN:=as.character(HN)]
+d1[,d1:="d1"]
+
+d1 <- unique(d1,by=c("RN","HN"))
+setkey(d1,RN,HN)
+
 setkey(nifs.tab,RN,HN); setkey(A2.tab,RN,HN)
 setkey(A3.tab,RN,HN); setkey(sma.tab,RN,HN)
 
@@ -56,7 +65,13 @@ tab <- merge(nifs.tab[,c("RN","HN","navn","NIFS")],
 tab <- merge(tab,sma.tab[,c("RN","HN","SMA")],all=T)
 
 
-tab <- merge(tab,A3.tab[,c("RN","HN","A3","key_")],all=T)
+tab <- merge(tab,A3.tab[,c("RN","HN","A3")],all=T)
+
+## what tab is in d1?
+
+tab <- merge(tab,d1[,c("RN","HN","d1")],all.x=T)
+
+
 
 # create lescon_var commands ----------------------------------------------
 
