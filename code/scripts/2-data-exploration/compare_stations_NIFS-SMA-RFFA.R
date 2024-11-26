@@ -69,7 +69,7 @@ tab <- merge(tab,A3.tab[,c("RN","HN","A3")],all=T)
 
 ## what tab is in d1?
 
-tab <- merge(tab,d1[,c("RN","HN","d1")],all.x=T)
+tab <- merge(tab,d1[,c("RN","HN","d1","dt_start_date","dt_end_date")],all.x=T)
 
 
 
