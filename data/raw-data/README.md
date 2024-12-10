@@ -1,12 +1,7 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
 
-Raw data files for use in floodGAM analysis.
+## Raw data files for use in floodGAM analysis.
 
-Data in this folder originates from published and is not edited by hand.
+Data in this folder originates from published reports and is not edited by hand.
 Instead it is loaded and processed/cleaned using the scripts located at
 [/code/scripts/data-creation/](/code/scripts/data-creation/).
 
@@ -33,26 +28,26 @@ identified in report 2016-85 as too low-quality for flood frequency
 analysis.
 
 -   `tabell_5_NIFS_rapport_2015-13.txt` - Table of stations used in
-    [NIFS report
-    13-2015](https://publikasjoner.nve.no/rapport/2015/rapport2015_13.pdf).
+    NIFS report
+    13-2015.
     Table copy-pasted from report text (vedlegg 1, table 5, pg 39-46).
 
 -   `tabell_A3_rapport_2016-85.txt` - Table of stations excluded from
-    [report
-    2016-85](https://publikasjoner.nve.no/rapport/2016/rapport2016_85.pdf)
+    report
+    2016-85
     because of poor data quality. Table copy-pasted from report
     (appendix, pg 58-70).
 
 -   `tabell_A2_rapport_2016-85_daba_edited.txt` - Table of stations
-    identified by [report
-    2016-85](https://publikasjoner.nve.no/rapport/2016/rapport2016_85.pdf)
+    identified by report
+    2016-85
     as suitable for flood frequency analysis. Table copy-pasted from
     report (appendix, pg 32-57).
 
     For 15 stations, the version number in the published report does not
-    produce a valid data file and does not match the version in the
-    Flomkart lescon_var commands
-    [here](\nve.no\fil\h\HM\Interne%20Prosjekter\Flomkart\Data\lesconvar)
+    produce a valid data file. In these cases, when possible, we substitue with 
+    the version number used in the Flomkart project. If the station does not exist
+    in the Flomkart file, we select the valid version number from Hysopp.
 
 These three tables are used to make the lescon_var commands to query
 archive 39 - hyfin_complete in Hydra II:
