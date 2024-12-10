@@ -14,6 +14,8 @@ and pull streamflow data. See
 [this](/data/how-to/hvordan_henter_jeg_data_med_lescon_var.md) guide for
 how to pull data from the databases using lescon_var (internal system).
 
+### Station selection
+
 The gamfelt stations are selected from the stations listed in two NVE
 reports: **Nasjonalt formelverk for flomberegning i små nedbørfelt**
 [(report
@@ -44,10 +46,14 @@ analysis.
     as suitable for flood frequency analysis. Table copy-pasted from
     report (appendix, pg 32-57).
 
-    For 15 stations, the version number in the published report does not
-    produce a valid data file. In these cases, when possible, we substitue with 
+    For 15 stations, the version number in the published table A2 does not
+    produce a valid data file. In these cases, when possible, we substitute with 
     the version number used in the Flomkart project. If the station does not exist
     in the Flomkart file, we select the valid version number from Hysopp.
+    
+    The valid version numbers are inserted by hand into the table. In addition,
+    more years for the station Jaren (12.286) are added to the 'utelatt' column 
+    after reccomendation from the data section at NVE. 
 
 These three tables are used to make the lescon_var commands to query
 archive 39 - hyfin_complete in Hydra II:
@@ -57,6 +63,8 @@ archive 39 - hyfin_complete in Hydra II:
     (hyfin_complete). These commands are created by
     [this](/code/scripts/1-data-creation/streamflow/1-pull-and-clean-data-from-HydraII.R)
     script.
+    
+### Catchment descriptors
 
 -   `gamfelt_catchment_covariates.csv` - catchment covariates from GIS.
     Created by Kolbjørn in 2019(?)
