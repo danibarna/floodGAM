@@ -3,7 +3,7 @@
 
 Data in this folder originates from published reports and is not edited by hand.
 Instead it is loaded and processed/cleaned using the scripts located at
-[/code/scripts/data-creation/](/code/scripts/data-creation/).
+[/code/scripts/data-creation/](/code/scripts/1-data-creation/).
 
 The exception is the file `tabell_A2_rapport_2016-85_daba_edited.txt`
 (see notes below).
@@ -34,9 +34,7 @@ analysis.
     13-2015.
     Table copy-pasted from report text (vedlegg 1, table 5, pg 39-46).
 
--   `tabell_A3_rapport_2016-85.txt` - Table of stations excluded from
-    report
-    2016-85
+-   `tabell_A3_rapport_2016-85.txt` - Table of stations not suitable for flood frequency analysis
     because of poor data quality. Table copy-pasted from report
     (appendix, pg 58-70).
 
@@ -48,15 +46,14 @@ analysis.
 
     For 15 stations, the version number in the published table A2 does not
     produce a valid data file. In these cases, when possible, we substitute with 
-    the version number used in the Flomkart project. If the station does not exist
+    the version number used in the lescon_var commands in the Flomkart project. If the station does not exist
     in the Flomkart file, we select the valid version number from Hysopp.
     
     The valid version numbers are inserted by hand into the table. In addition,
-    more years for the station Jaren (12.286) are added to the 'utelatt' column 
+    more years for the station Jaren (12.286) are added by hand to the 'utelatt' column 
     after reccomendation from the data section at NVE. 
 
-These three tables are used to make the lescon_var commands to query
-archive 39 - hyfin_complete in Hydra II:
+These three tables are used to make the lescon_var commands for the gamfelt dataset:
 
 -   `lesconvar_commands_NIFS-A2_archive_39-hyfincomplete.txt` -
     lescon_var commands to pull data from Hydra II, archive 39
