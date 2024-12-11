@@ -74,14 +74,16 @@ of data per year.
     
 ### Catchment descriptors
 
--   `gamfelt_catchment_covariates.csv` - catchment covariates from GIS.
-    Created by Kolbjørn in 2019(?)
+-   `catchment_properties_zenodo_5382146.csv` - catchment covariates from GIS. Created by Kolbjørn (?). [Link](https://zenodo.org/records/5382146) 
+to published dataset.
 
--   `README-gamfelt-covariates.txt` - description of gamfelt catchment
-    covariates
-
+-   `description_catchment_properties_zenodo_5382146.txt` - description of the catchment covariates.
 
 ## zfelt catchments
 
 -   `zfelt_catchment_covariates.csv` - catchment covariates from GIS.
     Created by Kolbjørn 05.07.2024
+    
+## Other
+
+-   `map_files` -- large raster data items not uploaded to GitHub.
