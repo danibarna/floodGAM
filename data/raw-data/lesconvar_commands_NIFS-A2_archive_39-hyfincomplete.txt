@@ -1,6 +1,4 @@
 # !/bin/bash
-lescon_var -b 0 -f timevalue 39 NA NA 0 1001 1 > NA-NA.txt
-lescon_var -b 0 -f timevalue 39 1 37 0 1001 1 > 1-37.txt
 lescon_var -b 0 -f timevalue 39 100 1 0 1001 1 > 100-1.txt
 lescon_var -b 0 -f timevalue 39 101 1 0 1001 1 > 101-1.txt
 lescon_var -b 0 -f timevalue 39 102 1 0 1001 1 > 102-1.txt
@@ -18,6 +16,7 @@ lescon_var -b 0 -f timevalue 39 109 11 0 1001 1 > 109-11.txt
 lescon_var -b 0 -f timevalue 39 109 12 0 1001 1 > 109-12.txt
 lescon_var -b 0 -f timevalue 39 109 19 0 1001 1 > 109-19.txt
 lescon_var -b 0 -f timevalue 39 109 21 0 1001 1 > 109-21.txt
+lescon_var -b 0 -f timevalue 39 109 27 0 1001 1 > 109-27.txt
 lescon_var -b 0 -f timevalue 39 109 29 0 1001 1 > 109-29.txt
 lescon_var -b 0 -f timevalue 39 109 31 0 1001 1 > 109-31.txt
 lescon_var -b 0 -f timevalue 39 109 35 0 1001 1 > 109-35.txt
@@ -70,6 +69,7 @@ lescon_var -b 0 -f timevalue 39 121 9 0 1001 1 > 121-9.txt
 lescon_var -b 0 -f timevalue 39 122 11 0 1001 1 > 122-11.txt
 lescon_var -b 0 -f timevalue 39 122 13 0 1001 1 > 122-13.txt
 lescon_var -b 0 -f timevalue 39 122 17 0 1001 1 > 122-17.txt
+lescon_var -b 0 -f timevalue 39 122 23 0 1001 1 > 122-23.txt
 lescon_var -b 0 -f timevalue 39 122 9 0 1001 1 > 122-9.txt
 lescon_var -b 0 -f timevalue 39 123 11 0 1001 1 > 123-11.txt
 lescon_var -b 0 -f timevalue 39 123 13 0 1001 1 > 123-13.txt
@@ -156,6 +156,7 @@ lescon_var -b 0 -f timevalue 39 156 5 0 1001 0 > 156-5.txt
 lescon_var -b 0 -f timevalue 39 156 8 0 1001 1 > 156-8.txt
 lescon_var -b 0 -f timevalue 39 156 9 0 1001 0 > 156-9.txt
 lescon_var -b 0 -f timevalue 39 157 3 0 1001 1 > 157-3.txt
+lescon_var -b 0 -f timevalue 39 157 5 0 1001 1 > 157-5.txt
 lescon_var -b 0 -f timevalue 39 159 3 0 1001 1 > 159-3.txt
 lescon_var -b 0 -f timevalue 39 159 4 0 1001 1 > 159-4.txt
 lescon_var -b 0 -f timevalue 39 16 108 0 1001 1 > 16-108.txt
@@ -172,6 +173,7 @@ lescon_var -b 0 -f timevalue 39 16 37 0 1001 1 > 16-37.txt
 lescon_var -b 0 -f timevalue 39 16 66 0 1001 1 > 16-66.txt
 lescon_var -b 0 -f timevalue 39 16 75 0 1001 1 > 16-75.txt
 lescon_var -b 0 -f timevalue 39 16 81 0 1001 1 > 16-81.txt
+lescon_var -b 0 -f timevalue 39 160 6 0 1001 2 > 160-6.txt
 lescon_var -b 0 -f timevalue 39 161 1 0 1001 1 > 161-1.txt
 lescon_var -b 0 -f timevalue 39 161 3 0 1001 0 > 161-3.txt
 lescon_var -b 0 -f timevalue 39 161 6 0 1001 1 > 161-6.txt
@@ -208,6 +210,7 @@ lescon_var -b 0 -f timevalue 39 177 4 0 1001 1 > 177-4.txt
 lescon_var -b 0 -f timevalue 39 178 1 0 1001 1 > 178-1.txt
 lescon_var -b 0 -f timevalue 39 18 10 0 1001 1 > 18-10.txt
 lescon_var -b 0 -f timevalue 39 18 11 0 1001 1 > 18-11.txt
+lescon_var -b 0 -f timevalue 39 18 12 0 1001 1 > 18-12.txt
 lescon_var -b 0 -f timevalue 39 18 4 0 1001 1 > 18-4.txt
 lescon_var -b 0 -f timevalue 39 180 1 0 1001 1 > 180-1.txt
 lescon_var -b 0 -f timevalue 39 185 1 0 1001 1 > 185-1.txt
@@ -234,6 +237,7 @@ lescon_var -b 0 -f timevalue 39 196 13 0 1001 1 > 196-13.txt
 lescon_var -b 0 -f timevalue 39 196 5 0 1001 0 > 196-5.txt
 lescon_var -b 0 -f timevalue 39 196 7 0 1001 1 > 196-7.txt
 lescon_var -b 0 -f timevalue 39 197 10 0 1001 1 > 197-10.txt
+lescon_var -b 0 -f timevalue 39 197 8 0 1001 1 > 197-8.txt
 lescon_var -b 0 -f timevalue 39 2 1 0 1001 1 > 2-1.txt
 lescon_var -b 0 -f timevalue 39 2 102 0 1001 2 > 2-102.txt
 lescon_var -b 0 -f timevalue 39 2 1036 0 1001 1 > 2-1036.txt
@@ -274,6 +278,7 @@ lescon_var -b 0 -f timevalue 39 2 457 0 1001 1 > 2-457.txt
 lescon_var -b 0 -f timevalue 39 2 463 0 1001 1 > 2-463.txt
 lescon_var -b 0 -f timevalue 39 2 464 0 1001 1 > 2-464.txt
 lescon_var -b 0 -f timevalue 39 2 465 0 1001 1 > 2-465.txt
+lescon_var -b 0 -f timevalue 39 2 469 0 1001 1 > 2-469.txt
 lescon_var -b 0 -f timevalue 39 2 479 0 1001 1 > 2-479.txt
 lescon_var -b 0 -f timevalue 39 2 578 0 1001 1 > 2-578.txt
 lescon_var -b 0 -f timevalue 39 2 592 0 1001 1 > 2-592.txt
@@ -356,6 +361,7 @@ lescon_var -b 0 -f timevalue 39 29 7 0 1001 1 > 29-7.txt
 lescon_var -b 0 -f timevalue 39 3 11 0 1001 1 > 3-11.txt
 lescon_var -b 0 -f timevalue 39 3 22 0 1001 1 > 3-22.txt
 lescon_var -b 0 -f timevalue 39 30 1 0 1001 1 > 30-1.txt
+lescon_var -b 0 -f timevalue 39 30 6 0 1001 1 > 30-6.txt
 lescon_var -b 0 -f timevalue 39 307 12 0 1001 1 > 307-12.txt
 lescon_var -b 0 -f timevalue 39 307 14 0 1001 1 > 307-14.txt
 lescon_var -b 0 -f timevalue 39 307 5 0 1001 1 > 307-5.txt
@@ -376,17 +382,20 @@ lescon_var -b 0 -f timevalue 39 36 13 0 1001 1 > 36-13.txt
 lescon_var -b 0 -f timevalue 39 36 2 0 1001 1 > 36-2.txt
 lescon_var -b 0 -f timevalue 39 36 32 0 1001 1 > 36-32.txt
 lescon_var -b 0 -f timevalue 39 37 27 0 1001 1 > 37-27.txt
+lescon_var -b 0 -f timevalue 39 37 8 0 1001 1 > 37-8.txt
 lescon_var -b 0 -f timevalue 39 38 1 0 1001 1 > 38-1.txt
 lescon_var -b 0 -f timevalue 39 39 1 0 1001 1 > 39-1.txt
 lescon_var -b 0 -f timevalue 39 39 2 0 1001 1 > 39-2.txt
 lescon_var -b 0 -f timevalue 39 41 1 0 1001 1 > 41-1.txt
 lescon_var -b 0 -f timevalue 39 41 5 0 1001 1 > 41-5.txt
+lescon_var -b 0 -f timevalue 39 41 7 0 1001 1 > 41-7.txt
 lescon_var -b 0 -f timevalue 39 42 1 0 1001 1 > 42-1.txt
 lescon_var -b 0 -f timevalue 39 42 16 0 1001 1 > 42-16.txt
 lescon_var -b 0 -f timevalue 39 42 2 0 1001 1 > 42-2.txt
 lescon_var -b 0 -f timevalue 39 45 4 0 1001 1 > 45-4.txt
 lescon_var -b 0 -f timevalue 39 46 1 0 1001 1 > 46-1.txt
 lescon_var -b 0 -f timevalue 39 46 3 0 1001 1 > 46-3.txt
+lescon_var -b 0 -f timevalue 39 46 7 0 1001 1 > 46-7.txt
 lescon_var -b 0 -f timevalue 39 46 9 0 1001 1 > 46-9.txt
 lescon_var -b 0 -f timevalue 39 47 1 0 1001 1 > 47-1.txt
 lescon_var -b 0 -f timevalue 39 48 1 0 1001 1 > 48-1.txt
