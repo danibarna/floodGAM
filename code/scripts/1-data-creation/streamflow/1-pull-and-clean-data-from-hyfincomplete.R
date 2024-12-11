@@ -262,7 +262,8 @@ saveRDS(data,file="~/floodGAM/data/cleaned-data/cleaned-NIFS-A2-hyfincomplete.rd
 
 # create record length data table--used to index into larger 'data' object
 recordlen <- data[,.(N.hfc=uniqueN(.SD)),by=ID,.SDcols = "yk"]
-# 'N.hfc' = number of years in hyfin complete, not utelatt, with 200+ days of data per year 
+# 'N.hfc' = number of years in hyfin complete, not utelatt, with 200+ days of 
+## data per year 
 
 # what is the first and last year recorded?
 recordlen <- merge(recordlen,data[,.(start.hfc=min(.SD)),by=ID,.SDcols = "yk"],
