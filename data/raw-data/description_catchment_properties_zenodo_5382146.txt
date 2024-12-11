@@ -20,7 +20,7 @@ X_long:		x-coordinate for the catchment’s outlet (Decimal degrees)
 Y_utm:		y-coordinate for the catchment’s outlet, UTM33N (m) 	
 X_utm:		x-coordinate for the catchment’s outlet, UTM33N (m) 	
 A:		logarithm of catchment area (km2:)	
-C_L:		logarithm of catchment length lm(km:)	
+C_L:		logarithm of catchment length (lm(km:)	
 Q_N:		Mean annual runoff 1961-1990 (l/s/km2:) 
 R_L:		Length of main river (km:)	
 R_G:		Gradient of main river (m/km)	
@@ -110,7 +110,3 @@ D_net:		Drainage density (R_TL,net/A)
 M_200,h:	200 year hourly precipitation  (mm/hour) 	
 M_200,d :	200 year daily precipitation  (mm/day) 	
 M_200,d,SN:	200 year daily precipitation based on SeNorge precipitation grid (mm/day)
-QD_fgp:         average flood generating process. 1 = rain 0 = snowmelt
-P_summer:       precip May-Oct summer  
-T_summer:       temperature May-Oct summer
-W_summer:       mean sum of rain and snow melt May-Oct summer
