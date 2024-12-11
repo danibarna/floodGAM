@@ -58,8 +58,19 @@ These three tables are used to make the lescon_var commands for the gamfelt data
 -   `lesconvar_commands_NIFS-A2_archive_39-hyfincomplete.txt` -
     lescon_var commands to pull data from Hydra II, archive 39
     (hyfin_complete). These commands are created by
-    [this](/code/scripts/1-data-creation/streamflow/1-pull-and-clean-data-from-HydraII.R)
+    [this](/code/scripts/1-data-creation/streamflow/1-pull-and-clean-data-from-hyfincomplete.R)
     script.
+    
+### Supplementary (daily) data
+
+For certain stations we are interested in supplementing the findata record with the 
+(much longer) series of daily data. See [this file]() for a discussion of this approach.
+
+-   `lesconvar_commands_min-findata_archive_37-hydag.txt` - lescon_var commands to pull data from hydag (archive 37) for a 
+certain set of stations (the 'min-findata' or 'minfin' stations). All stations in this file have at least 10 years of fine data in hyfin_complete with at least 200 days 
+of data per year.
+
+
     
 ### Catchment descriptors
 
@@ -69,26 +80,6 @@ These three tables are used to make the lescon_var commands for the gamfelt data
 -   `README-gamfelt-covariates.txt` - description of gamfelt catchment
     covariates
 
-Supporting files `alternate_version_numbers.csv`,
-`table_A2_report_2016-85.csv` are used to create the database commands.
-`utelatt.csv` is used to quality control the streamflow data.
-
-\## gamfelt catchments
-
-\### covariates - `gamfelt_catchment_covariates.csv` - catchment
-covariates from GIS. Created by Kolbjørn in 2019(?) -
-`README-gamfelt-covariates.txt` - description of gamfelt catchment
-covariates
-
-\### streamflow data - `utelatt.csv` - list of stations / years with
-problematic streamflow data. Manually identified (Kolbjørn and
-Danielle) - `alternate_version_numbers.csv` - alternate version numbers
-for some gauging stations. Manually identified (Kolbjørn) -
-`table_A2_report_2016-85.csv` - Table A2 from NVE report 2016:85.
-Identifies stations / years suitable for flood frequency analysis -
-`lescon_var_commands_archive_05.txt` - lescon_var commands to pull data
-from archive 05 (HYDAG) - `lescon_var_commands_archive_35.txt` -
-leacon_var_commands to pull data from archive 35 (HYKVALP-ICECORR)
 
 ## zfelt catchments
 

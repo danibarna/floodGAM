@@ -179,6 +179,22 @@ setkey(discard.200,ID,yk)
 data <- data[.(discard.200), discard := TRUE][discard == FALSE]
 
 
+
+# Enforce total minimum record length of 20 years -------------------------
+
+# (so at minimum, a station must have 10 years fine data and 10 years daily data)
+
+data <- readRDS("~/floodGAM/data/cleaned-data/cleaned-minfin-hydag.rds")
+
+rl <- data[,.(N.hfc=uniqueN(.SD)),by=ID,.SDcols = "year_key"]
+
+data <- data[ID %in% rl[N.hfc>=20,get("ID")]]
+
+data[,uniqueN(ID)] ## so really only 276 stations. 
+## vs 253 for gamfelt. Not that many more. 
+
+
+
 # Save minfin-hydag data --------------------------------------------------
 
 data <- data[,c("date","cumecs","ID","yk")]
