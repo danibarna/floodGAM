@@ -1,4 +1,4 @@
-Nr,version,Navn,Areal (km2),Dailydata_Start,Dailydata_Slutt,Dailydata_Utlatt,Dailydata_N,Findata_Start,Findata_Slutt,Findata_Utelatt,Findata_N,RN,HN,Nedlagt.regulert
+Nr,version,Navn,Areal (km2),Dailydata_Start,Dailydata_Slutt,Dailydata_Utlatt,Dailydata_N,Findata_Start,Findata_Slutt,Findata_Utelatt,Findata_N,RN,HN,Nedlagtregulert
 1.37,1,Kirkevatn,695,1914,1927,"",14,,,"",,1,37,
 100.1,1,Alstad,226.31,1984,2015,"",32,1999,2015,"2008, 2013, 2014",14,100,1,
 101.1,1,Engsetvatn,39.93,1924,2015,"",92,1991,2015,"",25,101,1,
@@ -421,7 +421,6 @@ Nr,version,Navn,Areal (km2),Dailydata_Start,Dailydata_Slutt,Dailydata_Utlatt,Dai
 46.1,1,Øvrehuselv,37,1919,1939,"",21,,,"",,46,1,
 46.3,1,Øyreselv 1921-1968,83.4,1922,1973,"",52,,,"",,46,3,
 46.4,1,Bondhus,60.5,1964,1973,1970:1971,8,,,"",,46,4,R
-,,,,,,,,,,,,,,
 46.9,1,Fønnerdalsvatn,7.01,1981,2014,"1997, 2003:2005",30,1981,2014,"1992, 1995, 1997, 2003:2005, 2007, 2011",26,46,9,
 47.1,1,Eidevatn (Byrkjedalsvatnet) 1908-1989,79.2,1909,1934,"",26,,,"",,47,1,
 48.1,1,Sandvenvatn,470.22,1909,2015,"",107,1997,2015,2007,18,48,1,
