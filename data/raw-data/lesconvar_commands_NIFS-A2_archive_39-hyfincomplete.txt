@@ -1,4 +1,5 @@
 # !/bin/bash
+lescon_var -b 0 -f timevalue 39 1 37 0 1001 1 > 1-37.txt
 lescon_var -b 0 -f timevalue 39 100 1 0 1001 1 > 100-1.txt
 lescon_var -b 0 -f timevalue 39 101 1 0 1001 1 > 101-1.txt
 lescon_var -b 0 -f timevalue 39 102 1 0 1001 1 > 102-1.txt
