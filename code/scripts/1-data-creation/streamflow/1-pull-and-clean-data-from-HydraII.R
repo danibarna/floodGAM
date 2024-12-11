@@ -43,9 +43,9 @@ setnames(nifs.tab,"V2","navn")
 nifs.tab <- nifs.tab[,c("navn","RN","HN")]
 nifs.tab[,NIFS:="nifs"]
 
-A2.tab <- A2.tab[-1,]
 A2.tab[, c("RN", "HN") := tstrsplit(Nr, ".", fixed=TRUE)]
 A2.tab[,A2:="A2"]
+A2.tab[,ID:=paste0(RN,"-",HN)]
 
 A3.tab[, key_ := do.call(paste, c(.SD, sep = " ")), .SDcols = names(A3.tab)]
 A3.tab <- A3.tab[,c("V1","key_")]
@@ -205,7 +205,6 @@ setkey(data,ID,yk)
 saveRDS(data,file="~/floodGAM/data/raw-data/raw-NIFS-A2-hyfincomplete.rds")
 
 
-
 # Remove years identified as utelatt, table A2 -------------------------------
 
 expandutelatt <- function(x){
@@ -261,7 +260,7 @@ saveRDS(data,file="~/floodGAM/data/cleaned-data/cleaned-NIFS-A2-hyfincomplete.rd
 
 # How many years of data does each station have now? ----------------------
 
-# what is the record length?
+# create record length data table--used to index into larger 'data' object
 recordlen <- data[,.(N.hfc=uniqueN(.SD)),by=ID,.SDcols = "yk"]
 # 'N.hfc' = number of years in hyfin complete, not utelatt, with 200+ days of data per year 
 
@@ -271,18 +270,29 @@ recordlen <- merge(recordlen,data[,.(start.hfc=min(.SD)),by=ID,.SDcols = "yk"],
 recordlen <- merge(recordlen,data[,.(slutt.hfc=max(.SD)),by=ID,.SDcols = "yk"],
                    by="ID")
 
+# add in supplementary info (which report, station name, num findata yrs from A2)
+recordlen <- merge(recordlen,
+                      lescon[,c("ID","Navn","NIFS","A2","Findata_N","version")],
+                   by="ID")
+
+
 # what stations have 20 years or more finedata?
 fin.stations <- recordlen[N.hfc>=20]
 
-# what report are these stations from? 
-fin.stations <- merge(fin.stations,
-               lescon[,c("ID","Navn","NIFS","A2","Findata_N")],by="ID")
+# what report are these stations from?
+fin.stations[!is.na(A2)&!is.na(NIFS)]
 
 fin.stations[!is.na(NIFS)]
 ## 1 station just in NIFS (46.7, Brakhaug)
 
 
-# Select years and stations ----------------------------------
+# Save the record length data table -----------------------
+
+saveRDS(recordlen, 
+        file="~/floodGAM/data/cleaned-data/record_length_data_table.rds")
+
+
+# Select and save years and stations for gamfelt -------------------------------
 
 # select years that are (i) not marked as utelatt in Table A2, with 
 # (ii) 20 years of data that have at least 200 days of data per year
@@ -295,5 +305,5 @@ setnames(gamfelt.hyfinc,c("cumecs","yk"),c("Qm3_s","year_key"))
 saveRDS(gamfelt.hyfinc,
         file="~/floodGAM/data/cleaned-data/gamfelt-NIFS-A2-hyfincomplete.rds")
 
-## also save recordlen
+
 
