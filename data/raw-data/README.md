@@ -74,7 +74,7 @@ of data per year.
     
 ### Catchment descriptors
 
--   `catchment_properties_zenodo_5382146.csv` - catchment covariates from GIS. Created by Kolbjørn (?). [Link](https://zenodo.org/records/5382146) 
+-   `catchment_properties_zenodo_5382146.csv` - catchment covariates from GIS. [Link](https://zenodo.org/records/5382146) 
 to published dataset.
 
 -   `description_catchment_properties_zenodo_5382146.txt` - description of the catchment covariates.
