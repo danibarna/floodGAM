@@ -40,7 +40,8 @@ A <- unique(gfam[,get("ID")])
 B <- gfcov[,get("ID")]
 setdiff(A,B)
 
-
+## sanity check: check the class of each column
+sapply(gfcov,class)
 
 ## create some variable transforms. These are needed for RFFA_2018 and
 ## for floodGAM (see Table 2 in paper II "Regional median flood estimation 
@@ -52,6 +53,20 @@ gfcov[,T_Feb_sqrd:=T_Feb^2]
 gfcov[,T_Mar_cubed:=T_Mar^3]
 gfcov[,W_Mai_sqrt:=sqrt(W_Mai)]
 
+## remove Q_median since we predicting that:
+gfcov[,Q_median:=NULL]
+
+## for consistency with earlier analyses, remove the log transforms:
+vtab <- names(gfcov)[grepl("ln",names(gfcov))]
+coltab <- gsub("\\(","",gsub("\\)","",gsub("ln","",vtab)))
+
+tt <- gfcov[,exp(.SD),.SDcols=vtab]
+setnames(tt,names(tt),coltab)
+
+gfcov <- cbind(gfcov[,!..vtab],tt)
+
+
+setnames(gfcov,c("regine","main"),c("RN","HN"))
 
 saveRDS(gfcov,file = paste0("~/floodGAM/data/processed-data/gamfelt/",
                          "gamfelt_catchment_covariates.rds"))
