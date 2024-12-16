@@ -18,6 +18,8 @@
 library(data.table)
 library(lubridate)
 
+library(ggplot2)
+
 
 # load in the data --------------------------------------------------------
 
@@ -158,7 +160,7 @@ emptyID <- substr(alltxtfiles[idx],1,nchar(alltxtfiles[idx])-4)
 lescon[ID%in%emptyID&is.na(NIFS)&is.na(Findata_N)]
 # the stations that are failing the command to hyfin_complete are all A2 stations
 # listed as having daily data (this is good, means things working as they should,
-# daily data not in hyfin)
+# daily data not in hyfin_complete)
 
 # are any listed as findata stations in A2?
 A2.tab[,ID:=paste0(RN,"-",HN)]
@@ -258,6 +260,261 @@ data <- data[.(discard.200), discard := TRUE][discard == FALSE]
 
 saveRDS(data,file="~/floodGAM/data/cleaned-data/cleaned-NIFS-A2-hyfincomplete.rds")
 
+
+
+# How many years of data do we have from hyfin_complete? ----------------------
+
+# create record length data table--used to index into larger 'data' object
+recordlen <- data[,.(N.hfc=uniqueN(.SD)),by=ID,.SDcols = "yk"]
+# 'N.hfc' = number of years in hyfin complete, not utelatt, with 200+ days of 
+## data per year 
+
+# add in supplementary info (which report, station name, num findata yrs from A2)
+recordlen <- merge(recordlen,
+                   lescon[,c("ID","Navn","NIFS","A2","Findata_N","version")],
+                   by="ID")
+
+
+# what stations have 20 years or more finedata?
+fin.stations <- recordlen[N.hfc>=20]
+
+data <- data[ID%in%fin.stations$ID]
+
+## pull hydag data for these fin.stations:
+
+## -----------------------------------------------------------------------------
+## *** Now start archive cross-check criteria. For every station with >20 years
+##     findata, also pull data from hydag (archive 37). Discard years with too 
+##     much missing data or improper spacing around annual maxima (archive 
+##     cross-check criteria) ***
+## -----------------------------------------------------------------------------
+
+
+fin.stations[, c("RN", "HN") := tstrsplit(ID, "-", fixed=TRUE)]
+
+
+## set a working directory. R will write the text file to this directory.
+setwd("~/floodGAM/data/raw-data/")
+
+## create commands to pull from hydag for stations in min.findata
+
+## pull from archive 37 (hydag)
+## name the executable lescon_var file and open the connection
+f <- file("lesconvar_commands_gamfelt_archive_37-hydag.txt", open="wb")
+
+## write text to file using cat command
+cat("# !/bin/bash",file=f,append=F,sep="\n")
+for(i in 1:dim(fin.stations)[1]){
+  cat(paste0("lescon_var -b 0 -f timevalue 37 ",
+             fin.stations$RN[i], " ", fin.stations$HN[i],
+             " 0 1001 ",fin.stations$version[i]," > ",
+             fin.stations$RN[i], "-", fin.stations$HN[i],".txt"),
+      file=f,append=T,sep="\n")
+}
+
+## close the connection
+close(f)
+
+## -----------------------------------------------------------------------------
+## *****************************************************************************
+## go to smarTTY and use the commands in txt file 
+## "lesconvar_commands_min-findata_archive_37-hydag.txt" to pull data.
+## see data/how-to-guides/ for instructions
+## download data to a local folder on your machine. 
+## *****************************************************************************
+## -----------------------------------------------------------------------------
+
+# Sanity check: what stations failed the command? ------------------------------
+
+## list the files in the directory you downloaded the data files into
+alltxtfiles <- list.files(path="C:/data-tab/NIFS-A2-hydag/", 
+                          pattern = ".txt") 
+
+## check for empty files:
+idx <- which(file.info(path=paste0("C:/data-tab/NIFS-A2-hydag/",
+                                   alltxtfiles))$size == 0)
+
+## no empty files. 
+
+
+
+# Load in the stations ----------------------------------------------------
+
+## remove command file
+fileloop <- alltxtfiles[-c(idx,
+                           which(alltxtfiles==paste0("lesconvar_commands_gamfelt_archive_37-hydag.txt")))]
+
+## initialize data table to store data
+hydag <- data.table(date=POSIXct(),cumecs=numeric(),ID=character())
+
+for(fl in fileloop){
+  
+  station.data <- fread(paste0("C:/data-tab/NIFS-A2-hydag/",fl))
+  setnames(station.data,c("V1","V2"),c("date","cumecs"))
+  ## --- remove negative Data values ---
+  station.data <- station.data[cumecs>=0]
+  ## --- convert to date object with lubridate ----
+  # use UTC because CET or "Europe/Oslo" in R has 
+  # the wrong daylight savings times for Norway so
+  # four or five dates fail to parse
+  tryCatch(station.data <- station.data[,
+                                        ("date"):=lapply(.SD,ymd_hm,tz="UTC"),
+                                        .SDcols = "date"],
+           warning = function(w) {
+             ## some of the limnigraph dates have hour-minute-second format:
+             station.data <- station.data[,
+                                          ("date"):=lapply(.SD,ymd_hms,tz="UTC"),
+                                          .SDcols = "date"]
+           })
+  station.data[,ID:=substr(fl,1,nchar(fl)-4)]
+  hydag <- rbind(hydag,station.data)
+} # end file loop
+
+
+hydag[,yk:=year(date)]
+setkey(hydag,ID,yk)
+
+saveRDS(hydag,file="~/floodGAM/data/raw-data/raw-gamfelt-hydag.rds")
+
+
+# Sanity check: what years and stations are in 37 vs 39? ------------------
+
+hyfinc.sy <- data[,unique(.SD),.SDcols = c("ID","yk")]
+hydag.sy <- hydag[,unique(.SD),.SDcols = c("ID","yk")]
+setkey(hyfinc.sy,ID,yk); setkey(hydag.sy,ID,yk)
+
+# station-years in hyfinc *not* in hydag:
+hyfinc.sy[, in.hydag := FALSE][hydag.sy, in.hydag := TRUE]
+hyfinc.sy[in.hydag==FALSE]
+
+## so all hyfin_c station-years are in hydag. good. 
+
+
+# Remove hydag years identified as utelatt, table A2 ---------------------------
+
+expandutelatt <- function(x){
+  out <- lapply(strsplit(x, ", "), 
+                function(x) do.call(c, 
+                                    lapply(strsplit(x, ":"), 
+                                           function(y) Reduce(`:`, as.numeric(y)))))
+  out <- list(as.numeric(unlist(out)))
+  return(out)
+}
+
+utelatt <- A2.tab[,
+                  lapply(.SD,expandutelatt),
+                  by=ID,
+                  .SDcols="Dailydata_Utlatt"]
+
+utelatt <- utelatt[, .(yk = unlist(Dailydata_Utlatt)), by = ID]
+
+setkey(utelatt,ID,yk)
+
+# define column to filter out discarded values
+hydag[,discard:=FALSE]
+
+hydag <- hydag[.(utelatt), discard := TRUE][discard == FALSE]
+
+
+# Remove years with < 200 days --------------------------------------------
+
+# create month column, day column and search for
+# unique combinations:
+keyGenerator <- function(x){list(month(x),day(x))}
+
+# add month and day
+hydag[,c("mk","dk"):=sapply(.SD,keyGenerator),.SDcols = "date"]
+
+# count number of days in a year (unique combinations of month key and
+# day key grouped by year)
+hydag[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
+
+# find the ID-yk (station-year) combinations that have less than 200 days of data
+discard.200 <- hydag[numdays<200,unique(.SD),.SDcols=c("ID","yk")]
+
+setkey(discard.200,ID,yk)
+
+hydag <- hydag[.(discard.200), discard := TRUE][discard == FALSE]
+
+saveRDS(hydag,file="~/floodGAM/data/cleaned-data/cleaned-gamfelt-hydag.rds")
+
+
+
+
+# Cross-check hyfin_complete with hydag ----------------------------------
+
+## --- 1. filter out station-years that have less than 300 days 
+## --- of data recorded both in hyfin_complete and hydag
+
+# find the ID-yk tuples that have < 300 days in *both* databases:
+discard.both300 <- merge(data[numdays<300,unique(.SD),.SDcols=c("ID","yk")],
+                         hydag[numdays<300,unique(.SD),.SDcols=c("ID","yk")])
+
+
+data <- data[.(discard.both300), discard := TRUE][discard == FALSE]
+hydag <- hydag[.(discard.both300), discard := TRUE][discard == FALSE]
+
+
+## --- 2. look at, and potentially discard, years in hyfin_c
+## --- that are missing the hydag ann max.
+
+
+# switch to working with decimal dates instead of POSIXt format:
+data[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
+hydag[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
+
+twentyfour <- 0.00273224 # 24 hours in decimal date
+
+# find annual maxima from hydag (data05)
+amhd <- hydag[hydag[, .I[which.max(cumecs)], by=c("ID","yk")]$V1]
+# only keep a few relevant columns:
+amhd <- amhd[,c("ID","yk","cumecs","dd")]
+
+# take the intersection of station-years in hydag and hyfin_c:
+data <- merge(data, amhd, all.x = T)
+
+# compute distance between points in hyfin_c and decimal date
+# of annual maxima from hydag
+data[,dd.dist:=abs(dd.x-dd.y)]
+
+# find minimum distance by station-year. If minimum distance is > 24 hrs
+# (if there is no observation in hyfin_c within +/- 1 day of the needed
+# point), then set discard to TRUE. Then select only rows
+# with discard = FALSE
+data[,discard:=ifelse(min(dd.dist)>twentyfour,TRUE,FALSE),by=c("ID","yk")]
+
+discard.annmax <- data[discard==T]
+discard.annmax <- discard.annmax[,unique(yk),by="ID"]
+setnames(discard.annmax,"V1","yk")
+
+## take a quick look at the years flagged for discard:
+
+for(station in unique(discard.annmax$ID)[1:25]){
+  
+  gdat <- data[discard==T&ID==station]
+  setkey(gdat,ID,yk)
+  hdat <- hydag[ID==station&yk%in%unique(gdat$yk)]
+  
+  gg <- ggplot(gdat) +
+    geom_line(aes(dd.x,cumecs.x),linewidth=0.9) +
+    geom_line(data=hdat,aes(dd,cumecs),color="red") +
+    geom_vline(aes(xintercept = dd.y),color="blue",
+               linetype=2,linewidth=1) +
+    labs(title=station) +
+    facet_wrap(vars(yk),scales="free_x") +
+    theme_bw()
+  
+  print(gg)
+  
+  gc()
+  
+}
+
+
+## discard all the years flagged in discard.annmax:
+data <- data[discard == FALSE]
+
+
 # How many years of data does each station have now? ----------------------
 
 # create record length data table--used to index into larger 'data' object
@@ -300,8 +557,8 @@ saveRDS(recordlen,
 
 gamfelt.hyfinc <- data[ID%in%fin.stations$ID]
 
-gamfelt.hyfinc <- gamfelt.hyfinc[,c("date","cumecs","ID","yk")]
-setnames(gamfelt.hyfinc,c("cumecs","yk"),c("Qm3_s","year_key"))
+gamfelt.hyfinc <- gamfelt.hyfinc[,c("date","cumecs.x","ID","yk")]
+setnames(gamfelt.hyfinc,c("cumecs.x","yk"),c("Qm3_s","year_key"))
 
 saveRDS(gamfelt.hyfinc,
         file="~/floodGAM/data/cleaned-data/gamfelt-NIFS-A2-hyfincomplete.rds")
