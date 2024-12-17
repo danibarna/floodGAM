@@ -43,42 +43,51 @@ createdurations <- function(DT, dvec){
                 .SDcols="date",
                 by=c("year_key")]
     
-    # interpolate to hourly values using stats::approx
-    hourlystreamflow <- DTi[,c(
-      list(grdpts = xgrd[,get("date")]),
-      lapply(.SD,function(col) stats::approx(x = decimaldate, 
-                                             y = Qm3_s, 
-                                             xout = xgrd[,get("date")])$y)
-    ), 
-    .SDcols = c("decimaldate","Qm3_s"),
-    by=c("year_key")]
+
     
-    # rename some columns
-    hourlystreamflow[,decimaldate:=NULL]
-    setnames(hourlystreamflow,"grdpts","decimaldate")
+    DTy <- split(DTi,DTi$year_key)
     
-    # smooth the interpolated streamflow data with a centered moving average.
-    # find the annual maxima from the smoothed streamflow data. Save the 
-    # annual maxima. 
-    
-    for(di in dvec){
+    for(yr in names(DTy)){
       
-      hourlystreamflow[,
-                       sQm3_s := frollmean(Qm3_s,di,align="center"),
-                       by="year_key"]
+      DTj <- DTy[[yr]]
+      yk <- unique(DTj$year_key)
       
-      # find the index of the annual maxima
-      idx <- hourlystreamflow[, 
-                              .I[which.max(sQm3_s)], 
-                              by=c("year_key")]$V1
+      # interpolate to hourly values using stats::approx
+      hourlystreamflow <- DTj[,c(
+        list(grdpts = xgrd[year_key==yk,get("date")]),
+        lapply(.SD,function(col) stats::approx(x = decimaldate, 
+                                               y = Qm3_s, 
+                                               xout = xgrd[year_key==yk,
+                                                           get("date")])$y)
+      ), .SDcols = c("decimaldate","Qm3_s")]
       
-      # select the annual maxima 
-      am <- hourlystreamflow[idx,]
-      am[,d:=di]; am[,ID:=i]; am[,Qm3_s:=NULL]
+      # rename some columns
+      hourlystreamflow[,decimaldate:=NULL]
+      setnames(hourlystreamflow,"grdpts","decimaldate")
+  
       
-      # save the annual maxima
-      out <- rbind(out,am)
-    }
+      # smooth the interpolated streamflow data with a centered moving average.
+      # find the annual maxima from the smoothed streamflow data. Save the 
+      # annual maxima. 
+      
+      for(di in dvec){
+        
+        hourlystreamflow[,
+                         sQm3_s := frollmean(Qm3_s,di,align="center")]
+        
+        # find the index of the annual maxima
+        idx <- hourlystreamflow[,.I[which.max(sQm3_s)]]
+        
+        # select the annual maxima 
+        am <- hourlystreamflow[idx,]
+        am[,d:=di]; am[,ID:=i]; am[,Qm3_s:=NULL]
+        am[,year_key:=yk]
+        
+        # save the annual maxima
+        out <- rbind(out,am)
+      } # end the durations loop
+
+    } # end the year loop
     
     # remove the station-specific data items to free up memory
     rm(xgrd,hourlystreamflow)
