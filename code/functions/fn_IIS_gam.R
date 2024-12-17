@@ -239,7 +239,8 @@ IIS <- function(y,X,k,p,eps,
     if(check == F){
       stack <- c(stack, newFeature)
       oldD <- newD
-      storeD <- c(storeD,newD)}
+      storeD <- c(storeD,newD)
+      }
   }
   
   tt <- rbind(tt,data.table(Feature = stack,
