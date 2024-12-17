@@ -558,7 +558,7 @@ data <- data[discard == FALSE]
 
 # create record length data table--used to index into larger 'data' object
 recordlen <- data[,.(N.hfc=uniqueN(.SD)),by=ID,.SDcols = "yk"]
-# 'N.hfc' = number of years in hyfin complete, not utelatt, with 200+ days of 
+# 'N.hfc' = number of years in hyfin complete, not utelatt, with 244+ days of 
 ## data per year 
 
 # what is the first and last year recorded?
