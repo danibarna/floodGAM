@@ -16,7 +16,7 @@ library(lubridate)
 
 source(paste0("~/floodGAM/code/functions/","fn_durations_streamflow.R"))
 
-dvec = c(1, 6, 12, 18, 24, 36, 48, 72) #durations (hours)
+dvec = c(1, 6, 12, 18, 24, 36, 48) #durations (hours)
 
 
 
@@ -28,9 +28,9 @@ gamfelt.hyfinc <- readRDS(paste0("~/floodGAM/data/cleaned-data/",
 
 gamfelt.hyfinc[,uniqueN(ID)] # number of stations
 
+
 ## this function takes a little while to run
 amd.gamfelt.hyfinc <- createdurations(gamfelt.hyfinc,dvec)
-
 
 setnames(amd.gamfelt.hyfinc,"sQm3_s","Qm3_s") # fix naming convention
 
@@ -72,11 +72,11 @@ fwrite(gamfelt.1hr,
 ## 20 years of fine data, record length extended with hydag records:
 
 ## ---- load in the hydag supplement
-minfin.hydag <- readRDS(paste0("~/floodGAM/data/cleaned-data/",
-                                 "cleaned-minfin-hydag.rds"))
+hydag.supp <- readRDS(paste0("~/floodGAM/data/cleaned-data/",
+                                 "gamfelt-NIFS-A2-hydag.rds"))
 
 ## make sure only the gamfelt stations are included:
-gamfelt.hydag <- minfin.hydag[ID%in%unique(gamfelt.1hr$ID)]
+gamfelt.hydag <- hydag.supp[ID%in%unique(amd.gamfelt.hyfinc$ID)]
 
 ## keep only years that do not already exist in gamfelt.hyfinc
 setkey(gamfelt.1hr,ID,year_key); setkey(gamfelt.hydag,ID,year_key)
@@ -137,79 +137,4 @@ saveRDS(
   file = paste0("~/floodGAM/data/processed-data/",
                 "gamfelt-durations/",
                 "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
-
-
-
-
-
-# minfin.hydagsupplement ----------------------------------------------
-
-## this dataset is every station that has at least 10 years findata in
-## hyfin_complete and at least 20 years total when supplemented with hydag data.
-
-## this adds 23 stations. (worth it...?)
-minfin.hydag[,uniqueN(ID)] - amd.gamfelt.hydagsupplement[,uniqueN(ID)]
-
-## ---- load the cleaned hyfin_complete data
-cleaned.hyfinc <- readRDS(paste0("~/floodGAM/data/cleaned-data/",
-                                 "cleaned-NIFS-A2-hyfincomplete.rds"))
-
-## ---- load the record length data table
-recordlen <- readRDS(paste0("~/floodGAM/data/cleaned-data/",
-                            "record_length_data_table.rds"))
-
-## fix some naming conventions
-cleaned.hyfinc <- cleaned.hyfinc[,c("date","cumecs","ID","yk")]
-setnames(cleaned.hyfinc,c("cumecs","yk"),c("Qm3_s","year_key"))
-
-## select stations with at least 10 years findata (minfin set)
-cleaned.hyfinc <- cleaned.hyfinc[ID %in% recordlen[N.hfc>=10,get("ID")]]
-
-## find annual max for the stations and years you haven't already found it for
-keyTab <- amd.gamfelt.hydagsupplement[d==1]
-
-setkey(keyTab,ID,year_key); setkey(cleaned.hyfinc,ID,year_key)
-
-cleaned.hyfinc <- cleaned.hyfinc[!.(keyTab)]
-
-## find d - annual max for those 23 stations, hyfinc data:
-amd.supp.hyfinc <- createdurations(cleaned.hyfinc,dvec)
-setnames(amd.supp.hyfinc,"sQm3_s","Qm3_s")
-
-## cut minfin.hydag down to those 23 stations and find the ann max for those too. 
-minfin.hydag <- minfin.hydag[ID %in% unique(amd.supp.hyfinc$ID)]
-## but not the years already in hyfinc:
-setkey(amd.supp.hyfinc,ID,year_key)
-setkey(minfin.hydag,ID,year_key)
-
-minfin.hydag <- minfin.hydag[!.(amd.supp.hyfinc)]
-
-## find d - annual max for those minfin hydag stations:
-amd.supp.hydag <- createdurations(minfin.hydag,dvec)
-setnames(amd.supp.hydag,"sQm3_s","Qm3_s")
-
-## stitch together gamfelt.supplement, amd.supp.hydag and amd.supp.hyfinc:
-amd.supp.hyfinc[,tag:="hyfinc"]
-amd.supp.hydag[,tag:="hydag"]
-
-amd.minfin.supp <- rbind(amd.supp.hydag,amd.supp.hyfinc)
-
-minfin.hydagsupplement <- rbind(amd.gamfelt.hydagsupplement,amd.minfin.supp)
-
-## ---------- save the annual maxima at each duration for the 
-## minfin.hydagsupplement data set 
-saveRDS(
-  minfin.hydagsupplement,
-  file = paste0("~/floodGAM/data/processed-data/",
-                "gamfelt-durations/",
-                "minfin_hydagsupplement_durations_annual_maxima.rds"))
-
-
-
-
-
-
-
-
-
 
