@@ -21,12 +21,12 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
 
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
-                       "durations_gamfelt_annual_maxima.rds"))
+                       "gamfelt_durations_annual_maxima.rds"))
 
 ## ---- load in the selected covariates from the IIS runs
 
 iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                             "gamfeaturesFromIIS.rds"))
+                             "gamfelt_featuresFromIIS.rds"))
 
 
 # convert to specific discharge
@@ -85,4 +85,4 @@ iis.models[,edf:=b.edf]
 
 
 saveRDS(iis.models, paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfeaturesFromIIS.rds"))
+                           "gamfelt_featuresFromIIS.rds"))

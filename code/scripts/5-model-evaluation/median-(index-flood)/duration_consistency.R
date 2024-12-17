@@ -18,10 +18,10 @@ source("~/floodGAM/code/functions/fn_check_results_with_plots.R")
 
 ## ----- load in the predictions and error metrics:
 oos.pred <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "median-index-flood-predictive-accuracy.rds"))
+                           "gamfelt_median_flood_oos_pred.rds"))
 
 pred.draws <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                             "median-index-flood-posterior-draws.rds"))
+                             "gamfelt_median_index_flood_posterior_draws.rds"))
 
 # order the columns properly
 setkey(oos.pred,ID,model,d)
@@ -32,9 +32,6 @@ oos.ics <- oos.pred[ics,]
 
 ## (can also check the predictive uncertainty for the inconsistent stations)
 ## how many are *significantly* inconsistent? 
-
-pred.draws <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                             "median-index-flood-posterior-draws.rds"))
 
 pred.draws <- pred.draws[ID%in%unique(oos.ics$ID)]
 
@@ -56,12 +53,6 @@ ct[`12.x`>`1.y`,.N,by=c("model")]
 ct[`24.x`>`1.y`,.N,by=c("model")]
 
 ct[`48.x`>`1.y`,.N,by=c("model")]
-
-ct[`72.x`>`1.y`,.N,by=c("model")]
-
-ct[`168.x`>`1.y`,.N,by=c("model")]
-
-ct[`72.x`>`24.y`,.N,by=c("model")]
 
 dvec <- unique(oos.pred$d)
 dcgrid <- data.table(i=c(rep( dvec, each = length(dvec)),
@@ -101,14 +92,14 @@ ggplot(dcgrid[i!=0&j!=0],
   labs(x = "duration (hours)", y = "duration (hours)") +
   facet_wrap(vars(model)) +
   theme(legend.position = "bottom") +
-  guides(fill=guide_legend(nrow=1))
+  guides(fill=guide_legend(nrow=1)) 
 
 dcgrid[,sum(z,na.rm=T),by="model"]
 
 
 ## if we want to plot a few...
 
-ggplot(pred.draws[ID=="15700003"&d%in%c(1,12,24,48,72,168)]) +
+ggplot(pred.draws[ID=="157-3"&d%in%c(1,12,24,48)]) +
   geom_density(aes(eta.draws,group=d,fill=as.factor(d)),alpha=0.2)+
   geom_vline(data=oos.pred[model!="xgboost"&ID=="15700003"&d%in%c(1,12,24,48,72,168)],
              aes(xintercept = eta.obs,color=as.factor(d))) +
@@ -116,7 +107,7 @@ ggplot(pred.draws[ID=="15700003"&d%in%c(1,12,24,48,72,168)]) +
   theme_bw()
 
 
-station = "19600011"
+station = "196-11"
 ggplot(pred.draws[ID==station&d%in%c(1,12,24,48,72,168)]) +
   geom_density(aes(eta.draws,group=d,fill=as.factor(d)),alpha=0.2)+
   geom_vline(data=oos.pred[model!="xgboost"&ID==station&d%in%c(1,12,24,48,72,168)],

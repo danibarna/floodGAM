@@ -25,11 +25,11 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
 
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
-                       "durations_gamfelt_annual_maxima.rds"))
+                       "gamfelt_durations_annual_maxima.rds"))
 
 ## ---- load in the selected covariates from the IIS runs
 iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                             "gamfeaturesFromIIS.rds"))
+                             "gamfelt_featuresFromIIS.rds"))
 # choose only covariates that were *not* shrunk out of the model:
 iis.models <- iis.models[edf>0.001]
 
@@ -58,7 +58,7 @@ gamdat <- merge(gfcov,gfam,by="ID")
 # Define the data folds ---------------------------------------------------
 set.seed(42)
 k = 10
-# use the 24 hour duration
+# use the 1 hour duration
 fidx <- createFolds(gamdat[d==24,get("qind")],k) 
 
 
@@ -73,7 +73,7 @@ posterior.draws <- data.table(eta.draws=numeric(),
                               model=character(),fold=numeric(),d=numeric(),
                               ID=character())
 
-for(di in unique(iis.models[,get("d")])){
+for(di in unique(gfam[,get("d")])){
   
   gamdat.d <- gamdat[d==di]
   
@@ -168,7 +168,7 @@ for(di in unique(iis.models[,get("d")])){
                                mu.gam = NA, sigma.gam = NA,
                                model=rep("xgboost",n),fold=rep(i,n),d=rep(di,n),
                                ID=test.gamdat.d[,get("ID")]))
-    
+
     ## ------------------ auto-data-driven
     ## from the GAM: get mu (prediction for the test set on the log scale)
     mu.gam <- predict(eta.datadrive,newdata=test.gamdat.d,type="link")
@@ -218,11 +218,11 @@ for(di in unique(iis.models[,get("d")])){
 
 saveRDS(oos.predictions,
         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "median-index-flood-oos-predictions.rds"))
+                           "gamfelt_median_flood_oos_pred.rds"))
 # this one has to be in gitignore because it is too large:
 saveRDS(posterior.draws,
         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
-                      "median-index-flood-posterior-draws.rds"))
+                      "gamfelt_median_index_flood_posterior_draws.rds"))
 
 
 

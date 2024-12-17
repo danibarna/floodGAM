@@ -10,6 +10,7 @@
 library(data.table)
 library(xgboost)
 library(caret)
+library(mgcv)
 
 ## ----- source custom functions:
 source("~/floodGAM/code/functions/fn_xgtune.R")
@@ -22,7 +23,7 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
 
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
-                       "durations_gamfelt_annual_maxima.rds"))
+                       "gamfelt_durations_annual_maxima.rds"))
 
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
@@ -51,11 +52,12 @@ gamdat <- merge(gfcov,gfam,by="ID")
 
 mydurations <- c(1,6,12,18,24,36,48,72)
 
+
 # Define the data folds ---------------------------------------------------
 set.seed(42)
 k = 10
-# use the instantaneous duration
-fidx <- createFolds(gamdat[d==0,get("qind")],k) 
+# use the 24 hour duration
+fidx <- createFolds(gamdat[d==24,get("qind")],k) 
 
 
 
@@ -129,10 +131,8 @@ for(di in mydurations){
   
 }
 
-
-
 saveRDS(iisDE,file=paste0("~/floodGAM/results/output/median-(index-flood)/",
-                          "gamfeaturesFromIIS.rds"))
+                          "gamfelt_featuresFromIIS.rds"))
 
 
 

@@ -19,11 +19,12 @@ source("~/floodGAM/code/functions/fn_check_results_with_plots.R")
 
 ## ----- load in the predictions and error metrics:
 oos.pred <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "median-index-flood-predictive-accuracy.rds"))
+                           "gamfelt_median_flood_predictive_accuracy.rds"))
 
 ## ----- for plotting of evaluation metrics:
-gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
-                        "gamfelt_catchment_covariates.rds"))
+gfcov <- fread(paste0("C:/Users/daba/downloads/",
+                        "raw_gamfelt_catchment_covariates.csv"))
+gfcov[,ID:=paste0(RN,"-",HN)]
 
 
 # Predictive accuracy -----------------------------------------------------
@@ -54,7 +55,7 @@ for(m in c("se","crps","ae","re","ape")){
   print(paste0("********",m))
   for(di in unique(oos.pred$d)){
     print(paste0(di," - ",permutationTest(oos.pred,
-                                          "floodGAM","datadrive",
+                                          "floodGAM","RFFA2018",
                                           1000,
                                           m,di)) )
   }
@@ -66,19 +67,53 @@ for(m in c("se","crps","ae","re","ape")){
 
 oos.pred <- merge(oos.pred,gfcov[,c("ID","A","QD_fgp")],by="ID")
 
+
+## cRPS
 glist <- list()
 i = 1
 for(di in unique(oos.pred$d)){
   
-  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "re")
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "crps")
   
-  glist[[i]] <- dotplotRFFA2018floodGAM(ggdat,0,6,paste0("RE, d = ",di))
+  gi <- dotplotRFFA2018floodGAM(ggdat,2,600,paste0("CRPS, d = ",di))
+  
+  gi <- gi + geom_point(data=ggdat[ID%in%c("311-6","2-142")],
+                        aes(floodGAM,RFFA2018),color="red")
+  
+  glist[[i]] <- gi
   
   i = i+1
 }
 
 figure <- ggarrange(glist[[1]],glist[[2]],glist[[3]],glist[[4]],
-                    glist[[5]],glist[[6]],glist[[7]],glist[[8]],
+                    glist[[5]],glist[[6]],glist[[7]],
+                    nrow=2,ncol = 4,
+                    common.legend = T, legend = "bottom")
+
+figure
+
+## load gfam
+ggplot(ttam[d>24]) +
+  geom_point(aes(year_key,Qm3_s,color=as.factor(d))) +
+  facet_wrap(vars(ID),scales="free_y")
+
+#,"212-10","246-9","311-460"
+
+
+### APE
+glist <- list()
+i = 1
+for(di in unique(oos.pred$d)){
+  
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "ape")
+  
+  glist[[i]] <- dotplotRFFA2018floodGAM(ggdat,0,1.5,paste0("APE, d = ",di))
+  
+  i = i+1
+}
+
+figure <- ggarrange(glist[[1]],glist[[2]],glist[[3]],glist[[4]],
+                    glist[[5]],glist[[6]],glist[[7]],
                     nrow=2,ncol = 4,
                     common.legend = T, legend = "bottom")
 
@@ -86,6 +121,77 @@ figure
 
 
 
+### AE
+glist <- list()
+i = 1
+for(di in unique(oos.pred$d)){
+  
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "ae")
+  
+  glist[[i]] <- dotplotRFFA2018floodGAM(ggdat,0,1000,paste0("AE, d = ",di))
+
+  
+  i = i+1
+}
+
+figure <- ggarrange(glist[[1]],glist[[2]],glist[[3]],glist[[4]],
+                    glist[[5]],glist[[6]],glist[[7]],
+                    nrow=2,ncol = 4,
+                    common.legend = T, legend = "bottom")
+
+figure
+
+
+
+
+
+### RE
+glist <- list()
+i = 1
+for(di in unique(oos.pred$d)){
+  
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "re")
+  
+  glist[[i]] <- dotplotRFFA2018floodGAM(ggdat,0,5,paste0("RE, d = ",di))
+  
+  i = i+1
+}
+
+figure <- ggarrange(glist[[1]],glist[[2]],glist[[3]],glist[[4]],
+                    glist[[5]],glist[[6]],glist[[7]],
+                    nrow=2,ncol = 4,
+                    common.legend = T, legend = "bottom")
+
+figure
+
+
+
+
+
+
+tt <- merge(oos.pred[model=="RFFA2018",c("ID","d","crps","re","ape","eta","eta.obs")],
+            oos.pred[model=="floodGAM",c("ID","d","crps","re","ape","eta")],by=c("ID","d"))
+
+tt[,dr:=ape.x-ape.y]
+
+tt[,dr.crps:=crps.x-crps.y]
+
+tt[,dr.re:=re.x-re.y]
+
+setkey(tt,dr.crps)
+
+tt[d==48]
+
+
+tt[ID=="311-6" & d==1]
+
+oos.pred[ID=="311-4"]
+
+tg <- gfam[ID=="311-4"]
+
+ggplot(tg) +
+  geom_point(aes(year_key,Qm3_s,group=d,color=as.factor(d))) +
+  scale_x_continuous(breaks=1989:2024)
 
 
 oos.pred[oos.pred[,.I[which.max(ape)],by=c("d","model")]$V1]
