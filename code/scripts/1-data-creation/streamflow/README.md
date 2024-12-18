@@ -5,17 +5,24 @@ Scripts in this folder are used to create the data objects in the [processed-dat
 pull data from the Hydra II database.
 
 -   `1-pull-and-clean-data-from-hyfin-complete.R` - combines and cross-checks the tables from [the NIFS report](https://publikasjoner.nve.no/rapport/2015/rapport2015_13.pdf) and [report
-2016-85](https://publikasjoner.nve.no/rapport/2016/rapport2016_85.pdf) to create a [set of lescon_var commands](/data/raw-data/lesconvar_commands_NIFS-A2_archive_39-hyfincomplete.txt).
-Data is then uploaded back into R and cleaned. Saves hyfin_complete streamflow data for a set of stations that have 
-at least 20 years of fine data, where every year has at least 200 days of data (the
-`gamfelt` dataset).
+2016-85](https://publikasjoner.nve.no/rapport/2016/rapport2016_85.pdf) to create 
+a [set of lescon_var commands](/data/raw-data/lesconvar_commands_NIFS-A2_archive_39-hyfincomplete.txt) 
+for HYFIN_COMPLETE. Data is pulled using lescon_var and then uploaded back into R 
+and cleaned. The cleaning process involves (1) removing years marked as 'utelatt' in Table A2, (2) removing 
+years where more than a third of the year is missing, and (3) cross-checking with the HYDAG archive. Step (3) 
+is necessary since the historic data in HYFIN_COMPLETE relies on the virtually ice reduced data, which is not gap-filled. 
+We therefore (i) check the minimum number of days per year in HYFIN_COMPLETE and HYDAG and discard years where both HYFIN_COMPLETE 
+and HYDAG have < 300 days of data, and (ii) perform an annual maximum check using the HYDAG data: 
+we check if HYFIN_COMPLETE contains an observation within +/- 24 hours of the date the annual maximum from HYDAG was observed. 
+If there is no HYFIN_COMPLETE observation within +/- 24 hours of the needed point, we discard the year.
 
--   `1.5-pull-and-clean-data-hydag-supplement.R` - if using a dataset supplemented with daily data, this script 
-creates a [set of lescon_var commands](/data/raw-data/lesconvar_commands_min-findata_archive_37-hydag.txt)
-to pull data from hydag. Data is then uploaded back into R and cleaned. Saves hydag streamflow data for a set of stations that have 
-at least 20 years total of data, where every year has at least 200 days of data and at least ten of those years are fine data years.
+
+File output is fine/variable spaced streamflow data for a set of stations that have 
+at least 20 years of fine data, where every year has at least 244 days of data and passes 
+the archive cross-check (the `gamfelt` dataset). Additionally we save supplemental HYDAG (daily) 
+data for these stations.
 
 -   `2-process-to-durations-and-get-ann-max.R` - generates the `gamfelt` sets of 
-annual maxima. Also generates annual maxima for supplementary datasets (gamfelt.hydagsupplement and minfin.hydagsupplement)
+annual maxima. Also generates annual maxima for supplementary datasets (gamfelt.hydagsupplement)
 
 

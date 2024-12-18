@@ -50,8 +50,9 @@ analysis.
     in the Flomkart file, we select the valid version number from Hysopp.
     
     The valid version numbers are inserted by hand into the table. In addition,
-    more years for the station Jaren (12.286) are added by hand to the 'utelatt' column 
-    after reccomendation from the data section at NVE. 
+    certain years are added by hand to the 'utelatt' column 
+    after reccomendation from the data section at NVE / comments in Hysopp. See 
+    [notes_for_table_A2](/data/raw-data/notes_for_table_A2.docx). 
 
 These three tables are used to make the lescon_var commands for the gamfelt dataset:
 
@@ -64,10 +65,10 @@ These three tables are used to make the lescon_var commands for the gamfelt data
 ### Supplementary (daily) data
 
 For certain stations we are interested in supplementing the findata record with the 
-(much longer) series of daily data. See [this file]() for a discussion of this approach.
+(much longer) series of daily data. See [/code/scripts/1-data-creation/streamflow/](/code/scripts/1-data-creation/streamflow/) for a discussion of this approach.
 
--   `lesconvar_commands_min-findata_archive_37-hydag.txt` - lescon_var commands to pull data from hydag (archive 37) for a 
-certain set of stations (the 'min-findata' or 'minfin' stations). All stations in this file have at least 10 years of fine data in hyfin_complete with at least 200 days 
+-   `lesconvar_commands_gamfelt_archive_37-hydag.txt` - lescon_var commands to pull data from hydag (archive 37) for 
+the set of stations that have at least 20 years of fine data in hyfin_complete (*not* including years marked 'utelatt' in Table A2) with at least 244 days 
 of data per year.
 
 
