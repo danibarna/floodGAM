@@ -7,8 +7,7 @@
 ##
 ## Get annual maxima at each duration for gamfelt dataset
 ## 
-## and two supplementary datasets: gamfelt.hydagsupplement (20 yrs findata + hydag)
-## and gamfelt.10.hydagsupplement (10 years findata + hydag, 20 years minimum total)
+## and supplementary dataset: gamfelt.hydagsupplement (20 yrs findata + hydag)
 ## -----------------------------------------------------------------------------
 
 library(data.table)
