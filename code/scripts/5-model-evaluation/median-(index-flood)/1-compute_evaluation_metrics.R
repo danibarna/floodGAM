@@ -17,7 +17,7 @@ source("~/floodGAM/code/functions/fn_calc_optimal_predictor.R")
 
 ## ----- load in the predictions from the models:
 oos.pred <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfelt_median_flood_oos_pred.rds"))
+                           "gamfelt_hydagsupp_median_flood_oos_pred.rds"))
 
 # Predictive accuracy -----------------------------------------------------
 
@@ -45,4 +45,4 @@ oos.pred[,ape:=abs( (eta.obs-eta.ape)/eta.obs )]
 
 saveRDS(oos.pred,
         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
-                      "gamfelt_median_flood_predictive_accuracy.rds"))
+                      "gamfelt_hydagsupp_median_flood_predictive_accuracy.rds"))

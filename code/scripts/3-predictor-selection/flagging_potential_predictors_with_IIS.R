@@ -5,6 +5,18 @@
 ##
 ##
 ## Master script for covariate pre-selection XGBoost-GAM index flood model
+##
+## Option to use either a GAM or XGBoost as a base learner within the IIS
+## algorithm. 
+##
+## If GAM is used as base learner, CRPS is used as error metric
+## If XGBoost used as base learner, MAE is used as error metric
+##
+## Note that this is a rather naive application of GAM and we do not assess
+## model fit beyond the single chosen evaluation metric. GAMs are not generally
+## meant for mass application and we could be missing fitting problems. Always 
+## check the chosen GAM with the script at
+## /code/scripts/4-model-fitting/median-(index-flood)/checking_auto_data_driven_gams.R
 ## -----------------------------------------------------------------------------
 
 library(data.table)
@@ -23,7 +35,7 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
 
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
-                       "gamfelt_durations_annual_maxima.rds"))
+                       "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
 
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
@@ -50,11 +62,11 @@ gamdat <- merge(gfcov,gfam,by="ID")
 
 # Choose which durations to run the analysis on ---------------------------
 
-mydurations <- c(1,6,12,18,24,36,48,72)
+mydurations <- c(1,6,12,18,24,36,48)
 
 
 # Define the data folds ---------------------------------------------------
-set.seed(42)
+set.seed(8)
 k = 10
 # use the 24 hour duration
 fidx <- createFolds(gamdat[d==24,get("qind")],k) 
@@ -132,7 +144,7 @@ for(di in mydurations){
 }
 
 saveRDS(iisDE,file=paste0("~/floodGAM/results/output/median-(index-flood)/",
-                          "gamfelt_featuresFromIIS.rds"))
+                          "gamfelt_hydagsupp_featuresFromIIS.rds"))
 
 
 

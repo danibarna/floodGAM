@@ -20,7 +20,7 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
 
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
-                       "durations_gamfelt_annual_maxima.rds"))
+                       "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
 
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
@@ -28,7 +28,8 @@ gfam[,specQ:=Qm3_s/A*1000]
 
 # remove the id and lat/long columns
 # XGBoost gets access to the full covariate set
-gfcov <- gfcov[,-c("RN","HN","Y_lat","X_long","Y_utm","X_utm")]
+gfcov <- gfcov[,-c("RN","HN","Y_lat","X_long","Y_utm","X_utm",
+                   "Y_G_Lat","X_G_Long","Y_G_UTM","X_G_UTM")]
 
 # standardize cov values by centering and dividing by 2 standard deviations
 coltab = names(gfcov)[-which(names(gfcov)=="ID")]

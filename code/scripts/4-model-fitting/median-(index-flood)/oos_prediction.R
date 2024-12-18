@@ -25,11 +25,11 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
 
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
-                       "gamfelt_durations_annual_maxima.rds"))
+                       "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
 
 ## ---- load in the selected covariates from the IIS runs
 iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                             "gamfelt_featuresFromIIS.rds"))
+                             "gamfelt_hydagsupp_featuresFromIIS.rds"))
 # choose only covariates that were *not* shrunk out of the model:
 iis.models <- iis.models[edf>0.001]
 
@@ -56,9 +56,10 @@ gamdat <- merge(gfcov,gfam,by="ID")
 
 
 # Define the data folds ---------------------------------------------------
-set.seed(42)
+#set.seed(12)
+set.seed(8)
 k = 10
-# use the 1 hour duration
+# use the 24 hour duration
 fidx <- createFolds(gamdat[d==24,get("qind")],k) 
 
 
@@ -218,11 +219,11 @@ for(di in unique(gfam[,get("d")])){
 
 saveRDS(oos.predictions,
         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfelt_median_flood_oos_pred.rds"))
+                           "gamfelt_hydagsupp_median_flood_oos_pred.rds"))
 # this one has to be in gitignore because it is too large:
 saveRDS(posterior.draws,
         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
-                      "gamfelt_median_index_flood_posterior_draws.rds"))
+                      "gamfelt_hydagsupp_median_index_flood_posterior_draws.rds"))
 
 
 

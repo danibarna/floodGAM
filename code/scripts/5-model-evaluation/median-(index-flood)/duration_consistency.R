@@ -18,10 +18,10 @@ source("~/floodGAM/code/functions/fn_check_results_with_plots.R")
 
 ## ----- load in the predictions and error metrics:
 oos.pred <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfelt_median_flood_oos_pred.rds"))
+                           "gamfelt_hydagsupp_median_flood_oos_pred.rds"))
 
 pred.draws <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                             "gamfelt_median_index_flood_posterior_draws.rds"))
+                             "gamfelt_hydagsupp_median_index_flood_posterior_draws.rds"))
 
 # order the columns properly
 setkey(oos.pred,ID,model,d)
@@ -35,8 +35,8 @@ oos.ics <- oos.pred[ics,]
 
 pred.draws <- pred.draws[ID%in%unique(oos.ics$ID)]
 
-tt <- pred.draws[,list(quantile(eta.draws,0.05),
-                       quantile(eta.draws,0.95)),by=c("ID","model","d")]
+tt <- pred.draws[,list(quantile(eta.draws,0.1),
+                       quantile(eta.draws,0.9)),by=c("ID","model","d")]
 
 tv <- merge(tt,
             oos.pred[ID%in%unique(oos.ics$ID),c("ID","eta","eta.obs","model","d")],
