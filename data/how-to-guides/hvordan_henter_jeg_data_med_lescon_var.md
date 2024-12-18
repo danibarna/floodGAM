@@ -41,7 +41,7 @@ trenger data fra flere hundre stasjoner, er det praktisk å bruke en
 automatisert metode (e.g. bash) for å lage .txt-filen. Denne kan vi
 gjøre med R.
 
-Skriptet for å gjøre dette finnes [her](/code/scripts/data-creation/) og kjørbar filen selv er
+Skriptet for å gjøre dette finnes [her](/code/scripts/1-data-creation/streamflow/) og kjørbar filen selv er
 lagret [her](/data/raw-data/).
 
 ## Kjør lescon_var
