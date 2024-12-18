@@ -23,11 +23,16 @@ library(stringr)
 
 gfcov <- fread("~/floodGAM/data/raw-data/catchment_properties_zenodo_5382146.csv")
 
+qdfgp <- fread("~/floodGAM/data/raw-data/cov-qd-fgp.csv")
+
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/","gamfelt/",
                        "gamfelt_1hour_annual_maxima.rds"))
 
 ## make the "RN" and "HN" (regime nummer og hovednummer) to "ID" format:
 gfcov[,ID:=paste0(regine,"-",main)]
+
+## merge with the flood-generating process covariate
+gfcov <- merge(gfcov,qdfgp[,c("QD_fgp","ID")],by="ID")
 
 ## select only covariates for stations that exist in gamfelt set:
 gfcov <- gfcov[ID %in% unique(gfam$ID)]
