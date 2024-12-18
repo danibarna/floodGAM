@@ -32,5 +32,6 @@ For certain catchments we wish the supplement the findata record with the much l
 This is feasible, f. eks., if the catchment has a 'slow' response time with a culmination factor (ratio between
  1-hour and 24-hour median flood) close to one. See script `2-process-to-durations-and-get-ann-max.R` and comments within.  
 
-
+We reccomend running the analysis both with and without the daily data supplement 
+to assess impact on results. 
 
