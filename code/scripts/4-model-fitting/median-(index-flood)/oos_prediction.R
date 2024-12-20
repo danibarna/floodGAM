@@ -27,14 +27,9 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
                        "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
 
-## ---- load in the selected covariates from the IIS runs
-iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                             "gamfelt_hydagsupp_featuresFromIIS.rds"))
-# choose only covariates that were *not* shrunk out of the model:
-iis.models <- iis.models[edf>0.001]
 
 # convert to specific discharge
-gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID") # we lost 4 stations here...check this out
+gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID") 
 gfam[,specQ:=Qm3_s/A*1000]
 
 # remove the id and lat/long columns
@@ -56,7 +51,6 @@ gamdat <- merge(gfcov,gfam,by="ID")
 
 
 # Define the data folds ---------------------------------------------------
-#set.seed(12)
 set.seed(8)
 k = 10
 # use the 24 hour duration
@@ -78,10 +72,10 @@ for(di in unique(gfam[,get("d")])){
   
   gamdat.d <- gamdat[d==di]
   
-  # load XGBoost hyperparameters for this duration:
-  hpXGB = readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                                "xgboost-hyperparameters/",
-                                "xgbpurehp_",di,".rds"))
+  # load XGBoost hyperparameters for this duration.
+  hpXGBmae = readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
+                             "xgboost-hyperparameters/","mae/",
+                             "xgbpurehp_mae_",di,".rds"))
   
   for(i in 1:k){
     
@@ -113,12 +107,18 @@ for(di in unique(gfam[,get("d")])){
                         data = train.gamdat.d,
                         family = gaussian(link=log))
     
-    eta.xgboost <- xgb.train(data = trainXGB.d,
-                             param = hpXGB[[1]],
-                             nrounds = hpXGB[[3]],
-                             objective = "reg:squarederror")
     
-    eta.datadrive <- gam(fml,
+    eta.xgboost <- xgb.train(data = trainXGB.d,
+                                  param = hpXGBmae[[1]],
+                                  nrounds = hpXGBmae[[3]],
+                                  objective = "reg:squarederror")
+    
+    eta.datadrive <- gam(qind ~ s(Q_N,k=6)+s(A_LE,k=6)+
+                           s(A_L,k=3)+
+                           s(A_P,k=6)+s(H_F,k=6)+
+                           s(log_R_G_1085,k=6)+s(H_MIN,k=3)+
+                           s(A_Agr,k=3)+s(A_For,k=3)+
+                           s(P_Apr,k=3)+s(W_Jul,k=3),
                          method = "REML",
                          data = train.gamdat.d,
                          family = gaussian(link=log))
@@ -145,6 +145,29 @@ for(di in unique(gfam[,get("d")])){
                                model = rep("floodGAM",n),fold=rep(i,n),d=rep(di,n),
                                ID = test.gamdat.d[,get("ID")]))
     
+    ## save predictions for floodGAM predicting across durations:
+    if(di==1|di==24){
+     
+      if(di == 1){
+        test.across.d <- gamdat[d==24][fidx[[i]]]
+        navn <- "floodGAM.1to24"
+      } else{
+        test.across.d <- gamdat[d==1][fidx[[i]]]
+        navn <- "floodGAM.24to1"
+      }
+      
+      oos.predictions <- rbind(oos.predictions,
+                               data.table(
+                                 eta = predict.gam(eta.floodGAM,
+                                                   newdata=test.across.d,
+                                                   type="response"),
+                                 eta.obs = test.gamdat.d[,get("qind")],
+                                 mu.gam = mu.gam, sigma.gam = sigma.gam,
+                                 model = rep(navn,n),fold=rep(i,n),d=rep(di,n),
+                                 ID = test.gamdat.d[,get("ID")]))
+    }
+    
+    
     ## ------------------ RFFA2018
     mu.gam <- predict(eta.RFFA2018,newdata=test.gamdat.d,type="link")
     sigma.gam <- sd(log(eta.RFFA2018$y) - eta.RFFA2018$linear.predictor)
@@ -160,7 +183,7 @@ for(di in unique(gfam[,get("d")])){
                                ID=test.gamdat.d[,get("ID")]))
     
     
-    ## ------------------ XGBoost
+    ## ------------------ XGBoost, mae
     ## no mu and sigma from xgboost, so these fields are null
     oos.predictions <- rbind(oos.predictions,
                              data.table(
