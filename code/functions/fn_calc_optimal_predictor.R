@@ -20,7 +20,8 @@ optimal.predictor.re <- function(sigma,mu,y){
   ## calculate ypred.re, the optimal predictor for the relative error.
   ## ypred.re is med^{(1)}(F) from Gneiting (2011).
   ## this is the median of the distribution with density proportional to xf(x).
-  ## y is fed to the function to window the grid search and speed up the approx
+  ## y = ypred and is fed to the function to window the grid search 
+  ## and speed up the approx.
   ## --------------------------------------
   if(is.na(sigma)|is.na(mu)){return(NA)}
   ## calculate the normalizing constant. integral done with mathematica:
@@ -35,7 +36,7 @@ optimal.predictor.re <- function(sigma,mu,y){
   }
   
   ## find where this integral == 0.5.
-  ## Give optimize an interval between 0 and 5 times the observed value.
+  ## Give optimize an interval between 0 and 5 times the predicted value.
   ## This upper limit is important to stop optimize from wandering into
   ## the long flat region of the function (beyond any reasonable values)
   ## Because of this, should always manually check the large relative errors
@@ -53,7 +54,8 @@ optimal.predictor.ape <- function(sigma,mu,y){
   ## calculate ypred.ape, the optimal predictor for the absolute percent error.
   ## ypred.ape is med^{(-1)}(F) from Gneiting (2011).
   ## this is the median of the distribution with density proportional to f(x)/x.
-  ## y is fed to the function to window the grid search and speed up the approx
+  ## y = ypred and is fed to the function to window the grid search 
+  ## and speed up the approx.
   ## --------------------------------------
   start.time <- Sys.time()
   if(is.na(sigma)|is.na(mu)){return(NA)}
@@ -69,7 +71,7 @@ optimal.predictor.ape <- function(sigma,mu,y){
   }
   
   ## find where this integral == 0.5.
-  ## Give optimize an interval between 0 and 5 times the observed value.
+  ## Give optimize an interval between 0 and 5 times the predicted value.
   ## This upper limit is important to stop optimize from wandering into
   ## the long flat region of the function (beyond any reasonable values)
   ## Because of this, should always manually check the large percent errors
