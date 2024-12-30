@@ -53,7 +53,9 @@ oos.pred <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
 
 pit <- oos.pred[,pnorm(log(eta.obs),mu.gam,sigma.gam),by=c("model","d")]
 
-par(mfrow=c(1,2),mar = c(3,3,3,1))
+par(mfrow=c(1,2),
+    mar = c(3,3,3,1),
+    family="serif")
 
 PITplot(pit,"floodGAM",1,24)
 

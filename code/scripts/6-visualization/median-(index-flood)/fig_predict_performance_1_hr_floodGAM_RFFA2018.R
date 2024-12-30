@@ -96,7 +96,7 @@ g.proportional <- ggplot(ggdat[is!=" "]) +
   guides(fill="none",
          size=guide_legend(override.aes=list(fill=NA)))+
   labs(y = paste0("<span style='font-size: 18pt'>",
-                  "RFFA_2018","</span>"),
+                  "RFFA2018","</span>"),
        x = paste0("<span style='font-size: 18pt'>",
                   "floodGAM","</span>")) +
   theme_bw() +
@@ -133,7 +133,7 @@ g.crps <- ggplot(ggdat[is==" "]) +
   guides(fill="none",
          size=guide_legend(override.aes=list(fill=NA)))+
   labs(y = paste0("<span style='font-size: 18pt'>",
-                  "RFFA_2018","</span>"),
+                  "RFFA2018","</span>"),
        x = paste0("<span style='font-size: 18pt'>",
                   "floodGAM","</span>")) +
   theme_bw() +

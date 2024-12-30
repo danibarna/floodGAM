@@ -189,7 +189,7 @@ gclip <- ggplot(smootheffects[d==1|d==24]) +
         strip.text.x = element_text( margin = margin( b = 6, t = 4) ), 
         axis.line.x = element_line(colour = "black"),
         axis.text.x   = element_text(size=12,margin = unit(c(1, 0, 0, 0), "mm")),
-        text = element_text(size=20,family="sans"),
+        text = element_text(size=20,family="serif"),
         panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5),
         legend.position=c(0.75,0.16)) #0.85,0.35
 
