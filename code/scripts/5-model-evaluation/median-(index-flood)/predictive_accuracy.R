@@ -55,7 +55,7 @@ for(m in c("se","crps","ae","re","ape")){
   print(paste0("********",m))
   for(di in unique(oos.pred$d)){
     print(paste0(di," - ",permutationTest(oos.pred,
-                                          "floodGAM","RFFA2018",
+                                          "xgboost","RFFA2018",
                                           1000,
                                           m,di)) )
   }
@@ -66,6 +66,10 @@ for(m in c("se","crps","ae","re","ape")){
 ## ------- Dotplots - predictive accuracy check 
 
 oos.pred <- merge(oos.pred,gfcov[,c("ID","A","QD_fgp")],by="ID")
+
+## save the data object for use in figure scripts:
+saveRDS(oos.pred,file=paste0("~/floodGAM/results/output/median-(index-flood)/",
+                             "gamfelt_hydagsupp_predictive_accuracy_dotplotobj.rds"))
 
 
 ## cRPS
