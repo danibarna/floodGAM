@@ -52,26 +52,46 @@ ggdat <- rbind(re,ape,crps)
 
 # Make the relative error plot --------------------------------------------
 
-lwr = 0
+lwr = 0.00025
 upr = 5
+
+#square function
+cub<-function(x){
+  x^(1/3)
+}
+#inverse square function (square root)
+cubr<-function(x){
+  x<-ifelse(x<0, 0, x) # workaround, ggplot bug. purely aesthetic limit setting
+  x^(3)
+}
 
 
 g.proportional <- ggplot(ggdat[is!=" "]) + 
   stat_density_2d(geom="polygon",aes(floodGAM,RFFA2018,
                                      fill = after_stat(level)),
-                  bins=5,alpha=0.5) +
+                  bins=7,alpha=0.5) +
   geom_point(aes(floodGAM,RFFA2018,size=A,color=QD_fgp)) +
   scale_color_scico(name = "Fraction of rain",
                     palette = "lapaz",end=0.95,
                     labels=scaleFUN) +
   geom_abline(slope=1,linewidth=0.6) +
-  scale_x_sqrt(limits = c(lwr,upr)) + 
-  scale_y_sqrt(limits = c(lwr,upr)) + 
+  scale_x_continuous(transform=scales::trans_new("cub",
+                                         cub,
+                                         cubr),
+                     limits=c(lwr,upr),
+                     breaks = c(0.1,0.5,1,upr),
+                     labels = scales::percent_format(accuracy = 1)) +
+  scale_y_continuous(transform=scales::trans_new("cub",
+                                                 cub,
+                                                 cubr),
+                     limits=c(lwr,upr),
+                     breaks = c(0.1,0.5,1,upr),
+                     labels = scales::percent_format(accuracy = 1)) +
   scale_shape_manual(values = 22, name="") +
   scale_fill_scico(palette = "oslo",direction=-1,begin=0.4,end=0.95) +
   scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
                                                 sep = "")) ,
-                        range=c(1.5,13),
+                        range=c(0.5,13),
                         breaks = c(50,1000,2000))+
   guides(fill="none",
          size=guide_legend(override.aes=list(fill=NA)))+
@@ -93,7 +113,6 @@ g.proportional <- ggplot(ggdat[is!=" "]) +
         ggh4x.facet.nestline = element_line(colour = "lightgrey"))
 
 
-
 g.crps <- ggplot(ggdat[is==" "]) + 
   stat_density_2d(geom="polygon",aes(floodGAM,RFFA2018,
                                      fill = after_stat(level)),
@@ -109,7 +128,7 @@ g.crps <- ggplot(ggdat[is==" "]) +
   scale_fill_scico(palette = "oslo",direction=-1,begin=0.4,end=0.95) +
   scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
                                                 sep = "")) ,
-                        range=c(1.5,13),
+                        range=c(0.5,13),
                         breaks = c(50,1000,2000))+
   guides(fill="none",
          size=guide_legend(override.aes=list(fill=NA)))+
