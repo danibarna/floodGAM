@@ -21,7 +21,8 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
 
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
-                       "durations_gamfelt_annual_maxima.rds"))
+                       "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
+
 
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID") 
@@ -115,14 +116,13 @@ for(di in unique(gamdat[,get("d")])){
 
 # plot the smooth effects and residuals -----------------------------------
 
-
 ## add an empty panel purely for plotting purposes (looks better
 ## if climatic characteristics P_Sep and W_Apr are on their own row)
 empt <- smootheffects[1,]; empt[,type:=as.factor("imempty")]
 smootheffects <- rbind(smootheffects, empt)
 smootheffects[,
-              type:=factor(type,levels=c(plotting.stack[1:5],
-                                         "imempty",plotting.stack[6:7]))]
+             type:=factor(type,levels=c(plotting.stack[1:5],
+                                        "imempty",plotting.stack[6:7]))]
 
 empt <- gamresiduals[1,]; empt[,type:=as.factor("imempty")]
 gamresiduals <- rbind(gamresiduals, empt)
@@ -136,11 +136,13 @@ gamresiduals <- merge(gamresiduals,gamdat.d,by="ID")
 
 ## Each of the panels needs its own range, so makes this hack where we plot
 ## empty points to get around the automatic scales in facet_wrap:
-rngDT <- data.table(type=plotting.stack)
-rngDT[,ptlow:=c(-1.3,-1.5,-1.3,-1.3,-1.3,-1.3,-1.3)]
-rngDT[,ptup:=c(1.5,1,1.3,1.5,1.5,1.5,1.5)]
-rngDT[,xcoord:=gamresiduals[type!="imempty",median(x),by="type"]$V1]
-rngDT[,type:=factor(type,levels=plotting.stack)]
+rngDT <- data.table(type=c(plotting.stack[1:5],
+                           "imempty",plotting.stack[6:7]))
+rngDT[,ptlow:=c(-1.3,-1.5,-1.3,-1.3,-1.3,-1.3,-1.3,-1.3)]
+rngDT[,ptup:=c(1.5,1,1.3,1.5,1.5,1.5,1.5,1.5)]
+rngDT[,xcoord:=gamresiduals[,median(x),by="type"]$V1]
+rngDT[,type:=factor(type,levels=c(plotting.stack[1:5],
+                                  "imempty",plotting.stack[6:7]))]
 
 
 ## set the values for the confidence intervals:
@@ -150,7 +152,7 @@ mul <- qnorm((level+1)/2)
 scaleFUN <- function(x) sprintf("%.1f", x)
 
 
-gclip <- ggplot(smootheffects[d==0|d==24]) +
+gclip <- ggplot(smootheffects[d==1|d==24]) +
   geom_point(data=rngDT,aes(xcoord,ptlow),color="white") +
   geom_point(data=rngDT,aes(xcoord,ptup),color="white") +
   geom_point(data=gamresiduals[d.x==24],
@@ -173,7 +175,7 @@ gclip <- ggplot(smootheffects[d==0|d==24]) +
   scale_linetype_manual(name = "Flood duration (hours)", values =c(1,2)) +
   scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
                                                 sep = "")),
-                        range=c(1,6),
+                        range=c(1,11),
                         breaks = c(50,100,2000))+
   scale_y_continuous(
     breaks = ~ trunc(c(.x[1],0,.x[2]),4),
@@ -199,10 +201,13 @@ rm_grobs <- g$layout$name %in% c("panel-2-3","strip-t-3-2",
 g$grobs[rm_grobs] <- NULL
 g$layout <- g$layout[!rm_grobs, ]
 ## move axis closer to panel
+
 grid.newpage()
 grid.draw(g)
 
-#ggsave(paste0(figPath,"floodGAM_partial_effects_residual.pdf"),width=23,height=18,units="in")
+
+#ggsave(paste0(figPath,"floodGAM_partial_effects_residual.pdf"),
+#width=23,height=18,units="in")
 
 
 
