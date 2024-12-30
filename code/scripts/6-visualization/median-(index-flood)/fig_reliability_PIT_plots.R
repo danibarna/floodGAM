@@ -57,8 +57,9 @@ par(mfrow=c(1,2),
     mar = c(3,3,3,1),
     family="serif")
 
+PITplot(pit,"RFFA2018",1,24)
+
 PITplot(pit,"floodGAM",1,24)
 
-PITplot(pit,"RFFA2018",1,24)
 
 # saved manually as PIT_histograms.pdf, landscape, 11 x 4.5 in
