@@ -83,6 +83,51 @@ for(di in unique(iis.models$d)){
 
 iis.models[,edf:=b.edf]
 
-
 saveRDS(iis.models, paste0("~/floodGAM/results/output/median-(index-flood)/",
                            "gamfelt_hydagsupp_featuresFromIIS.rds"))
+
+
+# Check XGBoost auto-select GAM -------------------------------------------
+
+b.edf <- vector()
+
+for(di in unique(iis.models$d)){
+  
+  # stack <- c("Q_N","A_LE","A_P","H_F","W_Jul","A_Bog","H_MIN","A_Agr",
+  #            "log_R_G_1085","A_For","P_Apr")
+  
+  stack <- c("Q_N","A_LE","A_L","A_P","H_F","W_Jul")
+  
+  gamdat.d <- gamdat[d==di]
+  
+  # fit the model
+  rhs <- paste('s(', stack, ',k=6)', sep = '', collapse = ' + ')
+  fml <- paste('qind', '~', rhs, collapse = ' ')
+  fml <- as.formula(fml)
+  
+  b <- gam(qind ~ s(Q_N,k=6)+s(A_LE,k=6)+
+             s(A_L,k=3)+
+             s(A_P,k=6)+s(H_F,k=6)+
+             s(log_R_G_1085,k=6)+s(H_MIN,k=3)+
+             s(A_Agr,k=3)+s(A_For,k=3)+
+             s(P_Apr,k=3)+s(W_Jul,k=3),
+           method = "REML",
+           select = T,
+           data = gamdat.d,
+           family = gaussian(link=log))
+  
+  print(summary(b))
+  
+  b.edf <- c(b.edf,summary(b)$edf)
+  
+}
+
+
+iis.out <- data.table(Feature=rep(stack,length(unique(iis.models$d))),
+                      d=rep(unique(iis.models$d),each=length(stack)),
+                      edf=b.edf)
+
+
+saveRDS(iis.out, paste0("~/floodGAM/results/output/median-(index-flood)/",
+                           "gamfelt_hydagsupp_featuresFromIIS_xgboost.rds"))
+
