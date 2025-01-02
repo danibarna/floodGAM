@@ -88,11 +88,6 @@ for(di in unique(gfam[,get("d")])){
     testXGB.d <- xgb.DMatrix(as.matrix(test.gamdat.d[,!c("ID","d","qind")]),
                              label = log(test.gamdat.d[,get("qind")]))
     
-    ## auto-data-driven prep
-    stack <- iis.models[d==di,get("Feature")]
-    rhs <- paste('s(', stack, ',k=6)', sep = '', collapse = ' + ')
-    fml <- paste('qind', '~', rhs, collapse = ' ')
-    fml <- as.formula(fml)
     
     ## ------- eta --------
     eta.floodGAM <- gam(qind ~ s(Q_N,k=6)+s(A_LE,k=6)+s(A_P,k=6)+s(H_F,k=6)+
@@ -161,10 +156,10 @@ for(di in unique(gfam[,get("d")])){
                                  eta = predict.gam(eta.floodGAM,
                                                    newdata=test.across.d,
                                                    type="response"),
-                                 eta.obs = test.gamdat.d[,get("qind")],
+                                 eta.obs = test.across.d[,get("qind")],
                                  mu.gam = mu.gam, sigma.gam = sigma.gam,
                                  model = rep(navn,n),fold=rep(i,n),d=rep(di,n),
-                                 ID = test.gamdat.d[,get("ID")]))
+                                 ID = test.across.d[,get("ID")]))
     }
     
     
@@ -249,4 +244,107 @@ saveRDS(posterior.draws,
                       "gamfelt_hydagsupp_median_index_flood_posterior_draws.rds"))
 
 
+
+
+# Quick stitch to test an alt datadriven GAM ------------------------------
+
+iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
+                             "gamfelt_hydagsupp_featuresFromIIS_gam.rds"))
+
+iis.models <- iis.models[edf>0.001]
+
+
+#iis.models[,Feature:=ifelse(Feature=="R_G","log_R_G",Feature)]
+
+# iis.models[,maediff:=c(-100,diff(maeFeat)),by=c("d","fold")]
+# 
+# tt <- iis.models[which(iis.models$maediff>0, arr.ind=TRUE),]
+# 
+# tt<- tt[,min(ordFeat),by=c("d","fold")]
+# 
+# tv <- merge(iis.models,tt,all.x=T,by=c("d","fold"))
+# 
+# tv[,V1 := lapply(.SD, nafill, fill = 50), .SDcols = "V1"]
+# 
+# iis.models.tt <- tv[ordFeat < V1,]
+
+
+
+oos.predictions <- data.table(eta=numeric(),
+                              eta.obs=numeric(),
+                              mu.gam=numeric(),sigma.gam=numeric(),
+                              model=character(),fold=numeric(),d=numeric(),
+                              ID=character())
+
+
+for(di in unique(gfam[,get("d")])){
+  
+  gamdat.d <- gamdat[d==di]
+  
+  for(i in 1:k){
+    
+    train.gamdat.d <- gamdat.d[-fidx[[i]]]
+    test.gamdat.d <- gamdat.d[fidx[[i]]]
+    
+    
+    ## auto-data-driven prep
+    stack <- iis.models[d==di&fold==i,get("Feature")]
+    rhs <- paste('s(', stack, ',k=3)', sep = '', collapse = ' + ')
+    # let the first three have 6 degrees of freedom, everything else
+    # gets 3 degrees of freedom:
+    aa <- unlist(gregexpr(pattern ='3',rhs))[1:3]
+    for(j in 1:3){substr(rhs,aa[j],aa[j]) <- "6"}
+    
+    
+    fml <- paste('qind', '~', rhs, collapse = ' ')
+    print(fml)
+    
+    fml <- as.formula(fml)
+    
+    
+    ## ------- eta --------
+    
+    eta.auto <- gam(fml,
+                    method = "REML",
+                         data = train.gamdat.d,
+                         family = gaussian(link=log))
+    
+    
+    
+    ## ------- generate and save the predictions & predictive uncertainty ------
+    n = dim(test.gamdat.d)[1]
+    
+    ## --- store the predictions
+    
+    ## ------------------ floodGAM
+    ## from the GAM: get mu (prediction for the test set on the log scale)
+    mu.gam <- predict(eta.auto,newdata=test.gamdat.d,type="link")
+    ## then estimate standard dev based on in-sample residuals for training data
+    sigma.gam <- sd(log(eta.auto$y) - eta.auto$linear.predictor)
+    
+    oos.predictions <- rbind(oos.predictions,
+                             data.table(
+                               eta = predict.gam(eta.auto,
+                                                 newdata=test.gamdat.d,
+                                                 type="response"),
+                               eta.obs = test.gamdat.d[,get("qind")],
+                               mu.gam = mu.gam, sigma.gam = sigma.gam,
+                               model = rep("auto",n),fold=rep(i,n),d=rep(di,n),
+                               ID = test.gamdat.d[,get("ID")]))
+    
+
+    
+  }
+  print(paste0("******",di))
+}
+
+
+op1 <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
+                      "gamfelt_hydagsupp_median_flood_oos_pred.rds"))
+
+oos.pred <- rbind(oos.predictions,op1[model!="auto"])
+
+saveRDS(oos.pred,
+        file = paste0("~/floodGAM/results/output/median-(index-flood)/",
+                      "gamfelt_hydagsupp_median_flood_oos_pred.rds"))
 
