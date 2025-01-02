@@ -53,6 +53,7 @@ sapply(gfcov,class)
 ## with generalized additive models: model selection across durations")
 gfcov[,R_L_sqrt:=sqrt(exp(`ln(R_L)`))]
 gfcov[,log_R_G_1085:=log(R_G_1085+1)]
+gfcov[,log_R_G:=log(R_G+1)]
 gfcov[,Q_N_cuberoot:=exp(`ln(Q_N)`)^(1/3)]
 gfcov[,T_Feb_sqrd:=T_Feb^2]
 gfcov[,T_Mar_cubed:=T_Mar^3]
