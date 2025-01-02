@@ -26,7 +26,7 @@ gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
 ## ---- load in the selected covariates from the IIS runs
 
 iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                             "gamfelt_hydagsupp_featuresFromIIS.rds"))
+                             "gamfelt_hydagsupp_featuresFromIIS_gam.rds"))
 
 
 # convert to specific discharge
@@ -49,6 +49,12 @@ gfam <- gfam[,.(qind = median(specQ)),by=c("ID","d")]
 
 gamdat <- merge(gfcov,gfam,by="ID")
 
+# Define the data folds ---------------------------------------------------
+set.seed(8)
+k = 10
+# use the 24 hour duration
+fidx <- createFolds(gamdat[d==24,get("qind")],k) 
+
 
 # Define the GAM and check select = T -------------------------------------
 
@@ -56,23 +62,38 @@ b.edf <- vector()
 
 for(di in unique(iis.models$d)){
   
-  stack <- iis.models[d==di,get("Feature")]
   gamdat.d <- gamdat[d==di]
   
-  # fit the model
-  rhs <- paste('s(', stack, ',k=6)', sep = '', collapse = ' + ')
-  fml <- paste('qind', '~', rhs, collapse = ' ')
-  fml <- as.formula(fml)
+    for(i in 1:k){
+      
+      train.gamdat.d <- gamdat.d[-fidx[[i]]]
+      test.gamdat.d <- gamdat.d[fidx[[i]]]
+      
+      
+      ## auto-data-driven prep
+      stack <- iis.models[d==di&fold==i,get("Feature")]
+      rhs <- paste('s(', stack, ',k=4)', sep = '', collapse = ' + ')
+      # let the first three have 6 degrees of freedom, everything else
+      # gets 3 degrees of freedom:
+      aa <- unlist(gregexpr(pattern ='4',rhs))[1:3]
+      for(j in 1:3){substr(rhs,aa[j],aa[j]) <- "6"}
+      
+      fml <- paste('qind', '~', rhs, collapse = ' ')
+      fml <- as.formula(fml)
+      
+      
+      ## ------- eta --------
+      
+      eta.auto <- gam(fml,
+                      method = "REML",
+                      select=T,
+                      data = train.gamdat.d,
+                      family = gaussian(link=log))
+      print(summary(eta.auto))
   
-  b <- gam(fml,
-           method = "REML",
-           select = T,
-           data = gamdat.d,
-           family = gaussian(link=log))
+      b.edf <- c(b.edf,summary(eta.auto)$edf)
   
-  print(summary(b))
-  
-  b.edf <- c(b.edf,summary(b)$edf)
+    }
   
 }
 
@@ -83,8 +104,13 @@ for(di in unique(iis.models$d)){
 
 iis.models[,edf:=b.edf]
 
+
+## change threshold for keeping features:
+iis.models[,epsdiff:=c(-100,diff(maeFeat)),by=c("d","fold")]
+
+
 saveRDS(iis.models, paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfelt_hydagsupp_featuresFromIIS.rds"))
+                           "gamfelt_hydagsupp_featuresFromIIS_gam.rds"))
 
 
 # Check XGBoost auto-select GAM -------------------------------------------
