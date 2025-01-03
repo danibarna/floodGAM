@@ -51,10 +51,26 @@ gamdat <- merge(gfcov,gfam,by="ID")
 
 
 # Define the data folds ---------------------------------------------------
-set.seed(8)
-k = 10
-# use the 24 hour duration
-fidx <- createFolds(gamdat[d==24,get("qind")],k) 
+# set.seed(8)
+# k = 10
+# # use the 24 hour duration
+# fidx <- createFolds(gamdat[d==24,get("qind")],k) 
+
+
+## !!! Start seed loop
+for( thisseed in c(30,32,85)){
+  
+  set.seed(thisseed)
+  k = 10
+  # use the 24 hour duration
+  fidx <- createFolds(gamdat[d==24,get("qind")],k) 
+  
+  
+  iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
+                               "gamfelt_hydagsupp_featuresFromIIS_gam_",
+                               thisseed,".rds"))
+  
+  iis.models <- iis.models[edf>0.001]
 
 
 # Fit the GAMs on the folds and save the predicted values ------------
@@ -88,6 +104,17 @@ for(di in unique(gfam[,get("d")])){
     testXGB.d <- xgb.DMatrix(as.matrix(test.gamdat.d[,!c("ID","d","qind")]),
                              label = log(test.gamdat.d[,get("qind")]))
     
+    ## auto select prep
+    stack <- iis.models[d==di&fold==i,get("Feature")]
+    rhs <- paste('s(', stack, ',k=4)', sep = '', collapse = ' + ')
+    # let the first three have 6 degrees of freedom, everything else
+    # gets 4 degrees of freedom:
+    aa <- unlist(gregexpr(pattern ='4',rhs))[1:3]
+    for(j in 1:3){substr(rhs,aa[j],aa[j]) <- "6"}
+    fml <- paste('qind', '~', rhs, collapse = ' ')
+    fml <- as.formula(fml)
+
+    
     
     ## ------- eta --------
     eta.floodGAM <- gam(qind ~ s(Q_N,k=6)+s(A_LE,k=6)+s(A_P,k=6)+s(H_F,k=6)+
@@ -117,6 +144,11 @@ for(di in unique(gfam[,get("d")])){
                          method = "REML",
                          data = train.gamdat.d,
                          family = gaussian(link=log))
+    
+    eta.auto <- gam(fml,
+                    method = "REML",
+                    data = train.gamdat.d,
+                    family = gaussian(link=log))
     
     
     ## ------- generate and save the predictions & predictive uncertainty ------
@@ -188,7 +220,7 @@ for(di in unique(gfam[,get("d")])){
                                model=rep("xgboost",n),fold=rep(i,n),d=rep(di,n),
                                ID=test.gamdat.d[,get("ID")]))
 
-    ## ------------------ auto-data-driven
+    ## ------------------ data-driven
     ## from the GAM: get mu (prediction for the test set on the log scale)
     mu.gam <- predict(eta.datadrive,newdata=test.gamdat.d,type="link")
     ## then estimate standard dev based on in-sample residuals for training data
@@ -204,30 +236,46 @@ for(di in unique(gfam[,get("d")])){
                                model = rep("datadrive",n),fold=rep(i,n),d=rep(di,n),
                                ID = test.gamdat.d[,get("ID")]))
     
+    ## -------------------- full auto
+    ## from the GAM: get mu (prediction for the test set on the log scale)
+    mu.gam <- predict(eta.auto,newdata=test.gamdat.d,type="link")
+    ## then estimate standard dev based on in-sample residuals for training data
+    sigma.gam <- sd(log(eta.auto$y) - eta.auto$linear.predictor)
     
-    ## --- store the simulations from the posterior 
-    
-    ## ------------------ floodGAM
-    posterior.draws <- rbind(posterior.draws,
+    oos.predictions <- rbind(oos.predictions,
                              data.table(
-                               eta.draws=simulateFromPosterior(eta.floodGAM,
-                                                               "eta",
-                                                               test.gamdat.d)$draws,
-                               model=rep("floodGAM",n*5000),
-                               fold=rep(i,n*5000),
-                               d=rep(di,n*5000),
-                               ID=rep(test.gamdat.d[,get("ID")],each=5000)))
+                               eta = predict.gam(eta.auto,
+                                                 newdata=test.gamdat.d,
+                                                 type="response"),
+                               eta.obs = test.gamdat.d[,get("qind")],
+                               mu.gam = mu.gam, sigma.gam = sigma.gam,
+                               model = rep("auto",n),fold=rep(i,n),d=rep(di,n),
+                               ID = test.gamdat.d[,get("ID")]))
     
-    ## ------------------ RFFA2018
-    posterior.draws <- rbind(posterior.draws,
-                             data.table(
-                               eta.draws=simulateFromPosterior(eta.RFFA2018,
-                                                               "eta",
-                                                               test.gamdat.d)$draws,
-                               model=rep("RFFA2018",n*5000),
-                               fold=rep(i,n*5000),
-                               d=rep(di,n*5000),
-                               ID=rep(test.gamdat.d[,get("ID")],each=5000)))
+    
+    # ## --- store the simulations from the posterior 
+    # 
+    # ## ------------------ floodGAM
+    # posterior.draws <- rbind(posterior.draws,
+    #                          data.table(
+    #                            eta.draws=simulateFromPosterior(eta.floodGAM,
+    #                                                            "eta",
+    #                                                            test.gamdat.d)$draws,
+    #                            model=rep("floodGAM",n*5000),
+    #                            fold=rep(i,n*5000),
+    #                            d=rep(di,n*5000),
+    #                            ID=rep(test.gamdat.d[,get("ID")],each=5000)))
+    # 
+    # ## ------------------ RFFA2018
+    # posterior.draws <- rbind(posterior.draws,
+    #                          data.table(
+    #                            eta.draws=simulateFromPosterior(eta.RFFA2018,
+    #                                                            "eta",
+    #                                                            test.gamdat.d)$draws,
+    #                            model=rep("RFFA2018",n*5000),
+    #                            fold=rep(i,n*5000),
+    #                            d=rep(di,n*5000),
+    #                            ID=rep(test.gamdat.d[,get("ID")],each=5000)))
     
   }
 }
@@ -237,13 +285,13 @@ for(di in unique(gfam[,get("d")])){
 
 saveRDS(oos.predictions,
         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfelt_hydagsupp_median_flood_oos_pred.rds"))
-# this one has to be in gitignore because it is too large:
-saveRDS(posterior.draws,
-        file = paste0("~/floodGAM/results/output/median-(index-flood)/",
-                      "gamfelt_hydagsupp_median_index_flood_posterior_draws.rds"))
+                           "gamfelt_hydagsupp_median_flood_oos_pred_",thisseed,".rds"))
+# # this one has to be in gitignore because it is too large:
+# saveRDS(posterior.draws,
+#         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
+#                       "gamfelt_hydagsupp_median_index_flood_posterior_draws.rds"))
 
-
+}
 
 
 # Quick stitch to test an alt datadriven GAM ------------------------------
@@ -289,10 +337,10 @@ for(di in unique(gfam[,get("d")])){
     
     ## auto-data-driven prep
     stack <- iis.models[d==di&fold==i,get("Feature")]
-    rhs <- paste('s(', stack, ',k=3)', sep = '', collapse = ' + ')
+    rhs <- paste('s(', stack, ',k=4)', sep = '', collapse = ' + ')
     # let the first three have 6 degrees of freedom, everything else
     # gets 3 degrees of freedom:
-    aa <- unlist(gregexpr(pattern ='3',rhs))[1:3]
+    aa <- unlist(gregexpr(pattern ='4',rhs))[1:3]
     for(j in 1:3){substr(rhs,aa[j],aa[j]) <- "6"}
     
     

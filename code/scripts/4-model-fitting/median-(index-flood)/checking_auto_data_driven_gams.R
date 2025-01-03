@@ -58,12 +58,25 @@ fidx <- createFolds(gamdat[d==24,get("qind")],k)
 
 # Define the GAM and check select = T -------------------------------------
 
-b.edf <- vector()
-
-for(di in unique(iis.models$d)){
+## run with different seeds.....
+for( thisseed in c(30,32,85)){
   
-  gamdat.d <- gamdat[d==di]
+  set.seed(thisseed)
+  k = 10
+  # use the 24 hour duration
+  fidx <- createFolds(gamdat[d==24,get("qind")],k) 
   
+  
+  iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
+                               "gamfelt_hydagsupp_featuresFromIIS_gam_",
+                               thisseed,".rds"))
+  
+  b.edf <- vector()
+  
+  for(di in unique(iis.models$d)){
+    
+    gamdat.d <- gamdat[d==di]
+    
     for(i in 1:k){
       
       train.gamdat.d <- gamdat.d[-fidx[[i]]]
@@ -90,27 +103,25 @@ for(di in unique(iis.models$d)){
                       data = train.gamdat.d,
                       family = gaussian(link=log))
       print(summary(eta.auto))
-  
+      
       b.edf <- c(b.edf,summary(eta.auto)$edf)
-  
+      
     }
+    
+  }
   
+  ## what to do when select = T shrinks out one of the covariates? 
+  ## f. eks. W_summer, 24 hours
+  
+  ## maybe just take it out of the stack
+  
+  iis.models[,edf:=b.edf]
+
+  
+  saveRDS(iis.models, paste0("~/floodGAM/results/output/median-(index-flood)/",
+                             "gamfelt_hydagsupp_featuresFromIIS_gam_",thisseed,".rds"))
 }
 
-## what to do when select = T shrinks out one of the covariates? 
-## f. eks. W_summer, 24 hours
-
-## maybe just take it out of the stack
-
-iis.models[,edf:=b.edf]
-
-
-## change threshold for keeping features:
-iis.models[,epsdiff:=c(-100,diff(maeFeat)),by=c("d","fold")]
-
-
-saveRDS(iis.models, paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfelt_hydagsupp_featuresFromIIS_gam.rds"))
 
 
 # Check XGBoost auto-select GAM -------------------------------------------
