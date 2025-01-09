@@ -91,10 +91,24 @@ miso <- function(y,X,boot_importance,fidx,k,p,stack){
       train.X <- X[-fidx[[kk]],..callname]; train.y <- y[-fidx[[kk]]]
       test.X <- X[fidx[[kk]],..callname]; test.y <- y[fidx[[kk]]]
       
-      # fit the model
-      rhs <- paste('s(', callname, ',k=6)', sep = '', collapse = ' + ')
-      fml <- paste('train.y', '~', rhs, collapse = ' ')
-      fml <- as.formula(fml)
+      # fit the model.
+      ## the first three predictors selected get 6 d.o.f.,
+      ## the rest get 4:
+      if(length(stack)<3){
+        rhs <- paste('s(', callname, ',k=6)', sep = '', collapse = ' + ')
+        fml <- paste('train.y', '~', rhs, collapse = ' ')
+        if(kk==1){print(fml)}
+        fml <- as.formula(fml)
+      }else{
+        rhs <- paste('s(', callname, ',k=4)', sep = '', collapse = ' + ')
+        aa <- unlist(gregexpr(pattern ='4',rhs))[1:3]
+        for(pp in 1:3){substr(rhs,aa[pp],aa[pp]) <- "6"}
+        fml <- paste('train.y', '~', rhs, collapse = ' ')
+        if(kk==1){print(fml)}
+        fml <- as.formula(fml)
+      }
+      
+      
       
       b <- gam(fml,
                method = "REML",
@@ -181,6 +195,7 @@ termination_test <- function(stack,newFeature,oldD,newD,eps){
   if(newFeature %in% stack){terminate = T}
   # 2. the performance of the inner model as measured by D
   # does not significantly improve
+  if(newD > oldD){terminate = T}
   if(abs(oldD - newD) < eps){terminate = T}
   return(terminate)
 }
