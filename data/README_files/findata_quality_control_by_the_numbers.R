@@ -2,336 +2,436 @@
 ##
 ##
 ##
-## what is removed when: numbers for summarizing findata quality control
-##
-## need to fix: still relies on old repository
+## Station selection is based off of report 2016-85 'Utvalg og kvalitetssikring 
+## av flomdata for flomfrekvensanalyser' and report 62-2014 'Nasjonalt formelverk 
+## for flomberegning i små nedbørfelt'
+## 
+## 
+## INPUT FILES: 
+##   - tabell_A2_rapport_2016-85_daba_edited.txt
+##   - tabell_5_NIFS_rapport_2015-13.txt (copy-pasted version of tabell 5, vedlegg 1)
+##   - tabell_A3_rapport_2016-85.txt
+##       (copy-pasted from 2016-85 report)
+## 
 ## -----------------------------------------------------------------------------
 
 library(data.table)
 library(lubridate)
 
-## ---define paths
-dataPath <- paste0("~/ClimDesign_PhD/XGBoost-GAM index flood model",
-                   "/src/","dataset_construction/","publishable/")
+library(ggplot2)
 
-## ---read in data
-data35 <- readRDS(paste0(dataPath,"arkiv35","data.rds"))
-data05 <- readRDS(paste0(dataPath,"arkiv05","data.rds"))
 
-## hykvalp-icecorr dataset is a few gigabytes:
-print(object.size(data35), units = "Gb")
+discard.tab <- data.table(ID=character(),yk=numeric(),type=character)
 
-## to speed up operations we set up the 
-## key columns for binary searches:
-# make year column
-data05[,yk:=year(date)]; data35[,yk:=year(date)]
-# set the key
-setkey(data05,ID,yk); setkey(data35,ID,yk)
+# load in the tables --------------------------------------------------------
 
-# add month and day
-keyGenerator <- function(x){list(month(x),day(x))}
-data35[,c("mk","dk"):=sapply(.SD,keyGenerator),.SDcols = "date"]
-data05[,c("mk","dk"):=sapply(.SD,keyGenerator),.SDcols = "date"]
+nifs.tab <- fread(paste0("~/floodGAM/data/raw-data/",
+                         "tabell_5_NIFS_rapport_2015-13.txt"),
+                  fill=T, colClasses = list(character=1))
 
-# define column to filter out discarded values
-data05[,discard:=FALSE]; data35[,discard:=FALSE]
+A2.tab <- fread(paste0("~/floodGAM/data/raw-data/",
+                       "tabell_A2_rapport_2016-85_daba_edited.txt"),
+                fill=T, colClasses = list(character=1))
 
-# compute the time between observations
-difftimeFn <- function(x){
-  a=x[-1]
-  b=x[-length(x)]
-  dtvec <- as.numeric(difftime(a,b,units="mins"))
-  return(c(0,dtvec))
+
+A3.tab <- fread(paste0("~/floodGAM/data/raw-data/",
+                       "tabell_A3_rapport_2016-85.txt"),
+                fill=T, colClasses = list(character=1:2))
+
+# Preliminary data cleaning -----------------------------------------------
+
+## fix column names and set indicator columns; set keys
+
+nifs.tab[, c("RN", "HN") := tstrsplit(V1, ".", fixed=TRUE)]
+setnames(nifs.tab,"V2","navn")
+nifs.tab <- nifs.tab[,c("navn","RN","HN")]
+nifs.tab[,NIFS:="nifs"]
+
+A2.tab[, c("RN", "HN") := tstrsplit(Nr, ".", fixed=TRUE)]
+A2.tab[,A2:="A2"]
+A2.tab[,ID:=paste0(RN,"-",HN)]
+
+A3.tab[, key_ := do.call(paste, c(.SD, sep = " ")), .SDcols = names(A3.tab)]
+A3.tab <- A3.tab[,c("V1","key_")]
+A3.tab[, c("RN", "HN") := tstrsplit(V1, ".", fixed=TRUE)]
+A3.tab[,A3:="A3"]
+A3.tab <- A3.tab[,c("key_","RN","HN","A3")]
+
+setkey(nifs.tab,RN,HN); setkey(A2.tab,RN,HN); setkey(A3.tab,RN,HN)
+
+# Merge the data tables ---------------------------------------------------
+
+tab <- merge(nifs.tab[,c("RN","HN","NIFS")],
+             A2.tab[,c("RN","HN","A2","Navn","version",
+                       "Findata_N","Nedlagtregulert")],all=T)
+
+tab <- merge(tab,A3.tab[,c("RN","HN","A3")],all=T)
+
+
+
+## -----------------------------------------------------------------------------
+## *****************************
+## Pull data from hyfin_complete
+## *****************************
+## -----------------------------------------------------------------------------
+
+# HYFIN_C: create lescon_var commands ------------------------------------
+
+lescon <- tab[(!is.na(NIFS) | !is.na(A2)) & is.na(A3)]
+lescon[,ID:=paste0(RN,"-",HN)]
+
+lescon <- lescon[!ID%in%lescon[Nedlagtregulert=="R",get("ID")]]
+
+## for the 11 stations in NIFS but not A2 the version number is chosen from Hysopp
+lescon[,version:=ifelse(is.na(version),1,version)]
+
+## station 160.6 needs version 2 (according to Hysopp)
+lescon[,version:=ifelse(ID=="160-6",2,version)]
+
+
+
+# HYFIN_C: What stations failed the command? -------------------------------
+
+## list the files in the directory you downloaded the data files into
+alltxtfiles <- list.files(path="C:/data-tab/NIFS-A2/", pattern = ".txt") 
+
+## check for empty files:
+idx <- which(file.info(path=paste0("C:/data-tab/NIFS-A2/",alltxtfiles))$size == 0)
+
+length(alltxtfiles) - length(idx)
+
+# HYFIN_C: Load in the stations ------------------------------------------
+
+data <- readRDS("~/floodGAM/data/raw-data/raw-NIFS-A2-hyfincomplete.rds")
+
+
+## select only stations that have at least 20 years data
+tt <- data[,uniqueN(.SD),by="ID",.SDcols="yk"]
+setkey(tt,ID)
+
+tt <- tt[V1>=20]
+
+data <- data[ID%in%tt$ID]
+
+# HYFIN_C: Remove years identified as utelatt, table A2 -------------------
+
+expandutelatt <- function(x){
+  out <- lapply(strsplit(x, ", "), 
+                function(x) do.call(c, 
+                                    lapply(strsplit(x, ":"), 
+                                           function(y) Reduce(`:`, as.numeric(y)))))
+  out <- list(as.numeric(unlist(out)))
+  return(out)
 }
 
-## we start with 329 stations that have at least some findata:
-data35[,uniqueN(.SD),.SDcols = c("ID")]
+utelatt <- A2.tab[,
+                  lapply(.SD,expandutelatt),
+                  by=ID,
+                  .SDcols="Findata_Utelatt"]
 
-# 1: total years ? subdaily years ? ---------------------------------------
+utelatt <- utelatt[, .(yk = unlist(Findata_Utelatt)), by = ID]
 
-# total years > 20:
-data35 <- data35[ID %in% data35[,uniqueN(.SD),by=ID,.SDcols = "yk"][V1>=20]$ID,]
-
-data35[,uniqueN(.SD),.SDcols = c("ID")]
-
-# findata years > 10:
-data35[, gapmin := lapply(.SD,difftimeFn), .SDcols = "date", by = c("ID","yk")]
-setkey(data35,ID,yk,mk,dk)
-numdayfin <- data35[,median(gapmin),by=c("yk","mk","dk","ID")]
-numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
-setnames(numdayfin,"V1","nfin.yk")
-# how many years of fine data does each station have?
-numyrsfin <- merge(numdayfin[nfin.yk>199, .N, by="ID"][,c("ID","N")],
-                   numdayfin[, .N, by="ID"][,"ID"],
-                   all.y=T)
-setnafill(numyrsfin,cols="N",fill=0)
-discard.fin <- numyrsfin[N<10]
-setkey(discard.fin,ID)
-
-data35 <- data35[.(discard.fin), discard := TRUE][discard == FALSE]
-
-data35[,uniqueN(.SD),.SDcols = c("ID")] # 273 stations
+setkey(utelatt,ID,yk)
 
 
-# run cross-check before utelatt ------------------------------------------
+# define column to filter out discarded values
+data[,discard:=FALSE]
 
-data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
+# discard all utelatt data:
+# subset all rows of data using key columns from utelatt where first key 
+# matches ID and second key matches year. Return the 'discard' column
+# and set discard value = T for utelatt subset. Then, use chaining 
+# to select only rows that have discard values = F. 
+data <- data[.(utelatt), discard := TRUE]
 
-# count number of days in a year (unique tuples of month key and
+
+ute.tab <- data[discard==TRUE,unique(yk),by="ID"]
+setnames(ute.tab,"V1","yk")
+ute.tab[,type:="Markert som utelatt, tabell A2 85-2016"]
+
+discard.tab <- rbind(discard.tab,ute.tab)
+
+data <- data[discard == FALSE]
+
+
+# HYFIN_C: Remove years with < 244 days ------------------------------------
+
+
+# create month column, day column and search for
+# unique combinations:
+keyGenerator <- function(x){list(month(x),day(x))}
+
+# add month and day
+data[,c("mk","dk"):=sapply(.SD,keyGenerator),.SDcols = "date"]
+
+# count number of days in a year (unique combinations of month key and
 # day key grouped by year)
-data35[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
-data05[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
+data[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
+
+# find the ID-yk (station-year) combinations that have less than 244 days of data
+
+## select only stations that have at least 20 years data
+tt <- data[,uniqueN(.SD),by="ID",.SDcols="yk"]
+setkey(tt,ID)
+
+tt <- tt[V1>=20]
+
+data <- data[ID%in%tt$ID]
 
 
-## --- filter out station-years that have less than 200 days 
-## --- of data recorded in hykvalp-icecorr (database 35)
-
-# find the ID-yk (station-year) tuples that have less than 200 days of data
-# in hykvalp-icecorr (database 35)
-discard.hykval200 <- data35[numdays<200,unique(.SD),.SDcols=c("ID","yk")]
-
-# set key for cache-efficient indexing
-setkey(discard.hykval200,"ID","yk")
-
-data05 <- data05[.(discard.hykval200), discard := TRUE][discard == FALSE]
-data35 <- data35[.(discard.hykval200), discard := TRUE][discard == FALSE]
-
-# after filtering on the hykval-200 days criteria
-data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
+discard.244 <- data[numdays<244,unique(.SD),.SDcols=c("ID","yk")]
+setkey(discard.244,ID,yk)
 
 
-## --- filter out station-years that have less than 300 days 
-## --- of data recorded both in hykvalp-icecorr (database 35)
-## --- and hydag (database 05)
+
+data <- data[.(discard.244), discard := TRUE][discard == FALSE]
+
+
+
+discard.244[,type:="HYFIN_COMPLETE < 244 days"]
+
+discard.tab <- rbind(discard.tab,discard.244)
+
+# How many years of data do we have from hyfin_complete? ----------------------
+
+# create record length data table--used to index into larger 'data' object
+recordlen <- data[,.(N.hfc=uniqueN(.SD)),by=ID,.SDcols = "yk"]
+# 'N.hfc' = number of years in hyfin complete, not utelatt, with 200+ days of 
+## data per year 
+
+# add in supplementary info (which report, station name, num findata yrs from A2)
+recordlen <- merge(recordlen,
+                   lescon[,c("ID","Navn","NIFS","A2","Findata_N","version")],
+                   by="ID")
+
+
+# what stations have 20 years or more finedata?
+fin.stations <- recordlen[N.hfc>=20]
+
+data <- data[ID%in%fin.stations$ID]
+
+
+## these stations, with >20 year findata, are the stations we will
+## pull hydag data for and cross-check.
+
+
+## -----------------------------------------------------------------------------
+## *****************************
+## Pull data from hydag
+## *****************************
+## -----------------------------------------------------------------------------
+
+
+
+hydag <- readRDS("~/floodGAM/data/raw-data/raw-gamfelt-hydag.rds")
+
+
+# Sanity check: what years and stations are in 37 vs 39? ------------------
+
+hyfinc.sy <- data[,unique(.SD),.SDcols = c("ID","yk")]
+hydag.sy <- hydag[,unique(.SD),.SDcols = c("ID","yk")]
+setkey(hyfinc.sy,ID,yk); setkey(hydag.sy,ID,yk)
+
+# station-years in hyfinc *not* in hydag:
+hyfinc.sy[, in.hydag := FALSE][hydag.sy, in.hydag := TRUE]
+hyfinc.sy[in.hydag==FALSE]
+
+## so all hyfin_c station-years are in hydag. good. 
+
+
+# Remove hydag years identified as utelatt, table A2 ---------------------------
+
+## dependencies: expandutelatt function
+
+utelatt.day <- A2.tab[,
+                      lapply(.SD,expandutelatt),
+                      by=ID,
+                      .SDcols="Dailydata_Utlatt"]
+
+utelatt.day <- utelatt.day[, .(yk = unlist(Dailydata_Utlatt)), by = ID]
+
+setkey(utelatt.day,ID,yk)
+
+# for the stations we care about: are any utelatt.day years in the data?
+merge(hyfinc.sy,utelatt.day,by=c("ID","yk"))
+## no. good.
+
+
+# define column to filter out discarded values
+setkey(hydag,ID,yk)
+hydag[,discard:=FALSE]
+
+hydag <- hydag[.(utelatt.day), discard := TRUE][discard == FALSE]
+
+
+# HYDAG: Remove years with < 244 days -------------------------------------
+
+# create month column, day column and search for
+# unique combinations:
+keyGenerator <- function(x){list(month(x),day(x))}
+
+# add month and day
+hydag[,c("mk","dk"):=sapply(.SD,keyGenerator),.SDcols = "date"]
+
+# count number of days in a year (unique combinations of month key and
+# day key grouped by year)
+hydag[,numdays:=uniqueN(.SD),by=list(ID,yk),.SDcols=c("mk","dk")]
+
+# find the ID-yk (station-year) combinations that have less than 200 days of data
+discard.244 <- hydag[numdays<244,unique(.SD),.SDcols=c("ID","yk")]
+
+setkey(discard.244,ID,yk)
+
+hydag <- hydag[.(discard.244), discard := TRUE][discard == FALSE]
+
+
+# Cross-check hyfin_complete with hydag ----------------------------------
+
+## --- 1. filter out station-years that have less than 300 days 
+## --- of data recorded both in hyfin_complete and hydag
 
 # find the ID-yk tuples that have < 300 days in *both* databases:
-discard.both300 <- merge(data35[numdays<300,unique(.SD),.SDcols=c("ID","yk")],
-                         data05[numdays<300,unique(.SD),.SDcols=c("ID","yk")])
+discard.both300 <- merge(data[numdays<300,unique(.SD),.SDcols=c("ID","yk")],
+                         hydag[numdays<300,unique(.SD),.SDcols=c("ID","yk")])
 
-data05 <- data05[.(discard.both300), discard := TRUE][discard == FALSE]
-data35 <- data35[.(discard.both300), discard := TRUE][discard == FALSE]
+setkey(discard.both300,ID,yk)
 
-# after filtering on the both-300 days criteria, we have:
-data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
+discard.both300[,type:="HYFIN_COMPLETE and HYDAG < 300 days"]
 
-
-## --- filter out station-years based on annual maxima - Hydag criteria
-
-# hydag and hykvalp-icecorr are not a perfect match. There are some
-# stations and years that are in hykval but not hydag and vice versa:
-hykval.sy <- data35[,unique(.SD),.SDcols = c("ID","yk")]
-hydag.sy <- data05[,unique(.SD),.SDcols = c("ID","yk")]
-setkey(hykval.sy,ID,yk); setkey(hydag.sy,ID,yk)
-
-# station-years in hykvalp-icecorr *not* in hydag:
-hykval.sy[, in.hydag := FALSE][hydag.sy, in.hydag := TRUE]
-hykval.sy[in.hydag==FALSE]
-
-# station-years in hydag *not* in hykvalp-icecorr:
-hydag.sy[, in.hykval := FALSE][hykval.sy, in.hykval := TRUE]
-hydag.sy[in.hykval==FALSE]
+discard.tab <- rbind(discard.tab,discard.both300)
 
 
-## there are 70 station-years where we have data in hykval
-## but no data in hydag. These station-years are not checked
-## with the ann max criteria.
-## for the remaining 14156 station-years where we *have* data in hydag,
-## run the annual maxima check against hykval:
+data <- data[.(discard.both300), discard := TRUE]
+
+## take a quick look at the years flagged for discard.both300:
+for(station in unique(discard.both300$ID)){
+  
+  gdat <- data[discard==T&ID==station]
+  setkey(gdat,ID,yk)
+  hdat <- hydag[ID==station&yk%in%unique(gdat$yk)]
+  
+  gg <- ggplot(gdat) +
+    geom_point(aes(date,cumecs),size=0.9) +
+    geom_point(data=hdat,aes(date,cumecs),color="red") +
+    labs(title=station) +
+    facet_wrap(vars(yk),scales="free_x") +
+    theme_bw()
+  
+  print(gg)
+  
+  gc()
+  
+}
+
+
+data <- data[discard == FALSE]
+hydag <- hydag[.(discard.both300), discard := TRUE][discard == FALSE]
+
+
+## --- 2. look at, and discard, years in hyfin_c
+## --- that are missing the hydag ann max.
+
 
 # switch to working with decimal dates instead of POSIXt format:
-data05[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
-data35[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
+data[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
+hydag[, dd:=lapply(.SD,decimal_date), .SDcols="date"]
 
 twentyfour <- 0.00273224 # 24 hours in decimal date
 
 # find annual maxima from hydag (data05)
-amhd <- data05[data05[, .I[which.max(cumecs)], by=c("ID","yk")]$V1]
+amhd <- hydag[hydag[, .I[which.max(cumecs)], by=c("ID","yk")]$V1]
 # only keep a few relevant columns:
 amhd <- amhd[,c("ID","yk","cumecs","dd")]
 
-# take the intersection of station-years in hydag and hykval:
-data35 <- merge(data35, amhd, all.x = T)
+# take the intersection of station-years in hydag and hyfin_c:
+data <- merge(data, amhd, all.x = T)
 
-# compute distance between points in hykval and decimal date
+# compute distance between points in hyfin_c and decimal date
 # of annual maxima from hydag
-data35[,dd.dist:=abs(dd.x-dd.y)]
+data[,dd.dist:=abs(dd.x-dd.y)]
 
-# find minimum distance by station-year. If minimum distance is > 48 hrs
-# (if there is no observation in hykval within +/- 2 days of the needed
+# find minimum distance by station-year. If minimum distance is > 24 hrs
+# (if there is no observation in hyfin_c within +/- 1 day of the needed
 # point), then set discard to TRUE. Then select only rows
 # with discard = FALSE
-data35[,discard:=ifelse(min(dd.dist)>twentyfour,TRUE,FALSE),by=c("ID","yk")]
+data[,discard:=ifelse(min(dd.dist)>twentyfour,TRUE,FALSE),by=c("ID","yk")]
 
-discard.annmax <- data35[discard==T]
+discard.annmax <- data[discard==T]
 discard.annmax <- discard.annmax[,unique(yk),by="ID"]
 setnames(discard.annmax,"V1","yk")
 
-data35 <- data35[discard == FALSE]
-
-# after filtering on the hydag-annmax criteria, 
-data35[,uniqueN(.SD),.SDcols = c("ID","yk")]
-
-
-## ---------------- now apply 20 yrs- 10 yrs criteria:
-# total years > 20:
-data35 <- data35[ID %in% data35[,uniqueN(.SD),by=ID,.SDcols = "yk"][V1>=20]$ID,]
-
-data35[,uniqueN(.SD),.SDcols = c("ID")]
-
-# findata years > 10:
-data35[, gapmin := lapply(.SD,difftimeFn), .SDcols = "date", by = c("ID","yk")]
-
-# what station-years have at least 200 days of findata?
-setkey(data35,ID,yk,mk,dk)
-
-numdayfin <- data35[,median(gapmin),by=c("yk","mk","dk","ID")]
-numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
-setnames(numdayfin,"V1","nfin.yk")
-
-# how many years of fine data does each station have?
-numyrsfin <- merge(numdayfin[nfin.yk>199, .N, by="ID"][,c("ID","N")],
-                   numdayfin[, .N, by="ID"][,"ID"],
-                   all.y=T)
-setnafill(numyrsfin,cols="N",fill=0)
-
-discard.fin <- numyrsfin[N<10]
-setkey(discard.fin,ID)
-
-data35 <- data35[.(discard.fin), discard := TRUE][discard == FALSE]
-
-data35[,uniqueN(.SD),.SDcols = c("ID")] # 255 stations
-
-
-
-## ------------------ now: how many utelatt years are still valid?
-
-utelatt <- fread(paste0(dataPath,"utelatt.csv"),
-                 colClasses = c("character","numeric"))
-
-
-# merge utelatt and ID, yk from data35.
-
-tt <- data35[,unique(yk),by="ID"]
-setnames(tt,"V1","yk")
-
-# 636 station-years in utelatt are still valid
-utelatt <- merge(tt,utelatt,by=c("ID","yk"))
-
-# see if the number of utelatt years = N years per station
-utelatt[,isutelatt:=1]
-tv <- merge(tt,utelatt,by=c("ID","yk"), all.x = T)
-setnafill(tv,cols="isutelatt", fill = 0)
-
-tv[,uteyrs:=sum(isutelatt),by="ID"]
-tv[,Nyrs:= .N, by ="ID"]
-
-utelatt.stations <- tv[uteyrs==Nyrs,unique(ID)] # so we remove 7 stations 
-
-# and 376 years from other stations
-tv[!ID%in%utelatt.stations,sum(isutelatt)]
-
-utelatt.years <- utelatt[!ID%in%utelatt.stations,]
-utelatt.years[,isutelatt:=NULL]
-
-# split into utelatt_stations and utelatt_years. Save the new utelatt files
-# to that messy folder in ClimDesign_PhD
-
-save(utelatt.stations,utelatt.years,file=paste0(dataPath,"utelatt.rda"))
-saveRDS(utelatt,file=paste0("~/floodGAM/data/raw-data/","utelatt.rds"))
-
-write.csv(utelatt.stations,paste0("~/floodGAM/data/raw-data/","utelatt_stations.csv"),row.names=F)
-write.csv(utelatt.years,paste0("~/floodGAM/data/raw-data/","utelatt_years.csv"),row.names = F)
-
-
-discard.utelatt <- utelatt
-discard.utelatt[,isutelatt:=NULL]
-
-
-# rbind all the discard types ---------------------------------------------
-
 discard.annmax[,type:="Missing observations around HYDAG ann max"]
-discard.both300[,type:="HYKVALP-ICECORR and HYDAG < 300 days"]
-discard.hykval200[,type:="HYKVALP-ICECORR < 200 days"]
-discard.utelatt[,type:="Manual removal"]
 
-discard.all <- rbind(discard.annmax,discard.both300,
-                     discard.hykval200,discard.utelatt)
+discard.tab <- rbind(discard.tab, discard.annmax)
 
-notdiscard <- data35[,unique(.SD),.SDcols = c("ID","yk")]
-notdiscard[,type:="Data used in analysis"]
+## take a quick look at the years flagged for discard:
 
-discard.all <- rbind(discard.all,notdiscard)
-
-saveRDS(discard.all,file=paste0("~/floodGAM/data/","README_files/",
-                                "discard_histogram_data.rds"))
-
-
-
-
-# percent fine data? ------------------------------------------------------
-
-## remove utelatt years
-setkey(utelatt,ID,yk)
-data35 <- data35[.(utelatt), discard := TRUE][discard == FALSE]
-
-data35[,uniqueN(.SD),.SDcols = c("ID")] # 248 stations
-
-## within each station...
-numdayfin <- data35[,median(gapmin),by=c("yk","mk","dk","ID")]
-numdayfin <- numdayfin[,sum(V1<1440),by=c("ID","yk")]
-setnames(numdayfin,"V1","nfin.yk")
-
-# how many years of fine data does each station have?
-numyrsfin <- numdayfin[nfin.yk>199, .N, by="ID"]
-# what percentage of years per station have at least 200 days of fine data?
-numdayfin[,isfin.yk:=nfin.yk>200]
-percentfin <- numdayfin[,sum(isfin.yk)/.N,by=c("ID")]
-percentfin[,perct:=ceiling(V1*100)]
-hist(percentfin$perct)
-
-setkey(percentfin,perct)
-
-# 80 stations are entirely findata
-percentfin[perct==100]
-
-percentfin[perct>89] # 124 stations (50% of the stations) have over 90% findata
-
-percentfin <- merge(percentfin,numdayfin[, .N, by="ID"],by="ID")
-
-# for those percentfin < 50, the overall record length is long
-percentfin[perct<50,median(N)]
+for(station in unique(discard.annmax$ID)[16:30]){
+  
+  
+  gdat <- data[discard==T&ID==station]
+  setkey(gdat,ID,yk)
+  gdat[,type:="hyfin_c"]
+  hdat <- hydag[ID==station&yk%in%unique(gdat$yk)]
+  hdat[,type:="hydag"]
+  setnames(hdat,c("cumecs","dd"),c("cumecs.x","dd.x"))
+  
+  g2dat <- rbind(gdat[,c("dd.x","cumecs.x","yk","type")],
+                 hdat[,c("dd.x","cumecs.x","yk","type")])
+  
+  gg <- ggplot(g2dat) +
+    geom_line(aes(dd.x,cumecs.x,color=type,linewidth=type)) +
+    #geom_line(data=hdat,aes(dd,cumecs),color="red") +
+    geom_vline(data=gdat,aes(xintercept = dd.y),color="blue",
+               linetype=2,linewidth=1) +
+    scale_color_manual(values=c("red","black")) +
+    scale_linewidth_manual(values=c(0.6,1))+
+    labs(title=station,
+         y = "m3/s", x= "date (as decimal)") +
+    facet_wrap(vars(yk),scales="free_x") +
+    theme_bw() +
+    theme(legend.title=element_blank())
+  
+  print(gg)
+  
+  gc()
+  
+}
 
 
-gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
-                "gamfelt_catchment_covariates.rds"))
-
-percentfin <- merge(percentfin,gfcov[,c("ID","A","QD_fgp")],by="ID")
+## discard all the years flagged in discard.annmax:
+data <- data[discard == FALSE]
 
 
-## ---- save percentfin
 
-saveRDS(percentfin,file=paste0("~/floodGAM/data/","README_files/",
-                                "findata_stats.rds"))
+# save discard tab ----------------------
 
+
+keep <- data[,unique(yk),by="ID"]
+
+keep[,type:="Data used in analysis"]
+setnames(keep,"V1","yk")
+
+discard.tab <- rbind(discard.tab,keep)
+
+
+save(discard.tab,file="~/floodGAM/data/README_files/histogram_findata_control.rda")
+
+discard.tab[,type:=as.character(type)]
+
+discard.tab[,type:=ifelse(type=="utelatt tabell A2",
+                          "Markert som utelatt, tabell A2 85-2016",type )]
 
 library(ggplot2)
 library(scico)
 
-ggplot(percentfin) +
-  geom_point(aes(perct,N,
-                 fill=QD_fgp,
-                 size=A),
-             color="black",
-             inherit.aes = FALSE,
-             pch=21,stroke=0.1) +
-  labs(x = "Percent of record that is subdaily data",
-       y = "Record length (years)") +
-  scale_fill_scico(name = "Fraction of rain\ncontribution to\nflood generating process",
-                   palette = "lapaz",end=0.9,
-                   alpha=1) +
-  scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
-                                                sep = "")) ,
-                        range=c(1.5,12),
-                        breaks = c(10,500,2000)) +
-  theme_bw()+
-  theme(legend.position = "bottom")
+ggplot(discard.tab) +
+  geom_histogram(aes(yk,fill=type,alpha=type),binwidth=1) +
+  labs(y = "Number of stations",
+       x = " ") +
+  scale_alpha_manual(values=c(0.4,0.8,0.8,0.8,0.8),guide=F) +
+  scale_fill_manual(name = " ",values=c("grey",scico(4,palette = "batlow"))) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16)) +
+  guides(fill=guide_legend(nrow=3,byrow=TRUE))
