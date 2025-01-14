@@ -12,116 +12,51 @@ library(sp)
 library(ggplot2)
 library(scico)
 
+library(ggpubr)
+
 gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/","gamfelt/",
                        "gamfelt_catchment_covariates.rds"))
-load(paste0("~/floodGAM/data/processed-data/","gamfelt/",
-            "README_files/","station_selection_map_datafiles.rda"))
-NorgeDF <- fortify(Norge)
+load(paste0("~/floodGAM/data/processed-data/gamfelt/README_files/stationmaps.rda"))
+
+
 percentfin <- readRDS(paste0("~/floodGAM/data/","README_files/",
                                 "findata_stats.rds"))
 ```
 
 # The `gamfelt` dataset
 
-This folder contains the annual maxima and catchment descriptors for the `gamfelt` dataset. We summarize some properties of the dataset below.
+This folder contains the annual maxima and catchment descriptors for the `gamfelt` dataset.
 
 ## File structure
 
- - `gamfelt_annual_maxima` - the annual maxima, in $m^3/s$. Saved as both `.csv` and `.rds`.
+ - `gamfelt_1hour_annual_maxima` - the annual maxima, in $m^3/s$. Data from archive hyfin-complete. Interpolated to hourly values and annual maxima extracted (see processing scripts [here](~/floodGAM/code/scripts/1-data-creation/). Saved as both `.csv` and `.rds`.
  - `gamfelt_catchment_covariates` - catchment descriptors for each gamfelt station. Saved as both `.csv` and `.rds`.
  - `gamfelt_catchment_covariates_description.txt` - description of each variable in the catchment descriptor dataset.
- - `gamfelt_table.xlsx` - summary table matching Table A2 in report [2016:85](https://asp.bibliotekservice.no/nve/title.aspx?tkey=23147).
 
 
 ## Describing the dataset
 
-The `gamfelt` dataset contains annual maxima for 248 stations in Norway. Each station has at least 20 years of total data and 10 years of sub-daily (fine) data. Each year of data has been assessed using the process described in the [data README](/data/README.md). 
+The `gamfelt` dataset contains annual maxima for 241 stations in Norway. Each station has at least 20 years of fine data.
 
 The stations represent a reasonably diverse collection of catchment sizes and hydroclimatic regimes:
 
-```{r,echo=F,warning=F,message=F}
-scaleFUN <- function(x) sprintf("%.1f", x) # to get good fraction of rain labels
+```{r,echo=F,warning=F,message=F,fig.height=5}
+figure <- ggarrange(gprecip, gstations, gtemperature,
+                    widths=c(1,1,1),
+                    nrow=1)
 
-gfgp <- ggplot() +
-  geom_polygon(data=NorgeDF,aes(long,lat,group=group),
-               fill = "white",color="grey",alpha=0.3) +
-  geom_point(data=gfcov,aes(X_utm,Y_utm,
-                                fill=QD_fgp,
-                                size=A),
-             color="black",
-             inherit.aes = FALSE,
-             pch=21,stroke=0.1) +
-  scale_fill_scico(name = "Fraction of rain\ncontribution to\nflood generating process",
-                   palette = "lapaz",end=0.9,
-                   alpha=1) +
-  scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
-                                                sep = "")) ,
-                        range=c(1.5,12),
-                        breaks = c(10,500,2000))+
-  coord_equal()+
-  theme_void() +
-  theme(legend.position = c(0.65,0.29),
-        text = element_text(family="sans"))
-gfgp
+figure
 ```
 
-| Catchment area ($km^2$)  | 0 - 2 $km^2$ | 2 - 10 $km^2$ | 10 - 60 $km^2$ | 60 - 100 $km^2$ | 100 - 500 $km^2$ | 500+ $km^2$ |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Number of stations** | 2 | 18 | 67 | 27 | 94 | 39 |
 
-*note: adds up to 247 right now because missing covariates for station 25.30*
+Total record lengths range from a minimum of 20 years of data to around 60 years of fine (sub-daily) data.
 
-### Record lengths
+```{r,echo=F,fig.dim=c(5,4)}
+gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
+                       "gamfelt_durations_annual_maxima.rds"))
 
-Each of the streamflow records contains a variety of collection methods. These differing collection methods provide data at different frequencies. Generally, the earlier part of the streamflow record has daily time resolution, while the later part of the record contains a higher frequency of measurements after adoption of digitized limnigraph records and/or digital measurements. For our dataset, the shift to a higher frequency of measurements is typically around 1980, and stations have, on average, 34 years of high frequency (fine) data.
-
-Total record lengths in our data set range from a minimum of 20 years of data to 131 years at station 62.5 (Bulken).
-
-```{r,echo=F,fig.dim=c(12,4)}
-par(mfrow=c(1,2),mar = c(5,5,1,1))
-
-hist(percentfin$N,breaks=20,
+hist(gfam[d==1,.N,by="ID"]$N,breaks=15,
      xlab="Record length (years)",ylab="Stations",main="",
      col="white")
-H2 <- hist(percentfin$perct,xaxt="n",
-           xlab="Percent of record that is subdaily data",ylab="Stations",
-           main="",
-           col="white")
-axis(side=1, at=H2$breaks, labels=paste0(H2$breaks, "%"))
 ```
-
-Half of the stations (123 stations) have more than 90% of the record made up of fine data.
-
-Around 20% of the stations (49 stations) have less than half the record made up of fine data. These stations showing a low percentage of fine data are characterized by having a long total record length compared to the fine (subdaily) record length, i.e. in these cases, the amount of subdaily data is not below average; rather, the overall record length is extensive. The median total record length at these stations is 97 years. 
-
-## Considerations when using the `gamfelt` dataset
-
-Although the `gamfelt` dataset focuses on fine data, it is not made up entirely of fine data. Users should consider whether this is acceptable for their particular analysis. 
-
-In the floodGAM analysis, which analyzed models fit on annual maxima of different duration, the `gamfelt` dataset was sufficient to to make a statistically significant distinction between models fit on 24-hour (daily averaged) data and models fit on fine (1-hour) data. 
-
-The question of "what data to include" will always be relevant to observation-based analyses. If the resolution of the data is a question in a particular analysis, users can start by investigating the 20% of stations that have less than half their record made up of fine data.
-
-
-```{r,echo=F}
-ggplot(percentfin) +
-  geom_point(aes(perct,N,
-                 fill=QD_fgp,
-                 size=A),
-             color="black",
-             inherit.aes = FALSE,
-             pch=21,stroke=0.1) +
-  labs(x = "Percent of record that is subdaily data",
-       y = "Record length (years)") +
-  scale_fill_scico(name = "Fraction of rain\ncontribution to\nflood generating process",
-                   palette = "lapaz",end=0.9,
-                   alpha=1) +
-  scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
-                                                sep = "")) ,
-                        range=c(2,17),
-                        breaks = c(10,500,2000)) +
-  theme_bw()+
-  theme(legend.position = "bottom")
-```
-
 
