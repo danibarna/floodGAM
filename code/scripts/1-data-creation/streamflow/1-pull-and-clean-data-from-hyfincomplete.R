@@ -1,24 +1,83 @@
+## daba@nve.no
 ##
-##
-##
+## Purpose of script:
+## 1. create database commands for lescon_var (Hydra II database)
+## 2. clean the streamflow data obtained with the database commands
 ##
 ## Station selection is based off of report 2016-85 'Utvalg og kvalitetssikring 
-## av flomdata for flomfrekvensanalyser' and report 62-2014 'Nasjonalt formelverk 
+## av flomdata for flomfrekvensanalyser' and report 13-2015 'Nasjonalt formelverk 
 ## for flomberegning i små nedbørfelt'
-## 
-## 
+##
+## -----
+## Notes:
+## This script is written to be run step-by-step with user input.
+##
+## It automatically writes lescon_var command files based off of tables in 
+## report 2016-85 and 13-2015.
+##
+## After the command file is written, the user must leave this R script, use
+## the command file in an external application (lescon_var) to download
+## the data to their local machine, and then return to this R script to run
+## the rest of the data cleaning script with the newly downloaded data. 
+##
+## -----
+##
 ## INPUT FILES: 
 ##   - tabell_A2_rapport_2016-85_daba_edited.txt
-##   - tabell_5_NIFS_rapport_2015-13.txt (copy-pasted version of tabell 5, vedlegg 1)
+##   - tabell_5_NIFS_rapport_2015-13.txt (copy-pasted version of tab 5, ved. 1)
 ##   - tabell_A3_rapport_2016-85.txt
 ##       (copy-pasted from 2016-85 report)
+## 
+## OUTPUT FILES:
+##   - lesconvar_commands_NIFS-A2_archive_39-hyfincomplete.txt
+##   - lesconvar_commands_gamfelt_archive_37-hydag.txt
+##
+##   several intermediate data objects are saved /data/cleaned-data:
+##   - raw-NIFS-A2-hyfincomplete.rds
+##   - cleaned-NIFS-A2-hyfincomplete.rds
+##   - gamfelt-NIFS-A2-hyfincomplete.rds (this is input to script 2-process-to-durations-and-get-ann-max.R)
+##
+##   we save also a table with record lengths:
+##   - record_length_data_table.rds
 ## 
 ## -----------------------------------------------------------------------------
 
 library(data.table)
 library(lubridate)
-
 library(ggplot2)
+
+
+# Define filepaths --------------------------------------------------------
+
+## filepath to the folder you want the lescon_var command files
+## to be written to:
+cmdpath <- "~/floodGAM/data/raw-data/"
+
+## filepath to the folder with raw hyfin-complete streamflow data:
+hyfincpath <- "C:/data-tab/NIFS-A2/"
+
+## filepath to the folder with raw hydag streamflow data:
+hydagpath <- "C:/data-tab/NIFS-A2-hydag/"
+
+# Custom functions --------------------------------------------------------
+
+expandutelatt <- function(x){
+  ## expands year ranges
+  ## for use in Table A2
+  ## ---
+  ## outputs a list for use as data.table column
+  ## --------
+  ## x = character vector of years. Can take both comma 
+  ## separated (for example: "2012, 2013, 2014")
+  ## or colon separated (for example "2012:2014")
+  ## ---------------------------------------------
+  out <- lapply(strsplit(x, ", "), 
+                function(x) do.call(c, 
+                                    lapply(strsplit(x, ":"), 
+                            function(y) Reduce(`:`, as.numeric(y)))))
+  out <- list(as.numeric(unlist(out)))
+  return(out)
+}
 
 
 # load in the tables --------------------------------------------------------
@@ -96,14 +155,12 @@ tab[!is.na(NIFS) & is.na(A2) & is.na(A3)]
 
 ## -----------------------------------------------------------------------------
 ## *****************************
-## Pull data from hyfin_complete
+## Create lescon_Var commands for hyfin_complete
 ## *****************************
 ## -----------------------------------------------------------------------------
 
-# HYFIN_C: create lescon_var commands ------------------------------------
-
 ## set a working directory. R will write the text file to this directory.
-setwd("~/floodGAM/data/raw-data/")
+setwd(cmdpath)
 
 ## create commands for stations in NIFS and Table A2. Use version number from
 ## Table A2 - daba edited. See notes in raw-data/README. Do not use stations
@@ -120,7 +177,6 @@ lescon[,version:=ifelse(is.na(version),1,version)]
 ## station 160.6 needs version 2 (according to Hysopp)
 lescon[,version:=ifelse(ID=="160-6",2,version)]
 
-## pull from archive 39 (hyfin completed)
 ## name the executable lescon_var file and open the connection
 f <- file("lesconvar_commands_NIFS-A2_archive_39-hyfincomplete.txt", open="wb")
 
@@ -151,10 +207,10 @@ close(f)
 # HYFIN_C: What stations failed the command? -------------------------------
 
 ## list the files in the directory you downloaded the data files into
-alltxtfiles <- list.files(path="C:/data-tab/NIFS-A2/", pattern = ".txt") 
+alltxtfiles <- list.files(path=hyfincpath, pattern = ".txt") 
 
 ## check for empty files:
-idx <- which(file.info(path=paste0("C:/data-tab/NIFS-A2/",alltxtfiles))$size == 0)
+idx <- which(file.info(path=paste0(hyfincpath,alltxtfiles))$size == 0)
 
 ## 143 failed the command.
 ## these stations either (i) do not exist in hyfin_complete 
@@ -177,14 +233,15 @@ A2.tab[ID%in%emptyID & !is.na(Findata_N)]$ID ## no
 ## remove command file
 fileloop <- alltxtfiles[-c(idx,
                            which(alltxtfiles==paste0("lesconvar_commands_",
-                                                     "NIFS-A2_archive_39-hyfincomplete.txt")))]
+                                                     "NIFS-A2_archive_39-",
+                                                     "hyfincomplete.txt")))]
 
 ## initialize data table to store data
 data <- data.table(date=POSIXct(),cumecs=numeric(),ID=character())
 
 for(fl in fileloop){
   
-  station.data <- fread(paste0("C:/data-tab/NIFS-A2/",fl))
+  station.data <- fread(paste0(hyfincpath,fl))
   setnames(station.data,c("V1","V2"),c("date","cumecs"))
   ## --- remove negative Data values ---
   station.data <- station.data[cumecs>=0]
@@ -213,15 +270,6 @@ saveRDS(data,file="~/floodGAM/data/raw-data/raw-NIFS-A2-hyfincomplete.rds")
 
 
 # HYFIN_C: Remove years identified as utelatt, table A2 -------------------
-
-expandutelatt <- function(x){
-  out <- lapply(strsplit(x, ", "), 
-                function(x) do.call(c, 
-                                    lapply(strsplit(x, ":"), 
-                                           function(y) Reduce(`:`, as.numeric(y)))))
-  out <- list(as.numeric(unlist(out)))
-  return(out)
-}
 
 utelatt <- A2.tab[,
                   lapply(.SD,expandutelatt),
@@ -309,7 +357,7 @@ fin.stations[, c("RN", "HN") := tstrsplit(ID, "-", fixed=TRUE)]
 
 
 ## set a working directory. R will write the text file to this directory.
-setwd("~/floodGAM/data/raw-data/")
+setwd(cmdpath)
 
 ## create commands to pull from hydag for stations in min.findata
 
@@ -342,11 +390,11 @@ close(f)
 # HYDAG: Sanity check: what stations failed the command? ------------------
 
 ## list the files in the directory you downloaded the data files into
-alltxtfiles <- list.files(path="C:/data-tab/NIFS-A2-hydag/", 
+alltxtfiles <- list.files(path=hydagpath, 
                           pattern = ".txt") 
 
 ## check for empty files:
-idx <- which(file.info(path=paste0("C:/data-tab/NIFS-A2-hydag/",
+idx <- which(file.info(path=paste0(hydagpath,
                                    alltxtfiles))$size == 0)
 
 ## no empty files. 
@@ -364,7 +412,7 @@ hydag <- data.table(date=POSIXct(),cumecs=numeric(),ID=character())
 
 for(fl in fileloop){
   
-  station.data <- fread(paste0("C:/data-tab/NIFS-A2-hydag/",fl))
+  station.data <- fread(paste0(hydagpath,fl))
   setnames(station.data,c("V1","V2"),c("date","cumecs"))
   ## --- remove negative Data values ---
   station.data <- station.data[cumecs>=0]
