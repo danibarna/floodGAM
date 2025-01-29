@@ -169,11 +169,11 @@ gc()
 
 ## --- split into summer and winter
 
-# summer = april - october
-# winter = november - march
+# summer = april - july
+# winter = august - march
 
 gf[,month_key:=month(date)]
-gf[,season:=ifelse(month_key > 3 & month_key < 11, "summer", "winter")]
+gf[,season:=ifelse(month_key > 3 & month_key < 8, "summer", "winter")]
 
 ## compute the seasonal maxima:
 summer <- createdurations(gf[season=="summer"], c(1,24))
