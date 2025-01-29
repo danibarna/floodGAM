@@ -32,9 +32,9 @@ createdurations <- function(DT, dvec){
     
     DTi <- DTt[[i]]
     
-    if( !("decimaldate" %in% names(DTi)) ){
+    
       DTi[,decimaldate:=decimal_date(date)]
-    }
+    
     
     # set up the vector of gridpoints to interpolate *to*. hourly spacing.
     xgrd <- DTi[,
