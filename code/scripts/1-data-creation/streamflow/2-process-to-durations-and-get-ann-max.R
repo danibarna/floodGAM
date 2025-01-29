@@ -7,7 +7,9 @@
 ##
 ## Get annual maxima at each duration for gamfelt dataset
 ## 
-## and supplementary dataset: gamfelt.hydagsupplement (20 yrs findata + hydag)
+## and supplementary datasets: 
+## - gamfelt.hydagsupplement (20 yrs findata + hydag)
+## - seasonal.gamfelt.hydagsupplement
 ## -----------------------------------------------------------------------------
 
 library(data.table)
@@ -136,4 +138,65 @@ saveRDS(
   file = paste0("~/floodGAM/data/processed-data/",
                 "gamfelt-durations/",
                 "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
+
+
+
+# seasonal.gamfelt.hydagsupp ----------------------------------------------
+
+## load in which years we need, and from which dataset:
+gfelths <- readRDS(paste0("~/floodGAM/data/processed-data/",
+                          "gamfelt-durations/",
+                          "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
+gfelths <- gfelths[d==1]
+## load in the hydag supplement
+hydag.supp <- readRDS(paste0("~/floodGAM/data/cleaned-data/",
+                             "gamfelt-NIFS-A2-hydag.rds"))
+## load the gamfelt data
+gamfelt.hyfinc <- readRDS(paste0("~/floodGAM/data/cleaned-data/",
+                                 "gamfelt-NIFS-A2-hyfincomplete.rds"))
+
+## select the relevant years and stations from hydag and hyfinc:
+setkey(gfelths,year_key,ID)
+setkey(hydag.supp,year_key,ID); setkey(gamfelt.hyfinc,year_key,ID)
+
+gfhd <- hydag.supp[.(gfelths[tag=="hydag"])]
+gfhf <- gamfelt.hyfinc[.(gfelths[tag=="hyfinc"])]
+
+gf <- rbind(gfhf,gfhd)
+
+rm(hydag.supp,gamfelt.hyfinc,gfhd,gfhf)
+gc()
+
+## --- split into summer and winter
+
+# summer = april - october
+# winter = november - march
+
+gf[,month_key:=month(date)]
+gf[,season:=ifelse(month_key > 3 & month_key < 11, "summer", "winter")]
+
+## compute the seasonal maxima:
+summer <- createdurations(gf[season=="summer"], c(1,24))
+winter <- createdurations(gf[season=="winter"], c(1,24))
+
+summer[,season:="summer"]; winter[,season:="winter"]
+
+seasonal.maxima <- rbind(summer,winter)
+
+saveRDS(
+  seasonal.maxima,
+  file = paste0("~/floodGAM/data/processed-data/",
+                "gamfelt-durations/",
+                "sasonal_maxima_gamfelt_hydagsupplement_durations.rds"))
+
+
+
+
+
+
+
+
+
+
+
 
