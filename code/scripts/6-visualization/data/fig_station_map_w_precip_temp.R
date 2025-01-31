@@ -102,7 +102,7 @@ plot_temp <- function(r){
                          guide = "legend")+
     coord_equal() +
     theme_void() +
-    theme(legend.position = c(0.6,0.33),
+    theme(legend.position = c(0.7,0.33),
           text = element_text(family="sans"))
   return(g)
 }
@@ -129,7 +129,7 @@ plot_stations <- function(gfcov,NorgeDF){
                           breaks = c(10,500,2000))+
     coord_equal()+
     theme_void() +
-    theme(legend.position = c(0.65,0.29),
+    theme(legend.position = c(0.75,0.29),
           text = element_text(family="sans"))
   return(g)
 }
@@ -141,6 +141,9 @@ gprecip <- plot_precip(r)
 gtemperature <- plot_temp(tam)
 
 gstations <- plot_stations(gfcov,NorgeDF)
+
+save(gprecip,gtemperature,gstations,
+     file="~/floodGAM/data/processed-data/gamfelt/README_files/stationmaps.rda")
 
 figure <- ggarrange(gprecip, gstations, gtemperature,
                     labels = c("(a)","(b)","(c)"),
