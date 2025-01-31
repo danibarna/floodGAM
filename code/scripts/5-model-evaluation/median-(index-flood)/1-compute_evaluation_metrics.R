@@ -15,11 +15,10 @@ library(scoringRules)
 ## ----- source function to calculate optimal predictor for APE and RE:
 source("~/floodGAM/code/functions/fn_calc_optimal_predictor.R")
 
-for( thisseed in c(30,32,85)){
 
 ## ----- load in the predictions from the models:
 oos.pred <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfelt_hydagsupp_median_flood_oos_pred_",thisseed,".rds"))
+                           "gamfelt_hydagsupp_median_flood_oos_pred_","T_",".rds"))
 
 # Predictive accuracy -----------------------------------------------------
 
@@ -52,6 +51,6 @@ oos.pred[,type:=NULL]
 
 saveRDS(oos.pred,
         file = paste0("~/floodGAM/results/output/median-(index-flood)/",
-                      "gamfelt_hydagsupp_median_flood_predictive_accuracy_",thisseed,".rds"))
+                      "gamfelt_hydagsupp_median_flood_predictive_accuracy_","T_",".rds"))
 
-}
+

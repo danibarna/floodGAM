@@ -18,7 +18,7 @@ source("~/floodGAM/code/functions/fn_check_results_with_plots.R")
 
 ## ----- load in the predictions and error metrics:
 oos.pred <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfelt_median_flood_predictive_accuracy.rds"))
+                           "gamfelt_hydagsupp_median_flood_predictive_accuracy_T_.rds"))
 
 
 # use the model mu and model sigma to PIT the eta.obs:

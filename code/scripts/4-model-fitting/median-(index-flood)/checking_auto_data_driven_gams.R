@@ -68,10 +68,11 @@ for( thisseed in c(30,32,85)){
   
   
   iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                               "gamfelt_hydagsupp_featuresFromIIS_gam_",
-                               thisseed,".rds"))
+                               "gamfelt_hydagsupp_featuresFromIIS_gam",
+                               ".rds"))
   
   b.edf <- vector()
+  fg.edf <- vector()
   
   for(di in unique(iis.models$d)){
     
@@ -102,9 +103,20 @@ for( thisseed in c(30,32,85)){
                       select=T,
                       data = train.gamdat.d,
                       family = gaussian(link=log))
-      print(summary(eta.auto))
+      #print(summary(eta.auto))
       
       b.edf <- c(b.edf,summary(eta.auto)$edf)
+      
+      
+      eta.floodGAM <- gam(qind ~ s(Q_N,k=6)+s(A_LE,k=6)+s(A_P,k=6)+s(H_F,k=6)+
+                            s(log_R_G_1085,k=6)+s(W_Apr,k=4)+s(P_Sep,k=3),
+                          method = "REML",
+                          select = T,
+                          data = train.gamdat.d,
+                          family = gaussian(link=log))
+      print(summary(eta.floodGAM))
+      
+      fg.edf <- c(fg.edf,summary(eta.floodGAM)$edf)
       
     }
     
@@ -121,6 +133,14 @@ for( thisseed in c(30,32,85)){
   saveRDS(iis.models, paste0("~/floodGAM/results/output/median-(index-flood)/",
                              "gamfelt_hydagsupp_featuresFromIIS_gam_",thisseed,".rds"))
 }
+
+
+fg <- data.table(cov=rep(c("Q_N","A_LE","A_P","H_F","log_R_G_1085","W_Apr","P_Sep"),
+                   k*length(unique(iis.models$d))),
+                 d = rep(unique(iis.models$d),each=7*10),
+                 fold = rep(1:10,each=7,length(unique(iis.models$d))),
+           edf = fg.edf)
+
 
 
 

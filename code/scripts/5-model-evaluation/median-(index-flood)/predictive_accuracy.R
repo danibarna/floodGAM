@@ -19,7 +19,7 @@ source("~/floodGAM/code/functions/fn_check_results_with_plots.R")
 
 ## ----- load in the predictions and error metrics:
 oos.pred <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
-                           "gamfelt_hydagsupp_median_flood_predictive_accuracy.rds"))
+                           "gamfelt_hydagsupp_median_flood_predictive_accuracy_T_.rds"))
 
 ## ----- for plotting of evaluation metrics:
 gfcov <- fread(paste0("C:/Users/daba/downloads/",
@@ -48,14 +48,14 @@ scre[,c("rmse","crps","ae","re","ape") := lapply(.SD,round,1),
 setkey(scre,d,re)
 
 ## TABLE 4 - error metrics
-scre[,c("model","d","rmse","crps","ae","re","ape")]
+scre[model%in%c("floodGAM","RFFA2018","auto","xgboost"),c("model","d","rmse","crps","ae","re","ape")]
 
 ## statistical significance of different error metrics:
 for(m in c("se","crps","ae","re","ape")){
   print(paste0("********",m))
   for(di in unique(oos.pred$d)){
     print(paste0(di," - ",permutationTest(oos.pred,
-                                          "xgboost","RFFA2018",
+                                          "auto","RFFA2018",
                                           1000,
                                           m,di)) )
   }
@@ -72,17 +72,26 @@ saveRDS(oos.pred,file=paste0("~/floodGAM/results/output/median-(index-flood)/",
                              "gamfelt_hydagsupp_predictive_accuracy_dotplotobj.rds"))
 
 
+
+iis.models <- readRDS(paste0("~/floodGAM/results/output/median-(index-flood)/",
+                     "gamfelt_hydagsupp_featuresFromIIS_gam.rds"))
+
+
+iis.models <- iis.models[edf>0.001]
+
+
 ## cRPS
 glist <- list()
 i = 1
 for(di in unique(oos.pred$d)){
   
-  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "crps")
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp + fold ~ model, value.var = "crps")
   
-  gi <- dotplotRFFA2018floodGAM(ggdat,2,500,paste0("CRPS, d = ",di))
+  ggdat[,outlineme:=ifelse(fold==3,"y",NA)]
   
-  gi <- gi + geom_point(data=ggdat[ID%in%c("15-21")], #311-6
-                        aes(floodGAM,RFFA2018),color="red")
+  print(max(ggdat$auto))
+  
+  gi <- dotplotautofloodGAM(ggdat,2,900,paste0("CRPS, d = ",di))
   
   glist[[i]] <- gi
   
@@ -109,12 +118,16 @@ glist <- list()
 i = 1
 for(di in unique(oos.pred$d)){
   
-  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "se")
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp + fold ~ model, value.var = "se")
   
-  gi <- dotplotRFFA2018floodGAM(ggdat,0,3.5*10^5,paste0("SE, d = ",di))
+  print(max(ggdat$auto))
   
-  gi <- gi + geom_point(data=ggdat[ID%in%c("15-21")],
-                        aes(floodGAM,RFFA2018),color="red")
+  print(ggdat[which.max(auto),])
+  
+  ggdat[,outlineme:=ifelse(fold==3,"y",NA)]
+  
+  gi <- dotplotautofloodGAM(ggdat,0,6.5*10^5,paste0("SE, d = ",di))
+  
   
   glist[[i]] <- gi
   
@@ -137,11 +150,11 @@ glist <- list()
 i = 1
 for(di in unique(oos.pred$d)){
   
-  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "ape")
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp + fold ~ model, value.var = "ape")
   
-  gi <- dotplotRFFA2018floodGAM(ggdat,0,1.5,paste0("APE, d = ",di))
-  gi <- gi + geom_point(data=ggdat[ID%in%c("78-8","80-4","42-16","156-15","76-11")],
-                        aes(floodGAM,RFFA2018),color="red")
+  ggdat[,outlineme:=ifelse(fold==3,"y",NA)]
+  
+  gi <- dotplotautofloodGAM(ggdat,0,2,paste0("APE, d = ",di))
   
   glist[[i]] <- gi
   
@@ -164,12 +177,11 @@ glist <- list()
 i = 1
 for(di in unique(oos.pred$d)){
   
-  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "ae")
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp + fold ~ model, value.var = "ae")
   
-  gi <- dotplotRFFA2018floodGAM(ggdat,0,1000,paste0("AE, d = ",di))
+  ggdat[,outlineme:=ifelse(fold==3,"y",NA)]
   
-  gi <- gi + geom_point(data=ggdat[ID%in%c("78-8","80-4","42.16","156-15","76-11")],
-                        aes(floodGAM,RFFA2018),color="red")
+  gi <- dotplotautofloodGAM(ggdat,0,2000,paste0("APE, d = ",di))
   
   glist[[i]] <- gi
 
@@ -193,12 +205,11 @@ glist <- list()
 i = 1
 for(di in unique(oos.pred$d)){
   
-  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp ~ model, value.var = "re")
+  ggdat <- dcast(oos.pred[d==di], ID + A + QD_fgp + fold ~ model, value.var = "re")
   
-  gi <- dotplotRFFA2018floodGAM(ggdat,0,5,paste0("RE, d = ",di))
+  ggdat[,outlineme:=ifelse(fold==3,"y",NA)]
   
-  gi <- gi + geom_point(data=ggdat[ID%in%c("2-616","311-6","311-4")],
-                        aes(floodGAM,RFFA2018),color="red")
+  gi <- dotplotautofloodGAM(ggdat,0,5,paste0("RE, d = ",di))
   
   glist[[i]] <- gi
   
