@@ -16,8 +16,8 @@ library(mgcv)
 ## ----- load in the gamfelt dataset
 gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
-gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
-                       "gamfelt_annual_maxima.rds"))
+gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
+                       "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
 gfam[,specQ:=Qm3_s/A*1000]
@@ -43,8 +43,13 @@ zfcov <- readRDS(paste0("~/floodGAM/data/processed-data/zfelt/",
 
 gevp <- readRDS("~/floodGAM/results/output/gamfeltstanresult.rds")
 
+dd <- unique(gfam[,get("d")])
+N <- length(unique(gfam[,get("ID")]))
+
+gevp[,d:=rep(dd,each=6,N)] # 6 parameters in Stan output
+
 # go from long to wide format, selecting only the posterior mean:
-gevp <- dcast(gevp, ID ~ param, value.var = "mean")
+gevp <- dcast(gevp, ID + d ~ param, value.var = "mean")
 
 # merge the response variable with the predictors (gamfelt covariate matrix)
 gamdat <- merge(gevp,gfcov,by="ID")
@@ -52,6 +57,13 @@ gamdat <- merge(gevp,gfcov,by="ID")
 
 
 # Fit the GAMs on the gamfelt data ----------------------------------------
+
+for(di in dd){ # where dd is the unique durations (1 to 48 hours)
+  
+  
+  # put code here
+  
+}
 
 ## ---- eta
 eta <- gam(qind ~ s(Q_N,k=6)+

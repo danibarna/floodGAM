@@ -25,7 +25,7 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
 
 gfam <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt-durations/",
-                       "durations_gamfelt_annual_maxima.rds"))
+                       "gamfelt_hydagsupplement_durations_annual_maxima.rds"))
 # convert to specific discharge
 gfam <- merge(gfam,gfcov[,c("ID","A")],by="ID")
 gfam[,specQ:=Qm3_s/A*1000]
@@ -50,11 +50,10 @@ gamfelt <- merge(gfcov,gfam,by="ID")
 ## ----- load in the response variables (GEV parameters from Stan fits to each 
 ##       station in gfam)
 
-gevp0 <- readRDS("~/floodGAM/results/output/gamfeltstanresult.rds")
-gevp24 <- readRDS("~/floodGAM/results/output/gamfeltstanresult_24.rds")
+gevp <- readRDS("~/floodGAM/results/output/gamfeltstanresult.rds")
 
 # go from long to wide format, selecting only the posterior mean:
-gevp0 <- dcast(gevp0, ID ~ param, value.var = "mean")
+gevp <- dcast(gevp, ID ~ param, value.var = "mean")
 gevp24 <- dcast(gevp24, ID ~ param, value.var = "mean")
 
 gevp <- rbind(gevp0[,d:=0],gevp24[,d:=24])
