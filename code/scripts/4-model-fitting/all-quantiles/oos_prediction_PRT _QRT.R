@@ -24,12 +24,6 @@ gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
 # response variable is from at-site GEV fits
 gevp <- readRDS("~/floodGAM/results/output/all-quantiles/gamfeltstanresult.rds")
 
-## prelimirary data cleaning: add column indicating what duration
-## estimates belong to (should fix this in at-site-freq analysis)
-dd <- c(1,6,12,18,24,36,48)
-N <- 239
-gevp[,d:=rep(dd,each=6,N)] # 6 parameters in Stan output
-
 # go from long to wide format, selecting only the posterior mean:
 gevp <- dcast(gevp, ID + d ~ param, value.var = "mean")
 
