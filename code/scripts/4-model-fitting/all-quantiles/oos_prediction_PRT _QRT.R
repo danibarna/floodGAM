@@ -22,7 +22,7 @@ source("~/floodGAM/code/functions/fn_posterior_simulation_GAM.R")
 gfcov <- readRDS(paste0("~/floodGAM/data/processed-data/gamfelt/",
                         "gamfelt_catchment_covariates.rds"))
 # response variable is from at-site GEV fits
-gevp <- readRDS("~/floodGAM/results/output/gamfeltstanresult.rds")
+gevp <- readRDS("~/floodGAM/results/output/all-quantiles/gamfeltstanresult.rds")
 
 ## prelimirary data cleaning: add column indicating what duration
 ## estimates belong to (should fix this in at-site-freq analysis)
