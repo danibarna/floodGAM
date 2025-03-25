@@ -156,5 +156,11 @@ saveRDS(result,file="~/floodGAM/results/output/gamfeltstanresult_intermediate.rd
 
 result <- rbind(rbindlist(result)) # if all converged, this will work
 
+## prelimirary data cleaning: add column indicating what duration
+## estimates belong to (should fix this in at-site-freq analysis)
+dd <- c(1,6,12,18,24,36,48)
+N <- 239
+result[,d:=rep(dd,each=6,N)] # 6 parameters in Stan output
+
 saveRDS(result,file="~/floodGAM/results/output/gamfeltstanresult.rds")
 
