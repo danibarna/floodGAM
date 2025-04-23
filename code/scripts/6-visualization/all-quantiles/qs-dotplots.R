@@ -16,7 +16,7 @@ library(data.table)
 library(ggplot2)
 library(scico)
 
-## load in the plotting data (from script 1-prtqrt_copmute_evaluation_metrics)
+## load in the plotting data (from script 2-prtqrt_copmute_evaluation_metrics)
 load("~/floodGAM/results/output/all-quantiles/objects-qs-and-rl-dotplots.rda")
 
 
@@ -76,4 +76,45 @@ ggsave(paste0("~/floodGAM/results/figures/all-quantiles/",
 
 
 
+# For appendix ------------------------------------------------------------
+
+
+qsg[,type:="hours"]
+
+# make the quantile score plot
+ggplot(qsg[d!=1]) +
+  geom_point(aes(prt.qs,qrt.qs,color=QD_fgp.x,size=A.x)) +
+  scale_color_scico(name = "Fraction of rain",
+                    palette = "lapaz",end=0.95,
+                    labels=scaleFUN) +
+  geom_abline(slope=1,size=0.6) +
+  scale_x_sqrt(limits = c(1,300)) + 
+  scale_y_sqrt(limits = c(1,300)) + 
+  scale_shape_manual(values = 22, name="") +
+  scale_size_continuous(name = expression(paste("Catchment area [", km^2, "]",
+                                                sep = "")) ,
+                        range=c(1.5,7),
+                        breaks = c(50,1000,2000))+
+  labs(y = paste0("<span style='font-size: 18pt'>",
+                  "QRT",
+                  " </span><span style='font-size: 12pt'>  Quantile score [ l/s/",
+                  expression(km^2)," ]","</span>"),
+       x = paste0("<span style='font-size: 18pt'>",
+                  "PRT",
+                  " </span><span style='font-size: 12pt'>  Quantile score [ l/s/",
+                  expression(km^2)," ]</span>")) +
+  theme_bw() +
+  facet_nested(type + d~rp) +
+  theme(text = element_text(family="serif",size = 18),
+        aspect.ratio = 1,
+        legend.position = "bottom",
+        legend.spacing.x = unit(1.0, 'cm'),
+        axis.title.x = ggtext::element_markdown(),
+        axis.title.y = ggtext::element_markdown(),
+        strip.background = element_blank())
+
+
+ggsave(paste0("~/floodGAM/results/figures/all-quantiles/",
+              "appdx_quantile_score.pdf"),
+       width=9,height=12,units="in")
 

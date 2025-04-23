@@ -69,9 +69,14 @@ qrt.predictions[,isadj:=ifelse(val!=adj.val,1,0)]
 qrt.count <- qrt.predictions[,sum(isadj,na.rm = T),by=c("d","rp")]
 
 # to match the table in paper III...
-qrt.count[V1!=0 & rp%in%c(10,20,50,100)]
+tt <- qrt.count[V1!=0 & rp%in%c(10,20,50,100)]
 
+tt[,V2:=round((V1/239),3) * 100 ]
 
+tt
 
+# Save the objects --------------------------------------------------------
+
+save(prt.predictions,qrt.predictions,file="~/floodGAM/results/output/all-quantiles/qrt-prt-oos.rda")
 
 
