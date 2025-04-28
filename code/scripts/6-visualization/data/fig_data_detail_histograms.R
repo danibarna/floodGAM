@@ -20,6 +20,15 @@ percentfin <- merge(gfam[d==1 & tag == "hyfinc",.N,by="ID"],
                     gfam[d==1,.N,by="ID"],
                     by="ID")
 
+par(family = "serif")
+
+hist(gfam[d==1,.N,by="ID"]$N,breaks=15,
+     xlab="Record length (years)",ylab="Stations",main="",
+     col="white",
+     cex.lab=1.4)
+
+
+# saved manually, landscape, 5.5 x 6.75 in
 
 par(mfrow=c(1,2),mar = c(5,5,1,1))
 
