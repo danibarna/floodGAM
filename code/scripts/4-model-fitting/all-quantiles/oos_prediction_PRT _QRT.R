@@ -54,6 +54,9 @@ qrt.predictions <- data.table(val=numeric(),
                               fold=numeric(),d=numeric(),
                               ID=character())
 
+
+dd <- unique(gamdat[,get("d")])
+
 for(di in dd){
   
   gamdat.d <- gamdat[d==di]
