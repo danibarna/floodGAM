@@ -1,0 +1,132 @@
+File //nve.no/fil/grid/metdata/prognosis/met_pp_nordic/analysis/archive/2015/05/met_analysis_1_0km_nordic_20150501T00Z.nc (NC_FORMAT_NETCDF4_CLASSIC):
+
+     15 variables (excluding dimension variables):
+        int projection_lcc[]   (Contiguous storage)  
+            standard_parallel: 63
+             standard_parallel: 63
+            longitude_of_central_meridian: 15
+            latitude_of_projection_origin: 63
+            grid_mapping_name: lambert_conformal_conic
+            earth_radius: 6371000
+        double forecast_reference_time[]   (Contiguous storage)  
+            units: seconds since 1970-01-01 00:00:00 +00:00
+            standard_name: forecast_reference_time
+        float latitude[x,y]   (Chunking: [1796,31])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            units: degree_north
+            standard_name: latitude
+        float longitude[x,y]   (Chunking: [1796,31])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            standard_name: longitude
+            units: degree_east
+        float altitude[x,y]   (Chunking: [1796,31])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            coordinates: longitude latitude
+            units: m
+            standard_name: surface_altitude
+        float land_area_fraction[x,y]   (Chunking: [1796,31])  (Compression: shuffle,level 3)
+            coordinates: longitude latitude
+            grid_mapping: projection_lcc
+            standard_name: land_area_fraction
+            units: 1
+        float air_temperature_2m[x,y,time]   (Chunking: [1796,31,1])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            coordinates: longitude latitude
+            units: K
+            standard_name: air_temperature
+            _ChunkSizes: 1
+             _ChunkSizes: 1161
+             _ChunkSizes: 898
+        float air_pressure_at_sea_level[x,y,time]   (Chunking: [1796,31,1])  (Compression: shuffle,level 3)
+            coordinates: longitude latitude
+            grid_mapping: projection_lcc
+            units: Pa
+            standard_name: air_pressure_at_sea_level
+            _ChunkSizes: 1
+             _ChunkSizes: 1161
+             _ChunkSizes: 898
+        float cloud_area_fraction[x,y,time]   (Chunking: [1796,31,1])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            coordinates: longitude latitude
+            units: 1
+            standard_name: cloud_area_fraction
+            _ChunkSizes: 1
+             _ChunkSizes: 1161
+             _ChunkSizes: 898
+        float integral_of_surface_downwelling_longwave_flux_in_air_wrt_time[x,y,time]   (Chunking: [1796,31,1])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            coordinates: longitude latitude
+            units: W s/m^2
+            standard_name: integral_of_surface_downwelling_longwave_flux_in_air_wrt_time
+            _ChunkSizes: 1
+             _ChunkSizes: 1161
+             _ChunkSizes: 898
+        float integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time[x,y,time]   (Chunking: [1796,31,1])  (Compression: shuffle,level 3)
+            coordinates: longitude latitude
+            grid_mapping: projection_lcc
+            units: W s/m^2
+            standard_name: integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time
+            _ChunkSizes: 1
+             _ChunkSizes: 1161
+             _ChunkSizes: 898
+        float relative_humidity_2m[x,y,time]   (Chunking: [1796,31,1])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            coordinates: longitude latitude
+            units: 1
+            standard_name: relative_humidity
+            _ChunkSizes: 1
+             _ChunkSizes: 1161
+             _ChunkSizes: 898
+        float precipitation_amount[x,y,time]   (Chunking: [1796,31,1])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            coordinates: longitude latitude
+            units: kg/m^2
+            standard_name: precipitation_amount
+            _ChunkSizes: 1
+             _ChunkSizes: 1161
+             _ChunkSizes: 898
+        float wind_speed_10m[x,y,time]   (Chunking: [1796,31,1])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            coordinates: longitude latitude
+            units: m/s
+            standard_name: wind_speed
+            _ChunkSizes: 1
+             _ChunkSizes: 1161
+             _ChunkSizes: 898
+        float wind_direction_10m[x,y,time]   (Chunking: [1796,31,1])  (Compression: shuffle,level 3)
+            grid_mapping: projection_lcc
+            coordinates: longitude latitude
+            units: degree
+            standard_name: wind_from_direction
+            _ChunkSizes: 1
+             _ChunkSizes: 1161
+             _ChunkSizes: 898
+
+     3 dimensions:
+        time  Size:1   *** is unlimited *** 
+            units: seconds since 1970-01-01 00:00:00 +00:00
+            standard_name: time
+            _ChunkSizes: 512
+        x  Size:1796 
+            units: m
+            standard_name: projection_x_coordinate
+        y  Size:2321 
+            units: m
+            standard_name: projection_y_coordinate
+
+    15 global attributes:
+        Conventions: CF-1.0
+        institution: Norwegian Meteorological Institute, met.no
+        creator_url: met.no
+        geospatial_lat_min: 51.0
+        geospatial_lat_max: 88.0
+        geospatial_lon_min: -20.0
+        geospatial_lon_max: 80.0
+        license: http://met.no/sb5-met.no/Forskning/Informasjonsteknologi/Tilgang_til_data/
+        summary: Based on model data from MEPS (MetCoOp-Ensemble Prediction System) and observations
+        meps_forecast_reference_time: 1430416800
+        history: Created 2023-01-06T11:51:44Z
+        title: MET Nordic Analysis Version 3
+        references: https://github.com/metno/NWPdocs
+        source: MEPS and surface observations
+        DODS_EXTRA.Unlimited_Dimension: time
