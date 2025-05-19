@@ -26,10 +26,10 @@ zfcov[,H_F:=heightMax-heightMin]
 zfcov[,A_P:=`Ap (km)`/1000]
 
 ## change naming convention to match gamfelt
-zfcov <- zfcov[,c("OBJECTID","QNormal6190_lskm2","effsjoPro","A_P","H_F",
+zfcov <- zfcov[,c("vassdragNr","QNormal6190_lskm2","effsjoPro","A_P","H_F",
                 "grad1085","qtt_Apr (mm)","P_Sep (mm)")]
 setnames(zfcov,
-         c("OBJECTID","QNormal6190_lskm2","effsjoPro","H_F","grad1085",
+         c("vassdragNr","QNormal6190_lskm2","effsjoPro","H_F","grad1085",
            "qtt_Apr (mm)","P_Sep (mm)"),
          c("ID","Q_N","A_LE","H_F","R_G_1085","W_Apr","P_Sep"))
 
